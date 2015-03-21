@@ -41,22 +41,22 @@ namespace Magic3D
         }
         public Cost ProducedMana;
     }
-
-    //public class AttachAbility : Ability
-    //{
-
-    //    public AttachAbility()
-    //        : base(AbilityEnum.Attach)
-    //    {
-    //    }
-    //}
-
-    public class Ability : Spell
+		
+    public class Ability
     {
-        public AbilityEnum AbilityType = AbilityEnum.Unset;
-        //public int RequiredTargetCount;
+		#region CTOR
+		public Ability()
+		{
+		}
+
+		public Ability(AbilityEnum a)
+		{
+			AbilityType = a;
+		}
+		#endregion
+        
         int _requiredTargetCount = 0;
-        public override int RequiredTargetCount
+        public int RequiredTargetCount
         {
             get
             {
@@ -68,21 +68,20 @@ namespace Magic3D
             }
         }
 
-        
+		public AbilityEnum AbilityType = AbilityEnum.Unset;
         public List<Effect> Effects = new List<Effect>();
         public Cost ActivationCost;
         public string Description = "";
 
         MultiformAttribut<Target> _validTargets;
-        public override MultiformAttribut<Target> ValidTargets
+        public MultiformAttribut<Target> ValidTargets
         {
             get { return _validTargets; }
             set { _validTargets = value; }
         }
-
-
+			
         List<Object> _selectedTargets = new List<object>();        
-        public override List<Object> SelectedTargets
+        public List<Object> SelectedTargets
         {
             get { return _selectedTargets; }
             set
@@ -91,20 +90,1128 @@ namespace Magic3D
             }
         }
 
+		public static Ability Parse(string strAbility)
+		{
+			Ability a = new Ability();
 
 
-        public Ability()
-        {
-        }
+			string[] tmp = strAbility.Split(new char[] { '|' });
 
-        public Ability(AbilityEnum a)
-        {
-            AbilityType = a;
-        }
+			foreach (string ab in tmp)
+			{
+				int v;
+
+				if (string.IsNullOrWhiteSpace(ab))
+					continue;
+
+				int dollarPos = ab.IndexOf('$');
+
+				if (dollarPos < 0)
+					continue;
+
+				AbilityFieldsEnum varName = (AbilityFieldsEnum)Enum.Parse(typeof(AbilityFieldsEnum), ab.Substring(0, dollarPos), true);
+				string value = ab.Substring(dollarPos + 1).Trim();
+
+				Effect e = null;
+
+				switch (varName)
+				{
+				case AbilityFieldsEnum.SP:
+				case AbilityFieldsEnum.AB:
+					#region ability type
+					switch (value)
+					{
+					case "Discard":
+						break;
+					case "Mana":
+						a = new ManaAbility();
+						break;
+					case "Pump":
+						break;
+					case "Attach":
+					case "Animate":
+						a.AbilityType = AbilityEnum.Attach;
+						a.RequiredTargetCount = 1;
+						break;
+					case "Effect":
+						break;
+					case "Counter":
+						break;
+					case "Destroy":
+						break;
+					case "Tap":
+						break;
+					case "TapAll":
+						break;
+					case "LoseLife":
+						break;
+					case "PreventDamage":
+						break;
+					case "Charm":
+						break;
+					case "DealDamage":
+						break;
+					case "ChangeZone":
+						break;
+					case "Draw":
+						break;
+					case "DestroyAll":
+						break;
+					case "RepeatEach":
+						break;
+					case "Token":
+						break;
+					case "GainControl":
+						break;
+					case "Repeat":
+						break;
+					case "Debuff":
+						break;
+					case "ChooseColor":
+						break;
+					case "Dig":
+						break;
+					case "PumpAll":
+						break;
+					case "RemoveCounterAll":
+						break;
+					case "ChangeZoneAll":
+						break;
+					case "DamageAll":
+						break;
+					case "UntapAll":
+						break;
+					case "PutCounter":
+						break;
+					case "GainLife":
+						break;
+					case "PutCounterAll":
+						break;
+					case "StoreSVar":
+						break;
+					case "Regenerate":
+						break;
+					case "FlipACoin":
+						break;
+					case "SacrificeAll":
+						break;
+					case "Untap":
+						break;
+					case "Mill":
+						break;
+					case "Fog":
+						break;
+					case "RemoveCounter":
+						break;
+					case "Protection":
+						break;
+					case "ExchangeZone":
+						break;
+					case "AnimateAll":
+						break;
+					case "ChooseCard":
+						break;
+					case "Reveal":
+						break;
+					case "ChooseSource":
+						break;
+					case "MustBlock":
+						break;
+					case "ExchangeControl":
+						break;
+					case "RearrangeTopOfLibrary":
+						break;
+					case "CopyPermanent":
+						break;
+					case "SetState":
+						break;
+					case "Balance":
+						break;
+					case "RevealHand":
+						break;
+					case "Sacrifice":
+						break;
+					case "AddTurn":
+						break;
+					case "TwoPiles":
+						break;
+					case "ManaReflected":
+						break;
+					case "SetLife":
+						break;
+					case "DebuffAll":
+						break;
+					case "Fight":
+						break;
+					case "ChooseType":
+						break;
+					case "Shuffle":
+						break;
+					case "NameCard":
+						break;
+					case "PermanentNoncreature":
+						break;
+					case "PermanentCreature":
+						break;
+					case "TapOrUntap":
+						break;
+					case "GenericChoice":
+						break;
+					case "Play":
+						break;
+					case "BecomesBlocked":
+						break;
+					case "AddOrRemoveCounter":
+						break;
+					case "WinsGame":
+						break;
+					case "Proliferate":
+						break;
+					case "Scry":
+						break;
+					case "MoveCounter":
+						break;
+					case "GainOwnership":
+						break;
+					case "ChangeTargets":
+						break;
+					case "UnattachAll":
+						break;
+					case "PeekAndReveal":
+						break;
+					case "LosesGame":
+						break;
+					case "DigUntil":
+						break;
+					case "CopySpellAbility":
+						break;
+					case "RollPlanarDice":
+						break;
+					case "RegenerateAll":
+						break;
+					case "DelayedTrigger":
+						break;
+					case "MustAttack":
+						break;
+					case "ProtectionAll":
+						break;
+					case "RemoveFromCombat":
+						break;
+					case "RestartGame":
+						break;
+					case "PreventDamageAll":
+						break;
+					case "ExchangeLife":
+						break;
+					case "DeclareCombatants":
+						break;
+					case "ControlPlayer":
+						break;
+					case "Phases":
+						break;
+					case "Clone":
+						break;
+					case "Clash":
+						break;
+					case "ChooseNumber":
+						break;
+					case "EachDamage":
+						break;
+					case "ReorderZone":
+						break;
+					case "ChoosePlayer":
+						break;
+					case "EndTurn":
+						break;
+					case "MultiplePiles":
+						break;
+
+					default:
+						break;
+					}
+					break;
+					#endregion
+				case AbilityFieldsEnum.Cost:
+					a.ActivationCost = Cost.Parse(value);
+					break;
+				case AbilityFieldsEnum.ValidTgts:
+					a.ValidTargets = Target.ParseTargets(value);
+					break;
+				case AbilityFieldsEnum.Mode:
+					switch (value.Trim().ToLower())
+					{
+					case "continuous":
+
+						break;
+					default:
+						break;
+					}
+					break;
+				case AbilityFieldsEnum.NumCards:
+					break;
+				case AbilityFieldsEnum.References:
+					break;
+				case AbilityFieldsEnum.SpellDescription:
+					break;
+				case AbilityFieldsEnum.Produced:
+					(a as ManaAbility).ProducedMana = Mana.Parse(value);
+					break;
+				case AbilityFieldsEnum.NumDef:                        
+					if (!int.TryParse(value, out v))
+						break;
+					a.Effects.Add(new NumericEffect
+						{
+							TypeOfEffect = EffectType.AddTouchness,
+							NumericValue = v
+						});
+					break;
+				case AbilityFieldsEnum.AILogic:
+					#region AIlogic
+					switch (value.Trim())
+					{
+					case "GainControl":
+						break;
+					case "BeginningOfOppTurn":
+						break;
+					case "Pump":
+						e = new Effect { TypeOfEffect = EffectType.Pump };
+						break;
+					case "Never":
+						break;
+					case "MostProminentInHumanDeck":
+						break;
+					case "RedirectSpellDamageFromPlayer":
+						break;
+					case "Curse":
+						break;
+					case "MostProminentAttackers":
+						break;
+					case "Fog":
+						break;
+					case "Animate":
+						break;
+					case "Reanimate":
+						break;
+					case "MostProminentInComputerGraveyard":
+						break;
+					case "BeforeCombat":
+						break;
+					case "MostProminentInComputerDeck":
+						break;
+					case "NeedsPrevention":
+						break;
+					case "Evasion":
+						break;
+					case "BalanceCreaturesAndLands":
+						break;
+					case "BalancePermanents":
+						break;
+					case "AtLeast1":
+						break;
+					case "KeepTapped":
+						a.Effects.Add(new Effect { TypeOfEffect = EffectType.DoesNotUntap });
+						break;
+					case "DontCast":
+						break;
+					case "MostProminentOnBattlefield":
+						break;
+					case "ChangeType":
+						break;
+					case "Clone":
+						break;
+					case "Worst":
+						break;
+					case "MostProminentComputerControls":
+						break;
+					case "Always":
+						break;
+					case "BestBlocker":
+						break;
+					case "MostProminentHumanControls":
+						break;
+					case "ZeroToughness":
+						break;
+					case "EndOfOppTurn":
+						break;
+					case "DoubleCounters":
+						break;
+					case "SpecificCard":
+						break;
+					case "HighestEvaluation":
+						break;
+					case "Main2":
+						break;
+					case "EndOfOpponentsTurn":
+						break;
+					case "WorstCard":
+						break;
+					case "DiscardLands":
+						break;
+					case "MostProminentInComputerHand":
+						break;
+					case "WildHunt":
+						break;
+					case "MomirAvatar":
+						break;
+					case "AtLeast2":
+						break;
+					case "BalanceLands":
+						break;
+					case "CloneAllTokens":
+						break;
+					case "CloneMyTokens":
+						break;
+					case "Color":
+						break;
+					case "MostProminentHumanCreatures":
+						break;
+					case "RemoveAllCounters":
+						break;
+					case "EOT":
+						break;
+					case "RestrictBlocking":
+						break;
+					default:
+						break;
+					}
+					#endregion
+					break;
+				case AbilityFieldsEnum.Name:
+					break;
+				case AbilityFieldsEnum.Power:                        
+					if (!int.TryParse(value, out v))
+						break;
+					a.Effects.Add(new NumericEffect
+						{
+							TypeOfEffect = EffectType.SetPower,
+							NumericValue = v
+						});
+					break;
+				case AbilityFieldsEnum.Toughness:
+					if (!int.TryParse(value, out v))
+						break;
+					a.Effects.Add(new NumericEffect
+						{
+							TypeOfEffect = EffectType.SetTouchness,
+							NumericValue = v
+						});
+					break;
+				case AbilityFieldsEnum.StaticAbilities:
+					break;
+				case AbilityFieldsEnum.RememberObjects:
+					break;
+				case AbilityFieldsEnum.SubAbility:
+					break;
+				case AbilityFieldsEnum.TargetType:
+					break;
+				case AbilityFieldsEnum.TgtPrompt:
+					break;
+				case AbilityFieldsEnum.ValidCards:
+					break;
+				case AbilityFieldsEnum.KW:
+					break;
+				case AbilityFieldsEnum.LifeAmount:
+					break;
+				case AbilityFieldsEnum.Amount:
+					break;
+				case AbilityFieldsEnum.Choices:
+					break;
+				case AbilityFieldsEnum.NumDmg:
+					break;
+				case AbilityFieldsEnum.Origin:
+					break;
+				case AbilityFieldsEnum.Destination:
+					break;
+				case AbilityFieldsEnum.NumAtt:
+					break;
+				case AbilityFieldsEnum.Defined:
+					break;
+				case AbilityFieldsEnum.Triggers:
+					break;
+				case AbilityFieldsEnum.SVars:
+					break;
+				case AbilityFieldsEnum.ImprintCards:
+					break;
+				case AbilityFieldsEnum.ActivationPhases:
+					break;
+				case AbilityFieldsEnum.RepeatPlayers:
+					break;
+				case AbilityFieldsEnum.RepeatSubAbility:
+					break;
+				case AbilityFieldsEnum.IsCurse:
+					break;
+				case AbilityFieldsEnum.StackDescription:
+					break;
+				case AbilityFieldsEnum.TokenAmount:
+					break;
+				case AbilityFieldsEnum.TokenName:
+					break;
+				case AbilityFieldsEnum.TokenTypes:
+					break;
+				case AbilityFieldsEnum.TokenOwner:
+					break;
+				case AbilityFieldsEnum.TokenColors:
+					break;
+				case AbilityFieldsEnum.TokenPower:
+					break;
+				case AbilityFieldsEnum.TokenToughness:
+					break;
+				case AbilityFieldsEnum.ChangeType:
+					break;
+				case AbilityFieldsEnum.ChangeNum:
+					break;
+				case AbilityFieldsEnum.GainControl:
+					break;
+				case AbilityFieldsEnum.LoseControl:
+					break;
+				case AbilityFieldsEnum.Untap:
+					break;
+				case AbilityFieldsEnum.AddKWs:
+					break;
+				case AbilityFieldsEnum.RepeatOptional:
+					break;
+				case AbilityFieldsEnum.Keywords:
+					break;
+				case AbilityFieldsEnum.TokenImage:
+					break;
+				case AbilityFieldsEnum.TokenKeywords:
+					break;
+				case AbilityFieldsEnum.DigNum:
+					break;
+				case AbilityFieldsEnum.ConditionCheckSVar:
+					break;
+				case AbilityFieldsEnum.ConditionSVarCompare:
+					break;
+				case AbilityFieldsEnum.ReplacementEffects:
+					break;
+				case AbilityFieldsEnum.Stackable:
+					break;
+				case AbilityFieldsEnum.ChangeValid:
+					break;
+				case AbilityFieldsEnum.DestinationZone:
+					break;
+				case AbilityFieldsEnum.RememberChanged:
+					break;
+				case AbilityFieldsEnum.TargetMin:
+					break;
+				case AbilityFieldsEnum.TargetMax:
+					break;
+				case AbilityFieldsEnum.AllCounterTypes:
+					break;
+				case AbilityFieldsEnum.NoReg:
+					break;
+				case AbilityFieldsEnum.AnyPlayer:
+					break;
+				case AbilityFieldsEnum.Optional:
+					break;
+				case AbilityFieldsEnum.Reveal:
+					break;
+				case AbilityFieldsEnum.LibraryPosition:
+					break;
+				case AbilityFieldsEnum.NoRegen:
+					break;
+				case AbilityFieldsEnum.RememberDamaged:
+					break;
+				case AbilityFieldsEnum.ValidDescription:
+					break;
+				case AbilityFieldsEnum.SorcerySpeed:
+					break;
+				case AbilityFieldsEnum.Mandatory:
+					break;
+				case AbilityFieldsEnum.Planeswalker:
+					break;
+				case AbilityFieldsEnum.CounterNum:
+					break;
+				case AbilityFieldsEnum.CounterType:
+					break;
+				case AbilityFieldsEnum.Ultimate:
+					break;
+				case AbilityFieldsEnum.TokenStaticAbilities:
+					break;
+				case AbilityFieldsEnum.TokenSVars:
+					break;
+				case AbilityFieldsEnum.Permanent:
+					break;
+				case AbilityFieldsEnum.ActivationLimit:
+					break;
+				case AbilityFieldsEnum.PlayerTurn:
+					break;
+				case AbilityFieldsEnum.SVar:
+					break;
+				case AbilityFieldsEnum.Type:
+					break;
+				case AbilityFieldsEnum.Expression:
+					break;
+				case AbilityFieldsEnum.WinSubAbility:
+					break;
+				case AbilityFieldsEnum.LoseSubAbility:
+					break;
+				case AbilityFieldsEnum.CostDesc:
+					break;
+				case AbilityFieldsEnum.RememberTargets:
+					break;
+				case AbilityFieldsEnum.RestrictValid:
+					break;
+				case AbilityFieldsEnum.DiscardValid:
+					break;
+				case AbilityFieldsEnum.Types:
+					break;
+				case AbilityFieldsEnum.RemoveCreatureTypes:
+					break;
+				case AbilityFieldsEnum.RememberMilled:
+					break;
+				case AbilityFieldsEnum.DestinationZone2:
+					break;
+				case AbilityFieldsEnum.IsPresent:
+					break;
+				case AbilityFieldsEnum.Colors:
+					break;
+				case AbilityFieldsEnum.OverwriteColors:
+					break;
+				case AbilityFieldsEnum.TokenHiddenKeywords:
+					break;
+				case AbilityFieldsEnum.Choser:
+					break;
+				case AbilityFieldsEnum.AITgts:
+					break;
+				case AbilityFieldsEnum.TgtZone:
+					break;
+				case AbilityFieldsEnum.AnnounceType:
+					break;
+				case AbilityFieldsEnum.Gains:
+					break;
+				case AbilityFieldsEnum.DefinedPlayer:
+					break;
+				case AbilityFieldsEnum.Chooser:
+					break;
+				case AbilityFieldsEnum.Unique:
+					break;
+				case AbilityFieldsEnum.Duration:
+					break;
+				case AbilityFieldsEnum.Hidden:
+					break;
+				case AbilityFieldsEnum.OriginChoice:
+					break;
+				case AbilityFieldsEnum.OriginAlternative:
+					break;
+				case AbilityFieldsEnum.AlternativeMessage:
+					break;
+				case AbilityFieldsEnum.PrecostDesc:
+					break;
+				case AbilityFieldsEnum.ActivationZone:
+					break;
+				case AbilityFieldsEnum.DividedAsYouChoose:
+					break;
+				case AbilityFieldsEnum.RememberCountered:
+					break;
+				case AbilityFieldsEnum.Announce:
+					break;
+				case AbilityFieldsEnum.Zone2:
+					break;
+				case AbilityFieldsEnum.CheckSVar:
+					break;
+				case AbilityFieldsEnum.Sacrifice:
+					break;
+				case AbilityFieldsEnum.RemoveTypes:
+					break;
+				case AbilityFieldsEnum.Activation:
+					break;
+				case AbilityFieldsEnum.sVars:
+					break;
+				case AbilityFieldsEnum.TokenTapped:
+					break;
+				case AbilityFieldsEnum.PresentCompare:
+					break;
+				case AbilityFieldsEnum.PresentZone:
+					break;
+				case AbilityFieldsEnum.ChoiceZone:
+					break;
+				case AbilityFieldsEnum.GameActivationLimit:
+					break;
+				case AbilityFieldsEnum.ValidPlayers:
+					break;
+				case AbilityFieldsEnum.UntilUntaps:
+					break;
+				case AbilityFieldsEnum.OpponentTurn:
+					break;
+				case AbilityFieldsEnum.RevealValid:
+					break;
+				case AbilityFieldsEnum.RememberRevealed:
+					break;
+				case AbilityFieldsEnum.XColor:
+					break;
+				case AbilityFieldsEnum.CharmNum:
+					break;
+				case AbilityFieldsEnum.RepeatCards:
+					break;
+				case AbilityFieldsEnum.Zone:
+					break;
+				case AbilityFieldsEnum.RememberChosen:
+					break;
+				case AbilityFieldsEnum.NoMove:
+					break;
+				case AbilityFieldsEnum.RememberLKI:
+					break;
+				case AbilityFieldsEnum.TargetValidTargeting:
+					break;
+				case AbilityFieldsEnum.UnlessCost:
+					break;
+				case AbilityFieldsEnum.Valid:
+					break;
+				case AbilityFieldsEnum.LibraryPosition2:
+					break;
+				case AbilityFieldsEnum.ChoiceTitle:
+					break;
+				case AbilityFieldsEnum.Abilities:
+					break;
+				case AbilityFieldsEnum.Tapped:
+					break;
+				case AbilityFieldsEnum.UnlessPayer:
+					break;
+				case AbilityFieldsEnum.UnlessAI:
+					break;
+				case AbilityFieldsEnum.TargetUnique:
+					break;
+				case AbilityFieldsEnum.TargetsFromSingleZone:
+					break;
+				case AbilityFieldsEnum.SacValid:
+					break;
+				case AbilityFieldsEnum.Radiance:
+					break;
+				case AbilityFieldsEnum.ConditionManaSpent:
+					break;
+				case AbilityFieldsEnum.NumTurns:
+					break;
+				case AbilityFieldsEnum.Separator:
+					break;
+				case AbilityFieldsEnum.ChosenPile:
+					break;
+				case AbilityFieldsEnum.UnchosenPile:
+					break;
+				case AbilityFieldsEnum.ColorOrType:
+					break;
+				case AbilityFieldsEnum.ReflectProperty:
+					break;
+				case AbilityFieldsEnum.Static:
+					break;
+				case AbilityFieldsEnum.RevealNumber:
+					break;
+				case AbilityFieldsEnum.TargetsWithDifferentControllers:
+					break;
+				case AbilityFieldsEnum.ConditionDefined:
+					break;
+				case AbilityFieldsEnum.ConditionPresent:
+					break;
+				case AbilityFieldsEnum.ConditionCompare:
+					break;
+				case AbilityFieldsEnum.SVarCompare:
+					break;
+				case AbilityFieldsEnum.NonBasicSpell:
+					break;
+				case AbilityFieldsEnum.staticAbilities:
+					break;
+				case AbilityFieldsEnum.AddsNoCounter:
+					break;
+				case AbilityFieldsEnum.RememberSacrificed:
+					break;
+				case AbilityFieldsEnum.RememberCounters:
+					break;
+				case AbilityFieldsEnum.ValidDesc:
+					break;
+				case AbilityFieldsEnum.MinCharmNum:
+					break;
+				case AbilityFieldsEnum.AllValid:
+					break;
+				case AbilityFieldsEnum.RememberUntapped:
+					break;
+				case AbilityFieldsEnum.AnyNumber:
+					break;
+				case AbilityFieldsEnum.TokenAbilities:
+					break;
+				case AbilityFieldsEnum.OptionalDecider:
+					break;
+				case AbilityFieldsEnum.Destroy:
+					break;
+				case AbilityFieldsEnum.NewState:
+					break;
+				case AbilityFieldsEnum.PreventionSubAbility:
+					break;
+				case AbilityFieldsEnum.ShieldEffectTarget:
+					break;
+				case AbilityFieldsEnum.OptionQuestion:
+					break;
+				case AbilityFieldsEnum.ImprintTargets:
+					break;
+				case AbilityFieldsEnum.SacMessage:
+					break;
+				case AbilityFieldsEnum.FromBottom:
+					break;
+				case AbilityFieldsEnum.Shuffle:
+					break;
+				case AbilityFieldsEnum.RememberDiscarded:
+					break;
+				case AbilityFieldsEnum.ValidZone:
+					break;
+				case AbilityFieldsEnum.WithoutManaCost:
+					break;
+				case AbilityFieldsEnum.Controller:
+					break;
+				case AbilityFieldsEnum.Image:
+					break;
+				case AbilityFieldsEnum.InstantSpeed:
+					break;
+				case AbilityFieldsEnum.RemoveKeywords:
+					break;
+				case AbilityFieldsEnum.RememberDestroyed:
+					break;
+				case AbilityFieldsEnum.ST:
+					break;
+				case AbilityFieldsEnum.DefinedCards:
+					break;
+				case AbilityFieldsEnum.DiscardMessage:
+					break;
+				case AbilityFieldsEnum.Equip:
+					break;
+				case AbilityFieldsEnum.AnyOpponent:
+					break;
+				case AbilityFieldsEnum.UpTo:
+					break;
+				case AbilityFieldsEnum.MaxFromEffect:
+					break;
+				case AbilityFieldsEnum.ValidCard:
+					break;
+				case AbilityFieldsEnum.ForgetOtherTargets:
+					break;
+				case AbilityFieldsEnum.NoPrevention:
+					break;
+				case AbilityFieldsEnum.AllType:
+					break;
+				case AbilityFieldsEnum.InvalidTypes:
+					break;
+				case AbilityFieldsEnum.HiddenKeywords:
+					break;
+				case AbilityFieldsEnum.ForgetOtherRemembered:
+					break;
+				case AbilityFieldsEnum.RememberCostCards:
+					break;
+				case AbilityFieldsEnum.ScryNum:
+					break;
+				case AbilityFieldsEnum.UntilYourNextUpkeep:
+					break;
+				case AbilityFieldsEnum.Imprint:
+					break;
+				case AbilityFieldsEnum.RegenerationTrigger:
+					break;
+				case AbilityFieldsEnum.ReplaceCardUID:
+					break;
+				case AbilityFieldsEnum.OverwriteTypes:
+					break;
+				case AbilityFieldsEnum.KeepSupertypes:
+					break;
+				case AbilityFieldsEnum.KeepCardTypes:
+					break;
+				case AbilityFieldsEnum.RemoveAllAbilities:
+					a.Effects.Add(new Effect(EffectType.LooseAllAbilities));                        
+					break;
+				case AbilityFieldsEnum.TargetsSingleTarget:
+					break;
+				case AbilityFieldsEnum.UseImprinted:
+					break;
+				case AbilityFieldsEnum.ChooseOrder:
+					break;
+				case AbilityFieldsEnum.UseAllOriginZones:
+					break;
+				case AbilityFieldsEnum.UnattachValid:
+					break;
+				case AbilityFieldsEnum.DamageSource:
+					break;
+				case AbilityFieldsEnum.ConditionDescription:
+					break;
+				case AbilityFieldsEnum.PeekAmount:
+					break;
+				case AbilityFieldsEnum.RevealOptional:
+					break;
+				case AbilityFieldsEnum.ActivationNumberSacrifice:
+					break;
+				case AbilityFieldsEnum.PumpZone:
+					break;
+				case AbilityFieldsEnum.OrColors:
+					break;
+				case AbilityFieldsEnum.RandomKeyword:
+					break;
+				case AbilityFieldsEnum.NoRepetition:
+					break;
+				case AbilityFieldsEnum.RememberTokens:
+					break;
+				case AbilityFieldsEnum.CopyOnce:
+					break;
+				case AbilityFieldsEnum.CopyCard:
+					break;
+				case AbilityFieldsEnum.FoundDestination:
+					break;
+				case AbilityFieldsEnum.RevealedDestination:
+					break;
+				case AbilityFieldsEnum.FoundLibraryPosition:
+					break;
+				case AbilityFieldsEnum.RevealedLibraryPosition:
+					break;
+				case AbilityFieldsEnum.RememberFound:
+					break;
+				case AbilityFieldsEnum.RepeatCheckSVar:
+					break;
+				case AbilityFieldsEnum.RepeatSVarCompare:
+					break;
+				case AbilityFieldsEnum.DefinedLandwalk:
+					break;
+				case AbilityFieldsEnum.RememberDrawn:
+					break;
+				case AbilityFieldsEnum.LoseAtEndStep:
+					break;
+				case AbilityFieldsEnum.DivideEvenly:
+					break;
+				case AbilityFieldsEnum.Flashback:
+					break;
+				case AbilityFieldsEnum.ActivationCardsInHand:
+					break;
+				case AbilityFieldsEnum.CopyIsColor:
+					break;
+				case AbilityFieldsEnum.AtRandom:
+					break;
+				case AbilityFieldsEnum.UntilHostLeavesPlay:
+					break;
+				case AbilityFieldsEnum.Deplete:
+					break;
+				case AbilityFieldsEnum.Phase:
+					break;
+				case AbilityFieldsEnum.Execute:
+					break;
+				case AbilityFieldsEnum.Defender:
+					break;
+				case AbilityFieldsEnum.AndOrValid:
+					break;
+				case AbilityFieldsEnum.DifferentNames:
+					break;
+				case AbilityFieldsEnum.RepeatCounters:
+					break;
+				case AbilityFieldsEnum.ControlledByTarget:
+					break;
+				case AbilityFieldsEnum.NewController:
+					break;
+				case AbilityFieldsEnum.RememberRemoved:
+					break;
+				case AbilityFieldsEnum.EachBasicType:
+					break;
+				case AbilityFieldsEnum.TargetsAtRandom:
+					break;
+				case AbilityFieldsEnum.Condition:
+					break;
+				case AbilityFieldsEnum.MaxRepeat:
+					break;
+				case AbilityFieldsEnum.ExileFaceDown:
+					break;
+				case AbilityFieldsEnum.AttachedTo:
+					break;
+				case AbilityFieldsEnum.AddsKeywords:
+					break;
+				case AbilityFieldsEnum.AtEOT:
+					break;
+				case AbilityFieldsEnum.RestRandomOrder:
+					break;
+				case AbilityFieldsEnum.Changetype:
+					break;
+				case AbilityFieldsEnum.Ninjutsu:
+					break;
+				case AbilityFieldsEnum.DestinationChoice:
+					break;
+				case AbilityFieldsEnum.ForgetRemembered:
+					break;
+				case AbilityFieldsEnum.Random:
+					break;
+				case AbilityFieldsEnum.RememberRemovedFromCombat:
+					break;
+				case AbilityFieldsEnum.RememberTargetedCard:
+					break;
+				case AbilityFieldsEnum.UntilYourNextTurn:
+					break;
+				case AbilityFieldsEnum.UntilEndOfCombat:
+					break;
+				case AbilityFieldsEnum.AnySupportedCard:
+					break;
+				case AbilityFieldsEnum.RandomCopied:
+					break;
+				case AbilityFieldsEnum.RandomNum:
+					break;
+				case AbilityFieldsEnum.ChoiceNum:
+					break;
+				case AbilityFieldsEnum.TargetControls:
+					break;
+				case AbilityFieldsEnum.RestrictFromZone:
+					break;
+				case AbilityFieldsEnum.RestrictFromValid:
+					break;
+				case AbilityFieldsEnum.Min:
+					break;
+				case AbilityFieldsEnum.Max:
+					break;
+				case AbilityFieldsEnum.TapOnLose:
+					break;
+				case AbilityFieldsEnum.DeclareAttackers:
+					break;
+				case AbilityFieldsEnum.DeclareBlockers:
+					break;
+				case AbilityFieldsEnum.Until:
+					break;
+				case AbilityFieldsEnum.DestroyTgt:
+					break;
+				case AbilityFieldsEnum.RememberSplicedOntoCounteredSpell:
+					break;
+				case AbilityFieldsEnum.Mitosis:
+					break;
+				case AbilityFieldsEnum.AddAbilities:
+					break;
+				case AbilityFieldsEnum.AddSVars:
+					break;
+				case AbilityFieldsEnum.ValidAttribute:
+					break;
+				case AbilityFieldsEnum.EffectOwner:
+					break;
+				case AbilityFieldsEnum.MayShuffle:
+					break;
+				case AbilityFieldsEnum.Monstrosity:
+					break;
+				case AbilityFieldsEnum.NoCall:
+					break;
+				case AbilityFieldsEnum.HeadsSubAbility:
+					break;
+				case AbilityFieldsEnum.TailsSubAbility:
+					break;
+				case AbilityFieldsEnum.StaticCommandCheckSVar:
+					break;
+				case AbilityFieldsEnum.StaticCommandSVarCompare:
+					break;
+				case AbilityFieldsEnum.AddsCounters:
+					break;
+				case AbilityFieldsEnum.UntilControllerNextUntap:
+					break;
+				case AbilityFieldsEnum.RandomChange:
+					break;
+				case AbilityFieldsEnum.TokenController:
+					break;
+				case AbilityFieldsEnum.NumCopies:
+					break;
+				case AbilityFieldsEnum.OwnerOnly:
+					break;
+				case AbilityFieldsEnum.RememberAllPumped:
+					break;
+				case AbilityFieldsEnum.TargetsFromDifferentZone:
+					break;
+				case AbilityFieldsEnum.TgtPromp:
+					break;
+				case AbilityFieldsEnum.UnlessResolveSubs:
+					break;
+				case AbilityFieldsEnum.RepeatDefined:
+					break;
+				case AbilityFieldsEnum.RepeatPresent:
+					break;
+				case AbilityFieldsEnum.RepeatCompare:
+					break;
+				case AbilityFieldsEnum.OtherwiseSubAbility:
+					break;
+				case AbilityFieldsEnum.ConditionTargetValidTargeting:
+					break;
+				case AbilityFieldsEnum.ConditionTargetsSingleTarget:
+					break;
+				case AbilityFieldsEnum.TargetRestriction:
+					break;
+				case AbilityFieldsEnum.CopyForEachCanTarget:
+					break;
+				case AbilityFieldsEnum.CanTargetPlayer:
+					break;
+				case AbilityFieldsEnum.Redistribute:
+					break;
+				case AbilityFieldsEnum.ListTitle:
+					break;
+				case AbilityFieldsEnum.TargetsWithoutSameCreatureType:
+					break;
+				case AbilityFieldsEnum.ContionSVarCompare:
+					break;
+				case AbilityFieldsEnum.isPresent:
+					break;
+				case AbilityFieldsEnum.ImprintTokens:
+					break;
+				case AbilityFieldsEnum.DamageDesc:
+					break;
+				case AbilityFieldsEnum.ConditionChosenColor:
+					break;
+				case AbilityFieldsEnum.SkipUntap:
+					break;
+				case AbilityFieldsEnum.RecordChoice:
+					break;
+				case AbilityFieldsEnum.ChoosePlayer:
+					break;
+				case AbilityFieldsEnum.TokenTriggers:
+					break;
+				case AbilityFieldsEnum.Source:
+					break;
+				case AbilityFieldsEnum.XCantBe0:
+					break;
+				case AbilityFieldsEnum.ReplacePlayerName:
+					break;
+				case AbilityFieldsEnum.ChangeSingleTarget:
+					break;
+				case AbilityFieldsEnum.NoReveal:
+					break;
+				case AbilityFieldsEnum.RememberTapped:
+					break;
+				case AbilityFieldsEnum.DelayedTrigger:
+					break;
+				case AbilityFieldsEnum.DestroyPermanent:
+					break;
+				case AbilityFieldsEnum.SkipReorder:
+					break;
+				case AbilityFieldsEnum.NoShuffle:
+					break;
+				case AbilityFieldsEnum.MaxRevealed:
+					break;
+				case AbilityFieldsEnum.Reference:
+					break;
+				case AbilityFieldsEnum.PhaseInOrOutAll:
+					break;
+				case AbilityFieldsEnum.ConditionLifeTotal:
+					break;
+				case AbilityFieldsEnum.ConditionLifeAmount:
+					break;
+				case AbilityFieldsEnum.NoPeek:
+					break;
+				case AbilityFieldsEnum.ImprintRevealed:
+					break;
+				case AbilityFieldsEnum.ValidTypes:
+					break;
+				case AbilityFieldsEnum.RememberControlled:
+					break;
+				case AbilityFieldsEnum.Bonus:
+					break;
+				case AbilityFieldsEnum.BonusProduced:
+					break;
+				case AbilityFieldsEnum.IsCursed:
+					break;
+				case AbilityFieldsEnum.RandomChosen:
+					break;
+				case AbilityFieldsEnum.Piles:
+					break;
+				case AbilityFieldsEnum.PreCostDesc:
+					break;
+				case AbilityFieldsEnum.UnlessType:
+					break;
+				default:
+					break;
+				}
 
 
+			}
 
-
+			return a;
+		}
 
 
         public static Ability SpecialK(string str)
@@ -400,1129 +1507,10 @@ namespace Magic3D
             }
             return a;
         }
-        public static List<string> strings = new List<string>();
-        public static Ability Parse(string strAbility)
-        {
-            Ability a = new Ability();
-            
-
-            string[] tmp = strAbility.Split(new char[] { '|' });
-
-            foreach (string ab in tmp)
-            {
-                int v;
-
-                if (string.IsNullOrWhiteSpace(ab))
-                    continue;
-
-                int dollarPos = ab.IndexOf('$');
-
-                if (dollarPos < 0)
-                    continue;
-
-                AbilitiesVariables varName = (AbilitiesVariables)Enum.Parse(typeof(AbilitiesVariables), ab.Substring(0, dollarPos), true);
-                string value = ab.Substring(dollarPos + 1).Trim();
-
-                Effect e = null;
-                
-                switch (varName)
-                {
-                    case AbilitiesVariables.SP:
-                    case AbilitiesVariables.AB:
-                        #region ability type
-                        switch (value)
-                        {
-                            case "Discard":
-                                break;
-                            case "Mana":
-                                a = new ManaAbility();
-                                break;
-                            case "Pump":
-                                break;
-                            case "Attach":
-                            case "Animate":
-                                a.AbilityType = AbilityEnum.Attach;
-                                a.RequiredTargetCount = 1;
-                                break;
-                            case "Effect":
-                                break;
-                            case "Counter":
-                                break;
-                            case "Destroy":
-                                break;
-                            case "Tap":
-                                break;
-                            case "TapAll":
-                                break;
-                            case "LoseLife":
-                                break;
-                            case "PreventDamage":
-                                break;
-                            case "Charm":
-                                break;
-                            case "DealDamage":
-                                break;
-                            case "ChangeZone":
-                                break;
-                            case "Draw":
-                                break;
-                            case "DestroyAll":
-                                break;
-                            case "RepeatEach":
-                                break;
-                            case "Token":
-                                break;
-                            case "GainControl":
-                                break;
-                            case "Repeat":
-                                break;
-                            case "Debuff":
-                                break;
-                            case "ChooseColor":
-                                break;
-                            case "Dig":
-                                break;
-                            case "PumpAll":
-                                break;
-                            case "RemoveCounterAll":
-                                break;
-                            case "ChangeZoneAll":
-                                break;
-                            case "DamageAll":
-                                break;
-                            case "UntapAll":
-                                break;
-                            case "PutCounter":
-                                break;
-                            case "GainLife":
-                                break;
-                            case "PutCounterAll":
-                                break;
-                            case "StoreSVar":
-                                break;
-                            case "Regenerate":
-                                break;
-                            case "FlipACoin":
-                                break;
-                            case "SacrificeAll":
-                                break;
-                            case "Untap":
-                                break;
-                            case "Mill":
-                                break;
-                            case "Fog":
-                                break;
-                            case "RemoveCounter":
-                                break;
-                            case "Protection":
-                                break;
-                            case "ExchangeZone":
-                                break;
-                            case "AnimateAll":
-                                break;
-                            case "ChooseCard":
-                                break;
-                            case "Reveal":
-                                break;
-                            case "ChooseSource":
-                                break;
-                            case "MustBlock":
-                                break;
-                            case "ExchangeControl":
-                                break;
-                            case "RearrangeTopOfLibrary":
-                                break;
-                            case "CopyPermanent":
-                                break;
-                            case "SetState":
-                                break;
-                            case "Balance":
-                                break;
-                            case "RevealHand":
-                                break;
-                            case "Sacrifice":
-                                break;
-                            case "AddTurn":
-                                break;
-                            case "TwoPiles":
-                                break;
-                            case "ManaReflected":
-                                break;
-                            case "SetLife":
-                                break;
-                            case "DebuffAll":
-                                break;
-                            case "Fight":
-                                break;
-                            case "ChooseType":
-                                break;
-                            case "Shuffle":
-                                break;
-                            case "NameCard":
-                                break;
-                            case "PermanentNoncreature":
-                                break;
-                            case "PermanentCreature":
-                                break;
-                            case "TapOrUntap":
-                                break;
-                            case "GenericChoice":
-                                break;
-                            case "Play":
-                                break;
-                            case "BecomesBlocked":
-                                break;
-                            case "AddOrRemoveCounter":
-                                break;
-                            case "WinsGame":
-                                break;
-                            case "Proliferate":
-                                break;
-                            case "Scry":
-                                break;
-                            case "MoveCounter":
-                                break;
-                            case "GainOwnership":
-                                break;
-                            case "ChangeTargets":
-                                break;
-                            case "UnattachAll":
-                                break;
-                            case "PeekAndReveal":
-                                break;
-                            case "LosesGame":
-                                break;
-                            case "DigUntil":
-                                break;
-                            case "CopySpellAbility":
-                                break;
-                            case "RollPlanarDice":
-                                break;
-                            case "RegenerateAll":
-                                break;
-                            case "DelayedTrigger":
-                                break;
-                            case "MustAttack":
-                                break;
-                            case "ProtectionAll":
-                                break;
-                            case "RemoveFromCombat":
-                                break;
-                            case "RestartGame":
-                                break;
-                            case "PreventDamageAll":
-                                break;
-                            case "ExchangeLife":
-                                break;
-                            case "DeclareCombatants":
-                                break;
-                            case "ControlPlayer":
-                                break;
-                            case "Phases":
-                                break;
-                            case "Clone":
-                                break;
-                            case "Clash":
-                                break;
-                            case "ChooseNumber":
-                                break;
-                            case "EachDamage":
-                                break;
-                            case "ReorderZone":
-                                break;
-                            case "ChoosePlayer":
-                                break;
-                            case "EndTurn":
-                                break;
-                            case "MultiplePiles":
-                                break;
-
-                            default:
-                                break;
-                        }
-                        break;
-                        #endregion
-                    case AbilitiesVariables.Cost:
-                        a.ActivationCost = Cost.Parse(value);
-                        break;
-                    case AbilitiesVariables.ValidTgts:
-                        a.ValidTargets = Target.ParseTargets(value);
-                        break;
-                    case AbilitiesVariables.Mode:
-                        switch (value.Trim().ToLower())
-                        {
-                            case "continuous":
-
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    case AbilitiesVariables.NumCards:
-                        break;
-                    case AbilitiesVariables.References:
-                        break;
-                    case AbilitiesVariables.SpellDescription:
-                        break;
-                    case AbilitiesVariables.Produced:
-                        (a as ManaAbility).ProducedMana = Mana.Parse(value);
-                        break;
-                    case AbilitiesVariables.NumDef:                        
-                        if (!int.TryParse(value, out v))
-                            break;
-                        a.Effects.Add(new NumericEffect
-                        {
-                            TypeOfEffect = EffectType.AddTouchness,
-                            NumericValue = v
-                        });
-                        break;
-                    case AbilitiesVariables.AILogic:
-                        #region AIlogic
-                        switch (value.Trim())
-                        {
-                            case "GainControl":
-                                break;
-                            case "BeginningOfOppTurn":
-                                break;
-                            case "Pump":
-                                e = new Effect { TypeOfEffect = EffectType.Pump };
-                                break;
-                            case "Never":
-                                break;
-                            case "MostProminentInHumanDeck":
-                                break;
-                            case "RedirectSpellDamageFromPlayer":
-                                break;
-                            case "Curse":
-                                break;
-                            case "MostProminentAttackers":
-                                break;
-                            case "Fog":
-                                break;
-                            case "Animate":
-                                break;
-                            case "Reanimate":
-                                break;
-                            case "MostProminentInComputerGraveyard":
-                                break;
-                            case "BeforeCombat":
-                                break;
-                            case "MostProminentInComputerDeck":
-                                break;
-                            case "NeedsPrevention":
-                                break;
-                            case "Evasion":
-                                break;
-                            case "BalanceCreaturesAndLands":
-                                break;
-                            case "BalancePermanents":
-                                break;
-                            case "AtLeast1":
-                                break;
-                            case "KeepTapped":
-                                a.Effects.Add(new Effect { TypeOfEffect = EffectType.DoesNotUntap });
-                                break;
-                            case "DontCast":
-                                break;
-                            case "MostProminentOnBattlefield":
-                                break;
-                            case "ChangeType":
-                                break;
-                            case "Clone":
-                                break;
-                            case "Worst":
-                                break;
-                            case "MostProminentComputerControls":
-                                break;
-                            case "Always":
-                                break;
-                            case "BestBlocker":
-                                break;
-                            case "MostProminentHumanControls":
-                                break;
-                            case "ZeroToughness":
-                                break;
-                            case "EndOfOppTurn":
-                                break;
-                            case "DoubleCounters":
-                                break;
-                            case "SpecificCard":
-                                break;
-                            case "HighestEvaluation":
-                                break;
-                            case "Main2":
-                                break;
-                            case "EndOfOpponentsTurn":
-                                break;
-                            case "WorstCard":
-                                break;
-                            case "DiscardLands":
-                                break;
-                            case "MostProminentInComputerHand":
-                                break;
-                            case "WildHunt":
-                                break;
-                            case "MomirAvatar":
-                                break;
-                            case "AtLeast2":
-                                break;
-                            case "BalanceLands":
-                                break;
-                            case "CloneAllTokens":
-                                break;
-                            case "CloneMyTokens":
-                                break;
-                            case "Color":
-                                break;
-                            case "MostProminentHumanCreatures":
-                                break;
-                            case "RemoveAllCounters":
-                                break;
-                            case "EOT":
-                                break;
-                            case "RestrictBlocking":
-                                break;
-                            default:
-                                break;
-                        }
-                        #endregion
-                        break;
-                    case AbilitiesVariables.Name:
-                        break;
-                    case AbilitiesVariables.Power:                        
-                        if (!int.TryParse(value, out v))
-                            break;
-                        a.Effects.Add(new NumericEffect
-                        {
-                            TypeOfEffect = EffectType.SetPower,
-                            NumericValue = v
-                        });
-                        break;
-                    case AbilitiesVariables.Toughness:
-                        if (!int.TryParse(value, out v))
-                            break;
-                        a.Effects.Add(new NumericEffect
-                        {
-                            TypeOfEffect = EffectType.SetTouchness,
-                            NumericValue = v
-                        });
-                        break;
-                    case AbilitiesVariables.StaticAbilities:
-                        break;
-                    case AbilitiesVariables.RememberObjects:
-                        break;
-                    case AbilitiesVariables.SubAbility:
-                        break;
-                    case AbilitiesVariables.TargetType:
-                        break;
-                    case AbilitiesVariables.TgtPrompt:
-                        break;
-                    case AbilitiesVariables.ValidCards:
-                        break;
-                    case AbilitiesVariables.KW:
-                        break;
-                    case AbilitiesVariables.LifeAmount:
-                        break;
-                    case AbilitiesVariables.Amount:
-                        break;
-                    case AbilitiesVariables.Choices:
-                        break;
-                    case AbilitiesVariables.NumDmg:
-                        break;
-                    case AbilitiesVariables.Origin:
-                        break;
-                    case AbilitiesVariables.Destination:
-                        break;
-                    case AbilitiesVariables.NumAtt:
-                        break;
-                    case AbilitiesVariables.Defined:
-                        break;
-                    case AbilitiesVariables.Triggers:
-                        break;
-                    case AbilitiesVariables.SVars:
-                        break;
-                    case AbilitiesVariables.ImprintCards:
-                        break;
-                    case AbilitiesVariables.ActivationPhases:
-                        break;
-                    case AbilitiesVariables.RepeatPlayers:
-                        break;
-                    case AbilitiesVariables.RepeatSubAbility:
-                        break;
-                    case AbilitiesVariables.IsCurse:
-                        break;
-                    case AbilitiesVariables.StackDescription:
-                        break;
-                    case AbilitiesVariables.TokenAmount:
-                        break;
-                    case AbilitiesVariables.TokenName:
-                        break;
-                    case AbilitiesVariables.TokenTypes:
-                        break;
-                    case AbilitiesVariables.TokenOwner:
-                        break;
-                    case AbilitiesVariables.TokenColors:
-                        break;
-                    case AbilitiesVariables.TokenPower:
-                        break;
-                    case AbilitiesVariables.TokenToughness:
-                        break;
-                    case AbilitiesVariables.ChangeType:
-                        break;
-                    case AbilitiesVariables.ChangeNum:
-                        break;
-                    case AbilitiesVariables.GainControl:
-                        break;
-                    case AbilitiesVariables.LoseControl:
-                        break;
-                    case AbilitiesVariables.Untap:
-                        break;
-                    case AbilitiesVariables.AddKWs:
-                        break;
-                    case AbilitiesVariables.RepeatOptional:
-                        break;
-                    case AbilitiesVariables.Keywords:
-                        break;
-                    case AbilitiesVariables.TokenImage:
-                        break;
-                    case AbilitiesVariables.TokenKeywords:
-                        break;
-                    case AbilitiesVariables.DigNum:
-                        break;
-                    case AbilitiesVariables.ConditionCheckSVar:
-                        break;
-                    case AbilitiesVariables.ConditionSVarCompare:
-                        break;
-                    case AbilitiesVariables.ReplacementEffects:
-                        break;
-                    case AbilitiesVariables.Stackable:
-                        break;
-                    case AbilitiesVariables.ChangeValid:
-                        break;
-                    case AbilitiesVariables.DestinationZone:
-                        break;
-                    case AbilitiesVariables.RememberChanged:
-                        break;
-                    case AbilitiesVariables.TargetMin:
-                        break;
-                    case AbilitiesVariables.TargetMax:
-                        break;
-                    case AbilitiesVariables.AllCounterTypes:
-                        break;
-                    case AbilitiesVariables.NoReg:
-                        break;
-                    case AbilitiesVariables.AnyPlayer:
-                        break;
-                    case AbilitiesVariables.Optional:
-                        break;
-                    case AbilitiesVariables.Reveal:
-                        break;
-                    case AbilitiesVariables.LibraryPosition:
-                        break;
-                    case AbilitiesVariables.NoRegen:
-                        break;
-                    case AbilitiesVariables.RememberDamaged:
-                        break;
-                    case AbilitiesVariables.ValidDescription:
-                        break;
-                    case AbilitiesVariables.SorcerySpeed:
-                        break;
-                    case AbilitiesVariables.Mandatory:
-                        break;
-                    case AbilitiesVariables.Planeswalker:
-                        break;
-                    case AbilitiesVariables.CounterNum:
-                        break;
-                    case AbilitiesVariables.CounterType:
-                        break;
-                    case AbilitiesVariables.Ultimate:
-                        break;
-                    case AbilitiesVariables.TokenStaticAbilities:
-                        break;
-                    case AbilitiesVariables.TokenSVars:
-                        break;
-                    case AbilitiesVariables.Permanent:
-                        break;
-                    case AbilitiesVariables.ActivationLimit:
-                        break;
-                    case AbilitiesVariables.PlayerTurn:
-                        break;
-                    case AbilitiesVariables.SVar:
-                        break;
-                    case AbilitiesVariables.Type:
-                        break;
-                    case AbilitiesVariables.Expression:
-                        break;
-                    case AbilitiesVariables.WinSubAbility:
-                        break;
-                    case AbilitiesVariables.LoseSubAbility:
-                        break;
-                    case AbilitiesVariables.CostDesc:
-                        break;
-                    case AbilitiesVariables.RememberTargets:
-                        break;
-                    case AbilitiesVariables.RestrictValid:
-                        break;
-                    case AbilitiesVariables.DiscardValid:
-                        break;
-                    case AbilitiesVariables.Types:
-                        break;
-                    case AbilitiesVariables.RemoveCreatureTypes:
-                        break;
-                    case AbilitiesVariables.RememberMilled:
-                        break;
-                    case AbilitiesVariables.DestinationZone2:
-                        break;
-                    case AbilitiesVariables.IsPresent:
-                        break;
-                    case AbilitiesVariables.Colors:
-                        break;
-                    case AbilitiesVariables.OverwriteColors:
-                        break;
-                    case AbilitiesVariables.TokenHiddenKeywords:
-                        break;
-                    case AbilitiesVariables.Choser:
-                        break;
-                    case AbilitiesVariables.AITgts:
-                        break;
-                    case AbilitiesVariables.TgtZone:
-                        break;
-                    case AbilitiesVariables.AnnounceType:
-                        break;
-                    case AbilitiesVariables.Gains:
-                        break;
-                    case AbilitiesVariables.DefinedPlayer:
-                        break;
-                    case AbilitiesVariables.Chooser:
-                        break;
-                    case AbilitiesVariables.Unique:
-                        break;
-                    case AbilitiesVariables.Duration:
-                        break;
-                    case AbilitiesVariables.Hidden:
-                        break;
-                    case AbilitiesVariables.OriginChoice:
-                        break;
-                    case AbilitiesVariables.OriginAlternative:
-                        break;
-                    case AbilitiesVariables.AlternativeMessage:
-                        break;
-                    case AbilitiesVariables.PrecostDesc:
-                        break;
-                    case AbilitiesVariables.ActivationZone:
-                        break;
-                    case AbilitiesVariables.DividedAsYouChoose:
-                        break;
-                    case AbilitiesVariables.RememberCountered:
-                        break;
-                    case AbilitiesVariables.Announce:
-                        break;
-                    case AbilitiesVariables.Zone2:
-                        break;
-                    case AbilitiesVariables.CheckSVar:
-                        break;
-                    case AbilitiesVariables.Sacrifice:
-                        break;
-                    case AbilitiesVariables.RemoveTypes:
-                        break;
-                    case AbilitiesVariables.Activation:
-                        break;
-                    case AbilitiesVariables.sVars:
-                        break;
-                    case AbilitiesVariables.TokenTapped:
-                        break;
-                    case AbilitiesVariables.PresentCompare:
-                        break;
-                    case AbilitiesVariables.PresentZone:
-                        break;
-                    case AbilitiesVariables.ChoiceZone:
-                        break;
-                    case AbilitiesVariables.GameActivationLimit:
-                        break;
-                    case AbilitiesVariables.ValidPlayers:
-                        break;
-                    case AbilitiesVariables.UntilUntaps:
-                        break;
-                    case AbilitiesVariables.OpponentTurn:
-                        break;
-                    case AbilitiesVariables.RevealValid:
-                        break;
-                    case AbilitiesVariables.RememberRevealed:
-                        break;
-                    case AbilitiesVariables.XColor:
-                        break;
-                    case AbilitiesVariables.CharmNum:
-                        break;
-                    case AbilitiesVariables.RepeatCards:
-                        break;
-                    case AbilitiesVariables.Zone:
-                        break;
-                    case AbilitiesVariables.RememberChosen:
-                        break;
-                    case AbilitiesVariables.NoMove:
-                        break;
-                    case AbilitiesVariables.RememberLKI:
-                        break;
-                    case AbilitiesVariables.TargetValidTargeting:
-                        break;
-                    case AbilitiesVariables.UnlessCost:
-                        break;
-                    case AbilitiesVariables.Valid:
-                        break;
-                    case AbilitiesVariables.LibraryPosition2:
-                        break;
-                    case AbilitiesVariables.ChoiceTitle:
-                        break;
-                    case AbilitiesVariables.Abilities:
-                        break;
-                    case AbilitiesVariables.Tapped:
-                        break;
-                    case AbilitiesVariables.UnlessPayer:
-                        break;
-                    case AbilitiesVariables.UnlessAI:
-                        break;
-                    case AbilitiesVariables.TargetUnique:
-                        break;
-                    case AbilitiesVariables.TargetsFromSingleZone:
-                        break;
-                    case AbilitiesVariables.SacValid:
-                        break;
-                    case AbilitiesVariables.Radiance:
-                        break;
-                    case AbilitiesVariables.ConditionManaSpent:
-                        break;
-                    case AbilitiesVariables.NumTurns:
-                        break;
-                    case AbilitiesVariables.Separator:
-                        break;
-                    case AbilitiesVariables.ChosenPile:
-                        break;
-                    case AbilitiesVariables.UnchosenPile:
-                        break;
-                    case AbilitiesVariables.ColorOrType:
-                        break;
-                    case AbilitiesVariables.ReflectProperty:
-                        break;
-                    case AbilitiesVariables.Static:
-                        break;
-                    case AbilitiesVariables.RevealNumber:
-                        break;
-                    case AbilitiesVariables.TargetsWithDifferentControllers:
-                        break;
-                    case AbilitiesVariables.ConditionDefined:
-                        break;
-                    case AbilitiesVariables.ConditionPresent:
-                        break;
-                    case AbilitiesVariables.ConditionCompare:
-                        break;
-                    case AbilitiesVariables.SVarCompare:
-                        break;
-                    case AbilitiesVariables.NonBasicSpell:
-                        break;
-                    case AbilitiesVariables.staticAbilities:
-                        break;
-                    case AbilitiesVariables.AddsNoCounter:
-                        break;
-                    case AbilitiesVariables.RememberSacrificed:
-                        break;
-                    case AbilitiesVariables.RememberCounters:
-                        break;
-                    case AbilitiesVariables.ValidDesc:
-                        break;
-                    case AbilitiesVariables.MinCharmNum:
-                        break;
-                    case AbilitiesVariables.AllValid:
-                        break;
-                    case AbilitiesVariables.RememberUntapped:
-                        break;
-                    case AbilitiesVariables.AnyNumber:
-                        break;
-                    case AbilitiesVariables.TokenAbilities:
-                        break;
-                    case AbilitiesVariables.OptionalDecider:
-                        break;
-                    case AbilitiesVariables.Destroy:
-                        break;
-                    case AbilitiesVariables.NewState:
-                        break;
-                    case AbilitiesVariables.PreventionSubAbility:
-                        break;
-                    case AbilitiesVariables.ShieldEffectTarget:
-                        break;
-                    case AbilitiesVariables.OptionQuestion:
-                        break;
-                    case AbilitiesVariables.ImprintTargets:
-                        break;
-                    case AbilitiesVariables.SacMessage:
-                        break;
-                    case AbilitiesVariables.FromBottom:
-                        break;
-                    case AbilitiesVariables.Shuffle:
-                        break;
-                    case AbilitiesVariables.RememberDiscarded:
-                        break;
-                    case AbilitiesVariables.ValidZone:
-                        break;
-                    case AbilitiesVariables.WithoutManaCost:
-                        break;
-                    case AbilitiesVariables.Controller:
-                        break;
-                    case AbilitiesVariables.Image:
-                        break;
-                    case AbilitiesVariables.InstantSpeed:
-                        break;
-                    case AbilitiesVariables.RemoveKeywords:
-                        break;
-                    case AbilitiesVariables.RememberDestroyed:
-                        break;
-                    case AbilitiesVariables.ST:
-                        break;
-                    case AbilitiesVariables.DefinedCards:
-                        break;
-                    case AbilitiesVariables.DiscardMessage:
-                        break;
-                    case AbilitiesVariables.Equip:
-                        break;
-                    case AbilitiesVariables.AnyOpponent:
-                        break;
-                    case AbilitiesVariables.UpTo:
-                        break;
-                    case AbilitiesVariables.MaxFromEffect:
-                        break;
-                    case AbilitiesVariables.ValidCard:
-                        break;
-                    case AbilitiesVariables.ForgetOtherTargets:
-                        break;
-                    case AbilitiesVariables.NoPrevention:
-                        break;
-                    case AbilitiesVariables.AllType:
-                        break;
-                    case AbilitiesVariables.InvalidTypes:
-                        break;
-                    case AbilitiesVariables.HiddenKeywords:
-                        break;
-                    case AbilitiesVariables.ForgetOtherRemembered:
-                        break;
-                    case AbilitiesVariables.RememberCostCards:
-                        break;
-                    case AbilitiesVariables.ScryNum:
-                        break;
-                    case AbilitiesVariables.UntilYourNextUpkeep:
-                        break;
-                    case AbilitiesVariables.Imprint:
-                        break;
-                    case AbilitiesVariables.RegenerationTrigger:
-                        break;
-                    case AbilitiesVariables.ReplaceCardUID:
-                        break;
-                    case AbilitiesVariables.OverwriteTypes:
-                        break;
-                    case AbilitiesVariables.KeepSupertypes:
-                        break;
-                    case AbilitiesVariables.KeepCardTypes:
-                        break;
-                    case AbilitiesVariables.RemoveAllAbilities:
-                        a.Effects.Add(new Effect(EffectType.LooseAllAbilities));                        
-                        break;
-                    case AbilitiesVariables.TargetsSingleTarget:
-                        break;
-                    case AbilitiesVariables.UseImprinted:
-                        break;
-                    case AbilitiesVariables.ChooseOrder:
-                        break;
-                    case AbilitiesVariables.UseAllOriginZones:
-                        break;
-                    case AbilitiesVariables.UnattachValid:
-                        break;
-                    case AbilitiesVariables.DamageSource:
-                        break;
-                    case AbilitiesVariables.ConditionDescription:
-                        break;
-                    case AbilitiesVariables.PeekAmount:
-                        break;
-                    case AbilitiesVariables.RevealOptional:
-                        break;
-                    case AbilitiesVariables.ActivationNumberSacrifice:
-                        break;
-                    case AbilitiesVariables.PumpZone:
-                        break;
-                    case AbilitiesVariables.OrColors:
-                        break;
-                    case AbilitiesVariables.RandomKeyword:
-                        break;
-                    case AbilitiesVariables.NoRepetition:
-                        break;
-                    case AbilitiesVariables.RememberTokens:
-                        break;
-                    case AbilitiesVariables.CopyOnce:
-                        break;
-                    case AbilitiesVariables.CopyCard:
-                        break;
-                    case AbilitiesVariables.FoundDestination:
-                        break;
-                    case AbilitiesVariables.RevealedDestination:
-                        break;
-                    case AbilitiesVariables.FoundLibraryPosition:
-                        break;
-                    case AbilitiesVariables.RevealedLibraryPosition:
-                        break;
-                    case AbilitiesVariables.RememberFound:
-                        break;
-                    case AbilitiesVariables.RepeatCheckSVar:
-                        break;
-                    case AbilitiesVariables.RepeatSVarCompare:
-                        break;
-                    case AbilitiesVariables.DefinedLandwalk:
-                        break;
-                    case AbilitiesVariables.RememberDrawn:
-                        break;
-                    case AbilitiesVariables.LoseAtEndStep:
-                        break;
-                    case AbilitiesVariables.DivideEvenly:
-                        break;
-                    case AbilitiesVariables.Flashback:
-                        break;
-                    case AbilitiesVariables.ActivationCardsInHand:
-                        break;
-                    case AbilitiesVariables.CopyIsColor:
-                        break;
-                    case AbilitiesVariables.AtRandom:
-                        break;
-                    case AbilitiesVariables.UntilHostLeavesPlay:
-                        break;
-                    case AbilitiesVariables.Deplete:
-                        break;
-                    case AbilitiesVariables.Phase:
-                        break;
-                    case AbilitiesVariables.Execute:
-                        break;
-                    case AbilitiesVariables.Defender:
-                        break;
-                    case AbilitiesVariables.AndOrValid:
-                        break;
-                    case AbilitiesVariables.DifferentNames:
-                        break;
-                    case AbilitiesVariables.RepeatCounters:
-                        break;
-                    case AbilitiesVariables.ControlledByTarget:
-                        break;
-                    case AbilitiesVariables.NewController:
-                        break;
-                    case AbilitiesVariables.RememberRemoved:
-                        break;
-                    case AbilitiesVariables.EachBasicType:
-                        break;
-                    case AbilitiesVariables.TargetsAtRandom:
-                        break;
-                    case AbilitiesVariables.Condition:
-                        break;
-                    case AbilitiesVariables.MaxRepeat:
-                        break;
-                    case AbilitiesVariables.ExileFaceDown:
-                        break;
-                    case AbilitiesVariables.AttachedTo:
-                        break;
-                    case AbilitiesVariables.AddsKeywords:
-                        break;
-                    case AbilitiesVariables.AtEOT:
-                        break;
-                    case AbilitiesVariables.RestRandomOrder:
-                        break;
-                    case AbilitiesVariables.Changetype:
-                        break;
-                    case AbilitiesVariables.Ninjutsu:
-                        break;
-                    case AbilitiesVariables.DestinationChoice:
-                        break;
-                    case AbilitiesVariables.ForgetRemembered:
-                        break;
-                    case AbilitiesVariables.Random:
-                        break;
-                    case AbilitiesVariables.RememberRemovedFromCombat:
-                        break;
-                    case AbilitiesVariables.RememberTargetedCard:
-                        break;
-                    case AbilitiesVariables.UntilYourNextTurn:
-                        break;
-                    case AbilitiesVariables.UntilEndOfCombat:
-                        break;
-                    case AbilitiesVariables.AnySupportedCard:
-                        break;
-                    case AbilitiesVariables.RandomCopied:
-                        break;
-                    case AbilitiesVariables.RandomNum:
-                        break;
-                    case AbilitiesVariables.ChoiceNum:
-                        break;
-                    case AbilitiesVariables.TargetControls:
-                        break;
-                    case AbilitiesVariables.RestrictFromZone:
-                        break;
-                    case AbilitiesVariables.RestrictFromValid:
-                        break;
-                    case AbilitiesVariables.Min:
-                        break;
-                    case AbilitiesVariables.Max:
-                        break;
-                    case AbilitiesVariables.TapOnLose:
-                        break;
-                    case AbilitiesVariables.DeclareAttackers:
-                        break;
-                    case AbilitiesVariables.DeclareBlockers:
-                        break;
-                    case AbilitiesVariables.Until:
-                        break;
-                    case AbilitiesVariables.DestroyTgt:
-                        break;
-                    case AbilitiesVariables.RememberSplicedOntoCounteredSpell:
-                        break;
-                    case AbilitiesVariables.Mitosis:
-                        break;
-                    case AbilitiesVariables.AddAbilities:
-                        break;
-                    case AbilitiesVariables.AddSVars:
-                        break;
-                    case AbilitiesVariables.ValidAttribute:
-                        break;
-                    case AbilitiesVariables.EffectOwner:
-                        break;
-                    case AbilitiesVariables.MayShuffle:
-                        break;
-                    case AbilitiesVariables.Monstrosity:
-                        break;
-                    case AbilitiesVariables.NoCall:
-                        break;
-                    case AbilitiesVariables.HeadsSubAbility:
-                        break;
-                    case AbilitiesVariables.TailsSubAbility:
-                        break;
-                    case AbilitiesVariables.StaticCommandCheckSVar:
-                        break;
-                    case AbilitiesVariables.StaticCommandSVarCompare:
-                        break;
-                    case AbilitiesVariables.AddsCounters:
-                        break;
-                    case AbilitiesVariables.UntilControllerNextUntap:
-                        break;
-                    case AbilitiesVariables.RandomChange:
-                        break;
-                    case AbilitiesVariables.TokenController:
-                        break;
-                    case AbilitiesVariables.NumCopies:
-                        break;
-                    case AbilitiesVariables.OwnerOnly:
-                        break;
-                    case AbilitiesVariables.RememberAllPumped:
-                        break;
-                    case AbilitiesVariables.TargetsFromDifferentZone:
-                        break;
-                    case AbilitiesVariables.TgtPromp:
-                        break;
-                    case AbilitiesVariables.UnlessResolveSubs:
-                        break;
-                    case AbilitiesVariables.RepeatDefined:
-                        break;
-                    case AbilitiesVariables.RepeatPresent:
-                        break;
-                    case AbilitiesVariables.RepeatCompare:
-                        break;
-                    case AbilitiesVariables.OtherwiseSubAbility:
-                        break;
-                    case AbilitiesVariables.ConditionTargetValidTargeting:
-                        break;
-                    case AbilitiesVariables.ConditionTargetsSingleTarget:
-                        break;
-                    case AbilitiesVariables.TargetRestriction:
-                        break;
-                    case AbilitiesVariables.CopyForEachCanTarget:
-                        break;
-                    case AbilitiesVariables.CanTargetPlayer:
-                        break;
-                    case AbilitiesVariables.Redistribute:
-                        break;
-                    case AbilitiesVariables.ListTitle:
-                        break;
-                    case AbilitiesVariables.TargetsWithoutSameCreatureType:
-                        break;
-                    case AbilitiesVariables.ContionSVarCompare:
-                        break;
-                    case AbilitiesVariables.isPresent:
-                        break;
-                    case AbilitiesVariables.ImprintTokens:
-                        break;
-                    case AbilitiesVariables.DamageDesc:
-                        break;
-                    case AbilitiesVariables.ConditionChosenColor:
-                        break;
-                    case AbilitiesVariables.SkipUntap:
-                        break;
-                    case AbilitiesVariables.RecordChoice:
-                        break;
-                    case AbilitiesVariables.ChoosePlayer:
-                        break;
-                    case AbilitiesVariables.TokenTriggers:
-                        break;
-                    case AbilitiesVariables.Source:
-                        break;
-                    case AbilitiesVariables.XCantBe0:
-                        break;
-                    case AbilitiesVariables.ReplacePlayerName:
-                        break;
-                    case AbilitiesVariables.ChangeSingleTarget:
-                        break;
-                    case AbilitiesVariables.NoReveal:
-                        break;
-                    case AbilitiesVariables.RememberTapped:
-                        break;
-                    case AbilitiesVariables.DelayedTrigger:
-                        break;
-                    case AbilitiesVariables.DestroyPermanent:
-                        break;
-                    case AbilitiesVariables.SkipReorder:
-                        break;
-                    case AbilitiesVariables.NoShuffle:
-                        break;
-                    case AbilitiesVariables.MaxRevealed:
-                        break;
-                    case AbilitiesVariables.Reference:
-                        break;
-                    case AbilitiesVariables.PhaseInOrOutAll:
-                        break;
-                    case AbilitiesVariables.ConditionLifeTotal:
-                        break;
-                    case AbilitiesVariables.ConditionLifeAmount:
-                        break;
-                    case AbilitiesVariables.NoPeek:
-                        break;
-                    case AbilitiesVariables.ImprintRevealed:
-                        break;
-                    case AbilitiesVariables.ValidTypes:
-                        break;
-                    case AbilitiesVariables.RememberControlled:
-                        break;
-                    case AbilitiesVariables.Bonus:
-                        break;
-                    case AbilitiesVariables.BonusProduced:
-                        break;
-                    case AbilitiesVariables.IsCursed:
-                        break;
-                    case AbilitiesVariables.RandomChosen:
-                        break;
-                    case AbilitiesVariables.Piles:
-                        break;
-                    case AbilitiesVariables.PreCostDesc:
-                        break;
-                    case AbilitiesVariables.UnlessType:
-                        break;
-                    default:
-                        break;
-                }
-
-
-            }
-
-            return a;
-        }
+        
+		//?
+		public static List<string> strings = new List<string>();
+        
 
         //public static bool operator ==(Ability a, EffectType e)
         //{
@@ -1550,374 +1538,4 @@ namespace Magic3D
         //}
     }
 
-    public enum AbilitiesVariables
-    {
-        SP,
-        Cost,
-        ValidTgts,
-        Mode,
-        NumCards,
-        References,
-        SpellDescription,
-        AB,
-        Produced,
-        NumDef,
-        AILogic,
-        Name,
-        StaticAbilities,
-        RememberObjects,
-        SubAbility,
-        TargetType,
-        TgtPrompt,
-        ValidCards,
-        KW,
-        LifeAmount,
-        Amount,
-        Choices,
-        NumDmg,
-        Origin,
-        Destination,
-        NumAtt,
-        Defined,
-        Triggers,
-        SVars,
-        ImprintCards,
-        ActivationPhases,
-        RepeatPlayers,
-        RepeatSubAbility,
-        IsCurse,
-        StackDescription,
-        TokenAmount,
-        TokenName,
-        TokenTypes,
-        TokenOwner,
-        TokenColors,
-        TokenPower,
-        TokenToughness,
-        ChangeType,
-        ChangeNum,
-        GainControl,
-        LoseControl,
-        Untap,
-        AddKWs,
-        RepeatOptional,
-        Keywords,
-        TokenImage,
-        TokenKeywords,
-        DigNum,
-        ConditionCheckSVar,
-        ConditionSVarCompare,
-        ReplacementEffects,
-        Stackable,
-        ChangeValid,
-        DestinationZone,
-        RememberChanged,
-        TargetMin,
-        TargetMax,
-        AllCounterTypes,
-        NoReg,
-        AnyPlayer,
-        Optional,
-        Reveal,
-        LibraryPosition,
-        NoRegen,
-        RememberDamaged,
-        ValidDescription,
-        SorcerySpeed,
-        Mandatory,
-        Planeswalker,
-        CounterNum,
-        CounterType,
-        Ultimate,
-        TokenStaticAbilities,
-        TokenSVars,
-        Permanent,
-        ActivationLimit,
-        PlayerTurn,
-        SVar,
-        Type,
-        Expression,
-        WinSubAbility,
-        LoseSubAbility,
-        CostDesc,
-        RememberTargets,
-        RestrictValid,
-        DiscardValid,
-        Types,
-        RemoveCreatureTypes,
-        RememberMilled,
-        DestinationZone2,
-        IsPresent,
-        Colors,
-        OverwriteColors,
-        TokenHiddenKeywords,
-        Choser,
-        AITgts,
-        TgtZone,
-        Power,
-        Toughness,
-        AnnounceType,
-        Gains,
-        DefinedPlayer,
-        Chooser,
-        Unique,
-        Duration,
-        Hidden,
-        OriginChoice,
-        OriginAlternative,
-        AlternativeMessage,
-        PrecostDesc,
-        ActivationZone,
-        DividedAsYouChoose,
-        RememberCountered,
-        Announce,
-        Zone2,
-        CheckSVar,
-        Sacrifice,
-        RemoveTypes,
-        Activation,
-        sVars,
-        TokenTapped,
-        PresentCompare,
-        PresentZone,
-        ChoiceZone,
-        GameActivationLimit,
-        ValidPlayers,
-        UntilUntaps,
-        OpponentTurn,
-        RevealValid,
-        RememberRevealed,
-        XColor,
-        CharmNum,
-        RepeatCards,
-        Zone,
-        RememberChosen,
-        NoMove,
-        RememberLKI,
-        TargetValidTargeting,
-        UnlessCost,
-        Valid,
-        LibraryPosition2,
-        ChoiceTitle,
-        Abilities,
-        Tapped,
-        UnlessPayer,
-        UnlessAI,
-        TargetUnique,
-        TargetsFromSingleZone,
-        SacValid,
-        Radiance,
-        ConditionManaSpent,
-        NumTurns,
-        Separator,
-        ChosenPile,
-        UnchosenPile,
-        ColorOrType,
-        ReflectProperty,
-        Static,
-        RevealNumber,
-        TargetsWithDifferentControllers,
-        ConditionDefined,
-        ConditionPresent,
-        ConditionCompare,
-        SVarCompare,
-        NonBasicSpell,
-        staticAbilities,
-        AddsNoCounter,
-        RememberSacrificed,
-        RememberCounters,
-        ValidDesc,
-        MinCharmNum,
-        AllValid,
-        RememberUntapped,
-        AnyNumber,
-        TokenAbilities,
-        OptionalDecider,
-        Destroy,
-        NewState,
-        PreventionSubAbility,
-        ShieldEffectTarget,
-        OptionQuestion,
-        ImprintTargets,
-        SacMessage,
-        FromBottom,
-        Shuffle,
-        RememberDiscarded,
-        ValidZone,
-        WithoutManaCost,
-        Controller,
-        Image,
-        InstantSpeed,
-        RemoveKeywords,
-        RememberDestroyed,
-        ST,
-        DefinedCards,
-        DiscardMessage,
-        Equip,
-        AnyOpponent,
-        UpTo,
-        MaxFromEffect,
-        ValidCard,
-        ForgetOtherTargets,
-        NoPrevention,
-        AllType,
-        InvalidTypes,
-        HiddenKeywords,
-        ForgetOtherRemembered,
-        RememberCostCards,
-        ScryNum,
-        UntilYourNextUpkeep,
-        Imprint,
-        RegenerationTrigger,
-        ReplaceCardUID,
-        OverwriteTypes,
-        KeepSupertypes,
-        KeepCardTypes,
-        RemoveAllAbilities,
-        TargetsSingleTarget,
-        UseImprinted,
-        ChooseOrder,
-        UseAllOriginZones,
-        UnattachValid,
-        DamageSource,
-        ConditionDescription,
-        PeekAmount,
-        RevealOptional,
-        ActivationNumberSacrifice,
-        PumpZone,
-        OrColors,
-        RandomKeyword,
-        NoRepetition,
-        RememberTokens,
-        CopyOnce,
-        CopyCard,
-        FoundDestination,
-        RevealedDestination,
-        FoundLibraryPosition,
-        RevealedLibraryPosition,
-        RememberFound,
-        RepeatCheckSVar,
-        RepeatSVarCompare,
-        DefinedLandwalk,
-        RememberDrawn,
-        LoseAtEndStep,
-        DivideEvenly,
-        Flashback,
-        ActivationCardsInHand,
-        CopyIsColor,
-        AtRandom,
-        UntilHostLeavesPlay,
-        Deplete,
-        Phase,
-        Execute,
-        Defender,
-        AndOrValid,
-        DifferentNames,
-        RepeatCounters,
-        ControlledByTarget,
-        NewController,
-        RememberRemoved,
-        EachBasicType,
-        TargetsAtRandom,
-        Condition,
-        MaxRepeat,
-        ExileFaceDown,
-        AttachedTo,
-        AddsKeywords,
-        AtEOT,
-        RestRandomOrder,
-        Changetype,
-        Ninjutsu,
-        DestinationChoice,
-        ForgetRemembered,
-        Random,
-        RememberRemovedFromCombat,
-        RememberTargetedCard,
-        UntilYourNextTurn,
-        UntilEndOfCombat,
-        AnySupportedCard,
-        RandomCopied,
-        RandomNum,
-        ChoiceNum,
-        TargetControls,
-        RestrictFromZone,
-        RestrictFromValid,
-        Min,
-        Max,
-        TapOnLose,
-        DeclareAttackers,
-        DeclareBlockers,
-        Until,
-        DestroyTgt,
-        RememberSplicedOntoCounteredSpell,
-        Mitosis,
-        AddAbilities,
-        AddSVars,
-        ValidAttribute,
-        EffectOwner,
-        MayShuffle,
-        Monstrosity,
-        NoCall,
-        HeadsSubAbility,
-        TailsSubAbility,
-        StaticCommandCheckSVar,
-        StaticCommandSVarCompare,
-        AddsCounters,
-        UntilControllerNextUntap,
-        RandomChange,
-        TokenController,
-        NumCopies,
-        OwnerOnly,
-        RememberAllPumped,
-        TargetsFromDifferentZone,
-        TgtPromp,
-        UnlessResolveSubs,
-        RepeatDefined,
-        RepeatPresent,
-        RepeatCompare,
-        OtherwiseSubAbility,
-        ConditionTargetValidTargeting,
-        ConditionTargetsSingleTarget,
-        TargetRestriction,
-        CopyForEachCanTarget,
-        CanTargetPlayer,
-        Redistribute,
-        ListTitle,
-        TargetsWithoutSameCreatureType,
-        ContionSVarCompare,
-        isPresent,
-        ImprintTokens,
-        DamageDesc,
-        ConditionChosenColor,
-        SkipUntap,
-        RecordChoice,
-        ChoosePlayer,
-        TokenTriggers,
-        Source,
-        XCantBe0,
-        ReplacePlayerName,
-        ChangeSingleTarget,
-        NoReveal,
-        RememberTapped,
-        DelayedTrigger,
-        DestroyPermanent,
-        SkipReorder,
-        NoShuffle,
-        MaxRevealed,
-        Reference,
-        PhaseInOrOutAll,
-        ConditionLifeTotal,
-        ConditionLifeAmount,
-        NoPeek,
-        ImprintRevealed,
-        ValidTypes,
-        RememberControlled,
-        Bonus,
-        BonusProduced,
-        IsCursed,
-        RandomChosen,
-        Piles,
-        PreCostDesc,
-        UnlessType
-    }
 }

@@ -13,8 +13,27 @@ namespace Magic3D
     public delegate float GetterDelegate();
     public delegate void SetterDelegate(float value);
 
+	public class AnimationList : List<AnimationList> ,IAnimatable
+	{
+		#region IAnimatable implementation
+
+		public event EventHandler<EventArgs> AnimationFinished;
+
+		public void Animate (float ellapseTime = 0f)
+		{
+			throw new NotImplementedException ();
+		}
+
+		#endregion
+
+
+	}
+
     public class Animation
     {
+		public static bool CancelOnGoingAnim = true;
+		public static int DelayMs = 0;
+
         protected GetterDelegate getValue;
         protected SetterDelegate setValue;
 
@@ -23,6 +42,7 @@ namespace Magic3D
         protected Stopwatch timer = new Stopwatch();
         protected int delayMs = 0;
         protected static List<Animation> AnimationList = new List<Animation>();
+
         //public FieldInfo member;
         public Object AnimatedInstance;
 
@@ -30,17 +50,21 @@ namespace Magic3D
 
         public static void StartAnimation(Animation a, int delayMs = 0, AnimationEvent OnEnd = null)
         {
-            Animation aa = null;
-            if (Animation.GetAnimation(a.AnimatedInstance, a.propertyName, ref aa))
-                aa.CancelAnimation();
+			if (CancelOnGoingAnim) {
+				Animation aa = null;
+				if (Animation.GetAnimation (a.AnimatedInstance, a.propertyName, ref aa))
+					aa.CancelAnimation ();
+			}
 
             a.OnAnimationEnd = OnEnd;
-            a.delayMs = delayMs;
+			a.delayMs = delayMs + DelayMs;
 
             if (a.delayMs > 0)
                 a.timer.Start();
             
-            AnimationList.Add(a);
+			lock (AnimationList) {
+				AnimationList.Add (a);
+			}
         }
 
         static Stack<Animation> anims = new Stack<Animation>();
@@ -49,43 +73,41 @@ namespace Magic3D
         {
             //Stopwatch animationTime = new Stopwatch();
             //animationTime.Start();
+			 
+			const int maxAnim = 200000;
+			int count = 0;
 
-            const int maxAnim = 200000;
-            int count = 0;
 
+			lock (AnimationList) {
+				if (anims.Count == 0)
+					anims = new Stack<Animation> (AnimationList);
+			}
+        
+			while (anims.Count > 0 && count < maxAnim) {
+				Animation a = anims.Pop ();	
+				if (a.timer.IsRunning) {
+					if (a.timer.ElapsedMilliseconds > a.delayMs)
+						a.timer.Stop ();
+					else
+						continue;
+				}
 
-
-            if (anims.Count == 0)
-                anims = new Stack<Animation>(AnimationList);
-            
-            while(anims.Count>0 && count < maxAnim)
-            {
-                Animation a = anims.Pop();
-            
-                if (a.timer.IsRunning)
-                {
-                    if (a.timer.ElapsedMilliseconds > a.delayMs)
-                        a.timer.Stop();
-                    else
-                        continue;
-                }
-
-                a.Process();
-                count++;
-            }
+				a.Process ();
+				count++;
+			}
             //animationTime.Stop();
             //Debug.WriteLine("animation: {0} ticks \t {1} ms ", animationTime.ElapsedTicks,animationTime.ElapsedMilliseconds);
         }
         public static bool GetAnimation(object instance, string PropertyName, ref Animation a)
         {
-            foreach (Animation anim in AnimationList)
-            {
-                if (anim.AnimatedInstance == instance && anim.propertyName == PropertyName)
-                {
-                    a = anim;
-                    return true;
-                }
-            }
+			for (int i = 0; i < AnimationList.Count; i++) {
+				Animation anim = AnimationList [i];
+				if (anim.AnimatedInstance == instance && anim.propertyName == PropertyName) {
+					a = anim;
+					return true;
+				}
+			}
+
             return false;
         }
         public virtual void Process(){}

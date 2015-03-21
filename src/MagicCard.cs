@@ -21,7 +21,11 @@ namespace Magic3D
     [Serializable]
     public class MagicCard
     {
-		const int maxCard = 5000;
+		const int maxCard = 1000;
+
+		public static Rectangle<float> CardBounds = new Rectangle<float> (-0.5f,-0.7125f, 1f, 1.425f);
+		public const float CardWidth = 1f;
+		public const float CardHeight = 1.425f;
 
         public static Dictionary<string, MagicCard> cardDatabase = new Dictionary<string, MagicCard>(StringComparer.OrdinalIgnoreCase);
 
@@ -30,7 +34,7 @@ namespace Magic3D
 		static string cardsDBPath = rootDir + @"MagicCardDataBase/";
         static Random rnd = new Random();
         
-		static vaoMesh cardMesh;
+		public static vaoMesh cardMesh;
 		static vaoMesh abilityMesh;
 		public static vaoMesh pointsMesh;
 
@@ -116,6 +120,8 @@ namespace Magic3D
             GL.BindTexture(TextureTarget.Texture2D, cardBack);
 			cardMesh.Render (PrimitiveType.TriangleStrip);
 
+			//Magic.texturedShader.ModelMatrix = Matrix4.CreateRotationY (MathHelper.Pi) * Magic.texturedShader.ModelMatrix;
+
 			GL.CullFace(CullFaceMode.Back);
             GL.BindTexture(TextureTarget.Texture2D, Texture);
 			cardMesh.Render (PrimitiveType.TriangleStrip);
@@ -174,14 +180,7 @@ namespace Magic3D
         public int CreateTexture(string file)
         {
             Texture t = new Texture(file);
-
-
-
             //updateGraphic(file);
-
-            
-
-
             return t;        
         }
 
@@ -300,10 +299,10 @@ namespace Magic3D
         {
 			cardBack = new Texture(@"images/card_back.jpg");
 
-			cardMesh = new vaoMesh(0, 0, 0, 1.0f, 1.425f);
+			cardMesh = new vaoMesh(0, 0, 0, CardWidth, CardHeight);
             
 			abilityMesh = new vaoMesh(0, 0, 0.001f, 0.1f, 0.1f);
-			pointsMesh = new vaoMesh(0, 0, 0.002f, 0.25f, 0.1f);            
+			pointsMesh = new vaoMesh(0, 0, 0.002f, 0.50f, 0.2f);            
         }
         
         public static void LoadCardDatabase()
@@ -317,196 +316,7 @@ namespace Magic3D
 
                 foreach (string f in files)
                 {
-                    MagicCard c = new MagicCard();
-
-                    using (Stream s = new FileStream(f, FileMode.Open))
-                    {
-                        using (StreamReader sr = new StreamReader(s))
-                        {
-                            while (!sr.EndOfStream)
-                            {
-                                string line = sr.ReadLine();
-
-                                string[] tmp = line.Split(new char[] { ':' });
-
-                                switch (tmp[0].ToLower())
-                                {
-                                    case "name":
-                                        c.Name = tmp[1];
-                                        break;
-                                    case "manacost":
-                                        c.Cost = Mana.Parse(tmp[1]);
-                                        break;
-                                    case "types":
-                                        string[] types = tmp[1].Split(new char[] { ' ' });
-                                        foreach (string t in types)
-                                        {
-                                            if (string.IsNullOrEmpty(t))
-                                                continue;
-                                            string tt = t.Replace('\'', '_');
-                                            tt = tt.Replace('-', '_');
-                                            c.Types.Value = (CardTypes)Enum.Parse(typeof(CardTypes), tt, true);
-                                        }
-                                        break;
-                                    case "a":
-                                        c.Abilities.Add(Ability.Parse(tmp[1]));
-                                        break;
-                                    case "oracle":
-                                        c.Oracle = tmp[1];
-                                        break;
-                                    case "pt":
-                                        string[] pt = tmp[1].Split(new char[] { '/' });
-
-                                        int intPT;
-
-                                        if (int.TryParse(pt[0], out intPT))
-                                            c.Power= intPT;
-                                        else
-                                            Debug.WriteLine("power:" + pt[0]);
-
-                                        if (int.TryParse(pt[1], out intPT))
-                                            c.Toughness = intPT;
-                                        else
-                                            Debug.WriteLine("toughness:" + pt[1]);
-                                        break;
-                                    case "s":
-                                        Ability aa = c.Abilities.FirstOrDefault();
-                                        if (aa == null)
-                                            aa = new Ability();
-                                        Effect.Parse(tmp[1],ref aa);
-                                        break;
-                                    case "t":
-                                        c.Triggers.Add(tmp[1]);
-                                        break;
-                                    case "svar":
-                                        switch (tmp[1].ToLower())
-                                        {
-                                            case "darkeffect":
-                                                break;
-                                            case "darkpower":
-                                                break;
-                                            case "darkmana":
-                                                break;
-                                            case "picture":
-                                                c.picturePath = tmp[3];
-                                                break;
-                                            case "X":
-                                                break;
-                                            case "remaideck":
-                                                break;
-                                            case "triggainlife":
-                                                break;
-                                            case "piccount":
-                                                c.nbrImg = int.Parse(tmp[2]);
-                                                break;
-                                            default:
-                                                if (!Svars.Contains(tmp[1]))
-                                                    Svars.Add(tmp[1]);
-
-                                                break;
-                                        }
-                                        break;
-                                    case "k":
-                                        Ability a = Ability.SpecialK(tmp[1]);
-                                        if (a != null)
-                                            c.Abilities.Add(a);
-                                        break;
-                                    case "r":
-                                        c.R.Add(tmp[1]);
-                                        break;
-                                    case "deckneeds":
-                                        c.DeckNeeds.Add(tmp[1]);
-                                        break;
-                                    case "text":
-                                        c.TextField.Add(tmp[1]);
-                                        break;
-                                    case "alternatemode":
-                                        c.AlternateMode = tmp[1];
-                                        break;
-                                    case "alternate":
-                                        c.Alternate = true;
-                                        break;
-                                    case "colors":
-                                        c.Colors.Value = (ManaTypes)Enum.Parse(typeof(ManaTypes), tmp[1], true);
-                                        break;
-                                    case "loyalty":
-                                        c.Loyalty = tmp[1];
-                                        break;
-                                    case "handlifemodifier":
-                                        c.HandLifeModifier = tmp[1];
-                                        break;
-                                    case "deckhints":
-                                        c.DeckHints = tmp[1];
-                                        break;
-                                    case "var":
-                                        Debug.WriteLine("var: {0} {1} {2}", c.Name, tmp[1], tmp[2]);
-                                        break;
-                                    default:
-                                        if (tmp[0].StartsWith("#"))
-                                            c.Comments.Add(tmp[0]);
-                                        else if (!string.IsNullOrEmpty(tmp[0]))
-                                        {
-                                            string txt = "";
-                                            for (int i = 0; i < tmp.Length; i++)
-                                                txt += ":" + tmp[i];
-
-                                            Debug.WriteLine("? => {0} {1}", c.Name, txt);
-                                        }
-                                        break;
-                                }
-                            }
-
-                        }
-                    }
-
-                    #region add mana ability to basic lands
-                    if (c.Types == CardTypes.Land)
-                    {
-                        if (c.Abilities.Count == 0)
-                        {
-                            Mana m = null;
-                            switch (c.Name.ToLower())
-                            {
-                                case "plains":
-                                case "snow-covered plains":
-                                    m = ManaTypes.White;
-                                    break;
-                                case "mountain":
-                                case "snow-covered mountain":
-                                    m = ManaTypes.Red;
-                                    break;
-                                case "swamp":
-                                case "snow-covered swamp":
-                                    m = ManaTypes.Black;
-                                    break;
-                                case "forest":
-                                case "snow-covered forest":
-                                    m = ManaTypes.Green;
-                                    break;
-                                case "island":
-                                case "snow-covered island":
-                                    m = ManaTypes.Blue;
-                                    break;
-                            }
-                            if (m != null)
-                                c.Abilities.Add(new ManaAbility { ProducedMana = m, ActivationCost = CostTypes.Tap });
-                        }
-                    }
-                    #endregion
-
-                    try
-                    {
-                        if (c.Name == "Circle of Protection" || c.Name == "Rune of Protection")
-                        {
-                            cardDatabase.Add(c.Name + ": " + c.colorComponentInPicName, c);
-                        }
-                        else
-                            cardDatabase.Add(c.Name, c);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.WriteLine("failed to add: {0} to db\n{1}", c.Name, e.Message);
-                    }
+					LoadCardData (f);
 
                     if (cardDatabase.Count > maxCard)
                         return;
@@ -538,7 +348,214 @@ namespace Magic3D
                 }
             }
         }
+		public static bool TryGetCard(string name, ref MagicCard c){
+			if (cardDatabase.ContainsKey (name)) {
+				c = cardDatabase [name];
+				return true;
+			}
+			string cfn = name.Trim ().Replace (' ', '_').ToLower () + ".txt";
+			foreach (string file in Directory.EnumerateFiles(
+				cardsDBPath, cfn, SearchOption.AllDirectories))
+			{
+				LoadCardData(file);
+				c = cardDatabase [name];
+				return true;
+			}
+			return false;
+		}
+		public static void LoadCardData(string path)
+		{
+			MagicCard c = new MagicCard();
 
+			using (Stream s = new FileStream(path, FileMode.Open))
+			{
+				using (StreamReader sr = new StreamReader(s))
+				{
+					while (!sr.EndOfStream)
+					{
+						string line = sr.ReadLine();
+
+						string[] tmp = line.Split(new char[] { ':' });
+
+						switch (tmp[0].ToLower())
+						{
+						case "name":
+							c.Name = tmp[1];
+							break;
+						case "manacost":
+							c.Cost = Mana.Parse(tmp[1]);
+							break;
+						case "types":
+							string[] types = tmp[1].Split(new char[] { ' ' });
+							foreach (string t in types)
+							{
+								if (string.IsNullOrEmpty(t))
+									continue;
+								string tt = t.Replace('\'', '_');
+								tt = tt.Replace('-', '_');
+								c.Types.Value = (CardTypes)Enum.Parse(typeof(CardTypes), tt, true);
+							}
+							break;
+						case "a":
+							c.Abilities.Add(Ability.Parse(tmp[1]));
+							break;
+						case "oracle":
+							c.Oracle = tmp[1];
+							break;
+						case "pt":
+							string[] pt = tmp[1].Split(new char[] { '/' });
+
+							int intPT;
+
+							if (int.TryParse(pt[0], out intPT))
+								c.Power= intPT;
+							else
+								Debug.WriteLine("power:" + pt[0]);
+
+							if (int.TryParse(pt[1], out intPT))
+								c.Toughness = intPT;
+							else
+								Debug.WriteLine("toughness:" + pt[1]);
+							break;
+						case "s":
+							Ability aa = c.Abilities.FirstOrDefault();
+							if (aa == null)
+								aa = new Ability();
+							Effect.Parse(tmp[1],ref aa);
+							break;
+						case "t":
+							c.Triggers.Add(tmp[1]);
+							break;
+						case "svar":
+							switch (tmp[1].ToLower())
+							{
+							case "darkeffect":
+								break;
+							case "darkpower":
+								break;
+							case "darkmana":
+								break;
+							case "picture":
+								c.picturePath = tmp[3];
+								break;
+							case "X":
+								break;
+							case "remaideck":
+								break;
+							case "triggainlife":
+								break;
+							case "piccount":
+								c.nbrImg = int.Parse(tmp[2]);
+								break;
+							default:
+								if (!Svars.Contains(tmp[1]))
+									Svars.Add(tmp[1]);
+
+								break;
+							}
+							break;
+						case "k":
+							Ability a = Ability.SpecialK(tmp[1]);
+							if (a != null)
+								c.Abilities.Add(a);
+							break;
+						case "r":
+							c.R.Add(tmp[1]);
+							break;
+						case "deckneeds":
+							c.DeckNeeds.Add(tmp[1]);
+							break;
+						case "text":
+							c.TextField.Add(tmp[1]);
+							break;
+						case "alternatemode":
+							c.AlternateMode = tmp[1];
+							break;
+						case "alternate":
+							c.Alternate = true;
+							break;
+						case "colors":
+							c.Colors.Value = (ManaTypes)Enum.Parse(typeof(ManaTypes), tmp[1], true);
+							break;
+						case "loyalty":
+							c.Loyalty = tmp[1];
+							break;
+						case "handlifemodifier":
+							c.HandLifeModifier = tmp[1];
+							break;
+						case "deckhints":
+							c.DeckHints = tmp[1];
+							break;
+						case "var":
+							Debug.WriteLine("var: {0} {1} {2}", c.Name, tmp[1], tmp[2]);
+							break;
+						default:
+							if (tmp[0].StartsWith("#"))
+								c.Comments.Add(tmp[0]);
+							else if (!string.IsNullOrEmpty(tmp[0]))
+							{
+								string txt = "";
+								for (int i = 0; i < tmp.Length; i++)
+									txt += ":" + tmp[i];
+
+								Debug.WriteLine("? => {0} {1}", c.Name, txt);
+							}
+							break;
+						}
+					}
+
+				}
+			}
+
+			#region add mana ability to basic lands
+			if (c.Types == CardTypes.Land)
+			{
+				if (c.Abilities.Count == 0)
+				{
+					Mana m = null;
+					switch (c.Name.ToLower())
+					{
+					case "plains":
+					case "snow-covered plains":
+						m = ManaTypes.White;
+						break;
+					case "mountain":
+					case "snow-covered mountain":
+						m = ManaTypes.Red;
+						break;
+					case "swamp":
+					case "snow-covered swamp":
+						m = ManaTypes.Black;
+						break;
+					case "forest":
+					case "snow-covered forest":
+						m = ManaTypes.Green;
+						break;
+					case "island":
+					case "snow-covered island":
+						m = ManaTypes.Blue;
+						break;
+					}
+					if (m != null)
+						c.Abilities.Add(new ManaAbility { ProducedMana = m, ActivationCost = CostTypes.Tap });
+				}
+			}
+			#endregion
+
+			try
+			{
+				if (c.Name == "Circle of Protection" || c.Name == "Rune of Protection")
+				{
+					cardDatabase.Add(c.Name + ": " + c.colorComponentInPicName, c);
+				}
+				else
+					cardDatabase.Add(c.Name, c);
+			}
+			catch (Exception e)
+			{
+				Debug.WriteLine("failed to add: {0} to db\n{1}", c.Name, e.Message);
+			}
+		}
 
         public string colorComponentInPicName
         {

@@ -265,7 +265,7 @@ namespace Magic3D
             {
                 if (arg.Type == TrigEnd.Type)
                 {
-                    if (TrigEnd.Card != null && TrigEnd.Card == arg.Card)
+                    if (TrigEnd.Card != null && TrigEnd.Card == arg.Source)
                     {
                         MagicEngine.MagicEvent -= Effect_MagicEvent;
                         ContainingList.RemoveEffect(this);

@@ -5,776 +5,828 @@ using System.Text;
 using OpenTK;
 using System.Diagnostics;
 using go;
+using OpenTK.Input;
+using System.Threading;
 
 namespace Magic3D
 {
+	public enum EngineStates
+	{
+		Stopped,
+		Loading,
+		Loaded,
+		PlayDrawChoiceDone,
+		Choice,
+		CurrentPlayer,
+		Opponents,
+		Resolve,
+		RequestStop
+	}
+//	class Sychronizer
+//	{
+//		public EngineStates State = EngineStates.Paused;
+//
+//	}
+	public class MagicEngine : IDisposable
+	{
+		public delegate void MagicEventHandler (MagicEventArg arg);
+		public static event MagicEventHandler MagicEvent;
+		public static MagicEngine CurrentEngine;
 
-    public enum EngineStates
-    {
-        Stopped,
-        Toss,
-        Init,
-        CurrentPlayer,
-        Opponents,
-        Resolve,
-    }
-    public enum GamePhases
-    {
-        Untap,
-        Upkeep,
-        Draw,
-        Main1,
-        BeforeCombat,
-        DeclareAttacker,
-        DeclareBlocker,
-        FirstStrikeDame,
-        CombatDamage,
-        EndOfCombat,
-        Main2,
-        EndOfTurn,
-        CleanUp
-    }
+		public void RaiseMagicEvent (MagicEventArg arg)
+		{
+			MagicEvent (arg);
+		}
 
-    public enum MagicEventType
-    {
-        Unset,
-        BeginPhase,
-        EndPhase,
-        EnTurn,
-        PlayLand,
-        CastSpell,
-        Destroy,
-        Exill,
-        QuitZone,
-        TapCard,
-        Damage
-    }
+		public volatile EngineStates State = EngineStates.Stopped;
 
-    public class MagicEventArg
-    {
-        public MagicEventType Type;
-        public CardInstance Card;
-        public Player Player;
-        public MagicEventArg()
-        { }
-        public MagicEventArg(MagicEventType t, CardInstance _card = null)
-        {
-            Type = t;
-            Card = _card;
-        }
-    }
-    public class PhaseEventArg : MagicEventArg
-    {
-        public GamePhases Phase;
+		//Sychronizer synchronizer = new Sychronizer ();
 
-    }
-    public class SpellEventArg : MagicEventArg
-    {
-        public Spell Spell;
-        public SpellEventArg()
-        {
-            Type = MagicEventType.CastSpell;
-        }
-    }
-    public class AbilityEventArg : MagicEventArg
-    {
-        public Ability ability;
-    }
-    public class DamageEventArg : MagicEventArg
-    {
-        public Damage Damage;
-        public DamageEventArg(Damage _d)
-        {
-            Type = MagicEventType.Damage;
-            Damage = _d;
-        }
-    }
+		Random rnd = new Random ();
 
-    public class MagicEngine
-    {
-        public delegate void MagicEventHandler(MagicEventArg arg);
-        public static event MagicEventHandler MagicEvent;
+		public Thread engineThread;
+		int _currentPlayer;
+		int _priorityPlayer;
+		int _interfacePlayer = 0;
+		//index of player using this interface
+		GamePhases _currentPhase;
+		//public int currentAttackingCreature = 0;    //combat damage resolution
+		//public Damage currentDamage;
+		/// <summary>
+		/// player having his turn running
+		/// </summary>
+		public Player cp {
+			get { return Players [currentPlayer]; }
+		}
 
-        public static MagicEngine CurrentEngine;
+		/// <summary>
+		/// player controling the interface, redirection card click
+		/// </summary>
+		public Player ip {
+			get { return Players [_interfacePlayer]; }
+		}
 
-        public void RaiseMagicEvent(MagicEventArg arg)
-        {
-            MagicEvent(arg);
-        }
+		/// <summary>
+		/// player having priority
+		/// </summary>
+		public Player pp {
+			get { return Players [_priorityPlayer]; }
+		}
 
-        int _currentPlayer;
-        int _priorityPlayer;
-        int _interfacePlayer = 0;   //index of player using this interface
-        GamePhases _currentPhase;
+		public int currentPlayer {
+			get { return _currentPlayer; }
+			set
+			{ 
+				if (value == _currentPlayer)
+					return;
 
-        public bool landPlayed = false;
-        //public int currentAttackingCreature = 0;    //combat damage resolution
-        //public Damage currentDamage;
-        /// <summary>
-        /// player having his turn running
-        /// </summary>
-        public Player cp
-        {
-            get { return Players[currentPlayer]; }
-        }
-        /// <summary>
-        /// player controling the interface, redirection card click
-        /// </summary>
-        public Player ip
-        {
-            get { return Players[_interfacePlayer]; }
-        }
-        /// <summary>
-        /// player having priority
-        /// </summary>
-        public Player pp
-        {
-            get { return Players[_priorityPlayer]; }
-        }
+				if (value >= Players.Length)
+					_currentPlayer = 0;
+				else
+					_currentPlayer = value;
 
-        public int currentPlayer
-        {
-            get { return _currentPlayer; }
-        }
-        public int priorityPlayer
-        {
-            get { return _priorityPlayer; }
-        }
-        public GamePhases CurrentPhase
-        {
-            get { return _currentPhase; }
-            set { _currentPhase = value; }
-        }
+			}
+		}
 
-        public void SwitchToNextPhase()
-        {
-            foreach (Player p in Players)
-                p.PhaseDone = false;
+		public int priorityPlayer {
+			get { return _priorityPlayer; }
+			set {
+				if (value == _priorityPlayer)
+					return;
+				int oldPp = _priorityPlayer;
+				int newPp = value;
+				if (newPp >= Players.Length)
+					newPp = 0;
 
-            MagicEvent(new PhaseEventArg
-            {
-                Type = MagicEventType.EndPhase,
-                Phase = _currentPhase,
-                Player = Players[currentPlayer]
-            });
+				_priorityPlayer = newPp;
+				Players [oldPp].UpdateUi ();
+				Players [_priorityPlayer].UpdateUi ();
+			}
+		}
+		/// <summary>
+		/// Player controling the graphic interface
+		/// </summary>
+		public int interfacePlayer {
+			get { return _interfacePlayer; }
+			set { _interfacePlayer = value; }
+		}
 
-            if (CurrentPhase == GamePhases.CleanUp)
-            {
-                SwitchToNextPlayer();
-                CurrentPhase = GamePhases.Untap;
-            }
-            else
-                CurrentPhase++;
+		public GamePhases CurrentPhase {
+			get { return _currentPhase; }
+			set { _currentPhase = value; }
+		}
 
-            MagicEvent(new PhaseEventArg
-            {
-                Type = MagicEventType.BeginPhase,
-                Phase = _currentPhase,
-                Player = Players[currentPlayer]
-            });
+		public void SwitchToNextPhase ()
+		{
+			foreach (Player p in Players)
+				p.PhaseDone = false;
 
-            _priorityPlayer = _currentPlayer;
-        }
-        public void SwitchToNextPlayer()
-        {
-            MagicEvent(new MagicEventArg
-            {
-                Type = MagicEventType.EnTurn,
-                Player = Players[currentPlayer]
-            });
+			MagicEvent (new PhaseEventArg {
+				Type = MagicEventType.EndPhase,
+				Phase = _currentPhase,
+				Player = Players [currentPlayer]
+			});
+		}
 
-            _currentPlayer++;
+		public void SwitchToNextPlayer ()
+		{
+			MagicEvent (new MagicEventArg {
+				Type = MagicEventType.EndTurn
+				//Player = Players [currentPlayer]
+			});
+		}
 
-            if (_currentPlayer == Players.Length)
-                _currentPlayer = 0;
+		public void GivePriorityToNextPlayer ()
+		{
+			priorityPlayer++;
 
-            _priorityPlayer = _currentPlayer;
-            Players[_priorityPlayer].pbTimer.Visible = true;
-        }
+			if (pp.Type == Player.PlayerType.human && CurrentPhase != GamePhases.DeclareBlocker)
+				startChrono ();
+			else
+				stopChrono ();
 
-        public void GivePriorityToNextPlayer()
-        {
-            _priorityPlayer++;
+			if (NextSpellOnStack == null) {
+				if (priorityPlayer == _currentPlayer && cp.PhaseDone)
+					SwitchToNextPhase ();
+			} else if (NextSpellOnStack.Source.Controler == pp)
+				CheckStackForResolutions ();
+		}
 
-            if (_priorityPlayer == Players.Length)
-                _priorityPlayer = 0;
+		public void startChrono ()
+		{
+			//if (pp.Type == Player.PlayerType.ai)
+			//    Debugger.Break();
 
-            if (pp.Type == Player.PlayerType.human && CurrentPhase != GamePhases.DeclareBlocker)
-                startChrono();
-            else
-                stopChrono();
+			//Chrono.Restart();
+			//pp.pbTimer.Visible = true;
 
-            if (NextSpellOnStack == null)
-            {
-                if (_priorityPlayer == _currentPlayer && cp.PhaseDone)
-                    SwitchToNextPhase();
-            }
-            else if (NextSpellOnStack.Source.Controler == pp)
-                CheckStackForResolutions();
-        }
+		}
 
-        public void startChrono()
-        {
-            //if (pp.Type == Player.PlayerType.ai)
-            //    Debugger.Break();
+		public void stopChrono ()
+		{
+			//    //if (pp.Type == Player.PlayerType.ai)
+			//    //    Debugger.Break();
+			//    Chrono.Reset();
+			//    pp.pbTimer.Visible = false;
+		}
 
-            //Chrono.Restart();
-            //pp.pbTimer.Visible = true;
+		public Stopwatch Chrono = new Stopwatch ();
+		public static int timerLength = 1500;
+		public CardLayout SpellStackLayout = new CardLayout ();
+		public Player[] Players;
+		public Stack<object> MagicStack = new Stack<object> ();
 
-        }
-        public void stopChrono()
-        {
-        //    //if (pp.Type == Player.PlayerType.ai)
-        //    //    Debugger.Break();
-        //    Chrono.Reset();
-        //    pp.pbTimer.Visible = false;
-        }
+//		public EngineStates State
+//		{
+//			get {
+//				lock (synchronizer) {
+//					return synchronizer.State;
+//				}
+//			}
+//			set {
+//				lock (synchronizer) {
+//					synchronizer.State = value;
+//				}
+//			}
+//		}
 
-        public Stopwatch Chrono = new Stopwatch();
-        public static int timerLength = 1500;
-        public CardLayout SpellStackLayout = new CardLayout();
+		public MagicEngine (Player[] _players)
+		{
+			CurrentEngine = this;
 
-        public Player[] Players;
-        public Stack<object> MagicStack = new Stack<object>();
-        public EngineStates State = EngineStates.Stopped;
-
-
-        public MagicEngine(Player[] _players)
-        {
-            CurrentEngine = this;
-
-            Players = _players;
-            MagicEvent += new MagicEventHandler(MagicEngine_MagicEvent);
+			Players = _players;
+			MagicEvent += new MagicEventHandler (MagicEngine_MagicEvent);
 
 			SpellStackLayout.Position = Magic.vGroupedFocusedPoint;
-            SpellStackLayout.HorizontalSpacing = 0.3f;
-            SpellStackLayout.VerticalSpacing = 0.01f;
-            SpellStackLayout.MaxHorizontalSpace = 3f;
+			SpellStackLayout.HorizontalSpacing = 0.3f;
+			SpellStackLayout.VerticalSpacing = 0.01f;
+			SpellStackLayout.MaxHorizontalSpace = 3f;
 			SpellStackLayout.xAngle = Magic.FocusAngle;
-        }
 
-        void processPhaseBegin(PhaseEventArg pea)
-        {
-            cp.labCurrentPhase.Text = pea.Phase.ToString();
+			State = EngineStates.Loading;
 
-            switch (pea.Phase)
-            {
-                case GamePhases.Untap:
-                    InitTurn();
+			engineThread = new Thread(engineLoop);
+			engineThread.Start();
+		}
 
-                    foreach (CardInstance c in cp.InPlay.Cards)
-                        c.Untap();
-                    break;
-                case GamePhases.Upkeep:
-                    break;
-                case GamePhases.Draw:
-                    if (pea.Player == cp)
-                        cp.DrawOneCard();
-                    break;
-                case GamePhases.Main1:
-                case GamePhases.Main2:
-                    if (cp.Type == Player.PlayerType.ai && !landPlayed)
-                        cp.AITryToPlayLand();
-                    else
-                        stopChrono();
-                    break;
-                case GamePhases.BeforeCombat:
-                    if (!cp.HaveUntapedCreatureOnTable)
-                        SwitchToNextPhase();
-                    break;
-                case GamePhases.DeclareAttacker:
-                    if (!cp.HaveUntapedCreatureOnTable)
-                        SwitchToNextPhase();
-                    else if (cp.Type == Player.PlayerType.human)
-                        stopChrono();
-                    else
-                        cp.AITryToAttack();
-                    break;
-                case GamePhases.DeclareBlocker:
-                    if (!cp.HaveAttackingCreature)
-                    {
-                        SwitchToNextPhase();
-                        break;
-                    }
-                    cp.PhaseDone = true;
-                    break;
-                case GamePhases.FirstStrikeDame:
-                    if (!cp.HaveAttackingCreature)
-                    {
-                        SwitchToNextPhase();
-                        break;
-                    }
-                    break;
-                case GamePhases.CombatDamage:
-                    if (!cp.HaveAttackingCreature)
-                    {
-                        SwitchToNextPhase();
-                        break;
-                    }
-                    Chrono.Reset();
-                    foreach (CardInstance ac in cp.AttackingCreature)
-                    {
-                        Damage d = new Damage(null, ac, ac.Power);
+		#region IDisposable implementation
 
-                        foreach (CardInstance def in ac.BlockingCreatures)
-                            MagicStack.Push(new Damage(ac, def, def.Power));
 
-                        if (ac.BlockingCreatures.Count == 0)
-                        {
-                            d.Target = cp.Opponent;
-                            MagicStack.Push(d);
-                        }
-                        else if (ac.BlockingCreatures.Count == 1)
-                        {
-                            d.Target = ac.BlockingCreatures[0];
-                            MagicStack.Push(d);
-                        }
-                        else
-                        {
-                            for (int i = 0; i < ac.Power; i++)
-                                MagicStack.Push(new Damage(null, d.Source, 1));
-                        }
-                    }
+		public void Dispose ()
+		{
+			State = EngineStates.RequestStop;
+			engineThread.Join ();
+		}
 
-                    CheckStackForUnasignedDamage();
-                    break;
-                case GamePhases.EndOfCombat:
-                    if (!cp.HaveAttackingCreature)
-                    {
-                        SwitchToNextPhase();
-                        break;
-                    }
-                    break;
-                case GamePhases.EndOfTurn:
-                    break;
-                case GamePhases.CleanUp:
-                    foreach (Player p in Players)
-                    {
-                        foreach (CardInstance ac in p.InPlay.Cards)
-                        {
-                            if (ac.Damages.Count > 0)
-                            {
-                                ac.Damages.Clear();
-                                ac.UpdateOverlay();
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
 
-        void processPhaseEnd(PhaseEventArg pea)
-        {
-            CheckStackForResolutions();
+		#endregion
 
-            switch (pea.Phase)
-            {
-                case GamePhases.Untap:
-                    break;
-                case GamePhases.Upkeep:
-                    break;
-                case GamePhases.Draw:
-                    break;
-                case GamePhases.Main2:
-                case GamePhases.Main1:
-                    break;
-                case GamePhases.BeforeCombat:
-                    break;
-                case GamePhases.DeclareAttacker:
-                    foreach (CardInstance c in pea.Player.InPlay.Cards)
-                    {
-                        if (c.Combating)
-                            if (!c.IsTapped)
-                                c.Tap();
-                            else
-                                Debugger.Break();
-                    }
-                    break;
-                case GamePhases.DeclareBlocker:
-                    break;
-                case GamePhases.FirstStrikeDame:
-                    break;
-                case GamePhases.CombatDamage:
-                    break;
-                case GamePhases.EndOfCombat:
-                    foreach (Player p in Players)
-                    {
-                        bool updateLayout = false;
-                        foreach (CardInstance c in p.InPlay.Cards)
-                        {
-                            if (c.Combating)
-                            {
-                                updateLayout = true;
-                                c.Combating = false;
-                            }
-                        }
-                        if (updateLayout)
-                            p.InPlay.UpdateLayout();
-                    }
-                    break;
-                case GamePhases.EndOfTurn:
-                    break;
-                case GamePhases.CleanUp:
-                    break;
-            }
-        }
+		void engineLoop()
+		{
+			bool run = true;
+			while (run) {
+				Thread.Sleep (10);
+				switch (State) {
+				case EngineStates.Stopped:
+					continue;
+				case EngineStates.Loading:
+					lock (Players) {
+						foreach (Player p in Players) {
+							if (p.Deck == null) {
+								p.Deck = Deck.PreLoadDeck (Magic.deckPath + p.deckPath);
+								int nbc = p.Deck.CardCount;
+								lock (p.pgBar) {
+									p.pgBar.Maximum = nbc;
+									p.pgBar.Value = 0;
+								}
+								for (int i = 0; i < nbc; i++) {
+									p.Deck.LoadNextCardsData ();
+									lock (p.pgBar) {
+										p.pgBar.Value++;
+									}
+								}
+								p.Reset ();
+								lock (p.pgBar) {
+									p.pgBar.Visible = false;
+								}
+							}
+						}
+					}
+					State = EngineStates.Loaded;
+					break;
+				case EngineStates.PlayDrawChoiceDone:
+					//initial draw
 
-        void MagicEngine_MagicEvent(MagicEventArg arg)
-        {
-            switch (arg.Type)
-            {
-                case MagicEventType.Unset:
-                    break;
-                case MagicEventType.BeginPhase:
-                    processPhaseBegin(arg as PhaseEventArg);
-                    break;
-                case MagicEventType.EndPhase:
-                    processPhaseEnd(arg as PhaseEventArg);
-                    break;
-                case MagicEventType.PlayLand:
-                    cp.Hand.RemoveCard(arg.Card);
-                    cp.PutCardInPlay(arg.Card);
-                    landPlayed = true;
-                    break;
-                case MagicEventType.CastSpell:
-                    //if (arg.Card.Controler.Type == Player.PlayerType.ai)
-                    //    Debugger.Break();
-                    SpellEventArg sea = arg as SpellEventArg;
-                    Ability a = sea.Spell as Ability;
-                    if (a != null)
-                    {
-                        #region abilities
-                        switch (a.AbilityType)
-                        {
-                            case AbilityEnum.Mana:
-                                ManaAbility ma = a as ManaAbility;
-                                sea.Spell.Source.Controler.ManaPool += ma.ProducedMana;
-                                break;
-                            default:
-                                break;
-                        }
+//					#region Keep/Mulligan ai logic goes here
+//					lock (Players) {
+//						foreach (Player p in Players) {
+//							if (p.Type == Player.PlayerType.ai && !p.Keep)
+//								MagicEvent (new MagicEventArg (MagicEventType.Keep, p));
+//						}
+//					}
+					break;
+//					#endregion
+//				case EngineStates.CurrentPlayer:
+//				case EngineStates.Opponents:
+//				case EngineStates.Resolve:
+//					break;
+				case EngineStates.RequestStop:
+					run = false;
+					break;
+				default:
+					break;
+				}
+			}
+		}
 
-                        #endregion
-                    }
-                    else
-                    {
-                        if (sea.Spell.SelectedTargets.Count > 0)
-                        {
-                            a = sea.Spell.Source.getAbilityByType(AbilityEnum.Attach);
-                            if (a != null)
-                            {
-                                CardInstance c = sea.Spell.SelectedTargets[0] as CardInstance;
+		public void StartGame ()
+		{
+			//			State = EngineStates.CurrentPlayer;
 
-                                c.AttachedCards.Add(sea.Spell.Source);
-                                sea.Spell.Source.IsAttached = true;
 
-                                foreach (Effect e in a.Effects)
-                                {
-                                    Effect ee = e.Clone();
-                                    ee.TrigEnd = new Trigger { Card = sea.Spell.Source, Type = MagicEventType.QuitZone };
-                                    c.Effects.AddEffect(ee);
-                                }
+		}
 
-                                c.UpdateOverlay();
-                            }
-                        }
-                        sea.Spell.Source.Controler.PutCardInPlay(sea.Spell.Source);
-                    }
-                    break;
-                case MagicEventType.TapCard:
 
-                    break;
-                case MagicEventType.QuitZone:
-                    foreach (CardInstance ci in arg.Card.AttachedCards)
-                    {
-                        ci.IsAttached = false;
-                    }
-                    arg.Card.AttachedCards.Clear();
-                    break;
-                default:
-                    break;
-            }
-        }
-
-//        void OnPlayFirst(Button sender)
-//        {
-//            Interface.UnloadPanel(sender.panel);
+		void MagicEngine_MagicEvent (MagicEventArg arg)
+		{
+			switch (arg.Type) {
+//			case MagicEventType.DecksLoaded:
 //
-//            _currentPlayer = 0;
-//            _priorityPlayer = 0;
+//				break;
+			case MagicEventType.Keep:
+
+				arg.Player.Keep = true;
+
+				foreach (Player p in Players)
+					if (!p.Keep)
+						break;
+
+				_currentPhase = GamePhases.Main1;
+				cp.AllowedLandsToBePlayed = 1;//it's normaly set in the untap phase...
+				State = EngineStates.CurrentPlayer;
+				MagicEvent (new PhaseEventArg {
+					Type = MagicEventType.BeginPhase,
+					Phase = _currentPhase,
+					Player = cp
+				});
+
+				break;
+			case MagicEventType.Mulligan:
+				arg.Player.TakeMulligan ();
+				break;
+			case MagicEventType.Unset:
+				break;
+			case MagicEventType.BeginPhase:
+				processPhaseBegin (arg as PhaseEventArg);
+				break;
+			case MagicEventType.EndPhase:
+				processPhaseEnd (arg as PhaseEventArg);
+				break;
+			case MagicEventType.PlayLand:
+				cp.Hand.RemoveCard (arg.Source);
+				cp.PutCardInPlay (arg.Source);
+				cp.AllowedLandsToBePlayed--;
+				break;
+			case MagicEventType.ActivateAbility:
+				AbilityEventArg aea = arg as AbilityEventArg;
+				switch (aea.Ability.AbilityType) {
+				case AbilityEnum.Mana:
+					ManaAbility ma = aea.Ability as ManaAbility;
+					aea.Source.Controler.ManaPool += ma.ProducedMana;
+					aea.Source.Controler.UpdateUi ();
+					break;
+				default:
+					break;
+				}					
+				break;
+			case MagicEventType.CastSpell:
+				//if (arg.Card.Controler.Type == Player.PlayerType.ai)
+				//    Debugger.Break();
+				SpellEventArg sea = arg as SpellEventArg;
+				if (sea.Spell.SelectedTargets.Count > 0) {
+					Ability a = sea.Spell.Source.getAbilitiesByType (AbilityEnum.Attach).FirstOrDefault();
+					if (a != null) {
+						CardInstance c = sea.Spell.SelectedTargets [0] as CardInstance;
+
+						c.AttachedCards.Add (sea.Spell.Source);
+						sea.Spell.Source.IsAttached = true;
+
+						foreach (Effect e in a.Effects) {
+							Effect ee = e.Clone ();
+							ee.TrigEnd = new Trigger {
+								Card = sea.Spell.Source,
+								Type = MagicEventType.QuitZone
+							};
+							c.Effects.AddEffect (ee);
+						}
+
+						c.UpdateOverlay ();
+					}
+				}
+				sea.Spell.Source.Controler.PutCardInPlay (sea.Spell.Source);
+				break;
+			case MagicEventType.TapCard:
+
+				break;
+			case MagicEventType.QuitZone:
+				foreach (CardInstance ci in arg.Source.AttachedCards) {
+					ci.IsAttached = false;
+				}
+				arg.Source.AttachedCards.Clear ();
+				break;
+			
+			default:
+				break;
+			}
+		}
+
+		void processPhaseBegin (PhaseEventArg pea)
+		{
+			priorityPlayer = _currentPlayer;
+
+			//cp.labCurrentPhase.Text = pea.Phase.ToString();
+
+			switch (pea.Phase) {
+			case GamePhases.Untap:
+				cp.AllowedLandsToBePlayed = 1;
+				foreach (CardInstance c in cp.InPlay.Cards)
+					c.Untap ();
+				break;
+			case GamePhases.Upkeep:
+				break;
+			case GamePhases.Draw:
+				if (pea.Player == cp)
+					cp.DrawOneCard ();
+				break;
+			case GamePhases.Main1:
+			case GamePhases.Main2:
+				if (cp.Type == Player.PlayerType.ai && cp.AllowedLandsToBePlayed>0)
+					cp.AITryToPlayLand ();
+				else
+					stopChrono ();
+				break;
+			case GamePhases.BeforeCombat:
+				if (!cp.HaveUntapedCreatureOnTable)
+					SwitchToNextPhase ();
+				break;
+			case GamePhases.DeclareAttacker:
+				if (!cp.HaveUntapedCreatureOnTable)
+					SwitchToNextPhase ();
+				else if (cp.Type == Player.PlayerType.human)
+					stopChrono ();
+				else
+					cp.AITryToAttack ();
+				break;
+			case GamePhases.DeclareBlocker:
+				if (!cp.HaveAttackingCreature) {
+					SwitchToNextPhase ();
+					break;
+				}
+				cp.PhaseDone = true;
+				break;
+			case GamePhases.FirstStrikeDame:
+				if (!cp.HaveAttackingCreature) {
+					SwitchToNextPhase ();
+					break;
+				}
+				break;
+			case GamePhases.CombatDamage:
+				if (!cp.HaveAttackingCreature) {
+					SwitchToNextPhase ();
+					break;
+				}
+				Chrono.Reset ();
+				foreach (CardInstance ac in cp.AttackingCreature) {
+					Damage d = new Damage (null, ac, ac.Power);
+
+					foreach (CardInstance def in ac.BlockingCreatures)
+						MagicStack.Push (new Damage (ac, def, def.Power));
+
+					if (ac.BlockingCreatures.Count == 0) {
+						d.Target = cp.Opponent;
+						MagicStack.Push (d);
+					} else if (ac.BlockingCreatures.Count == 1) {
+						d.Target = ac.BlockingCreatures [0];
+						MagicStack.Push (d);
+					} else {
+						for (int i = 0; i < ac.Power; i++)
+							MagicStack.Push (new Damage (null, d.Source, 1));
+					}
+				}
+
+				CheckStackForUnasignedDamage ();
+				break;
+			case GamePhases.EndOfCombat:
+				if (!cp.HaveAttackingCreature) {
+					SwitchToNextPhase ();
+					break;
+				}
+				break;
+			case GamePhases.EndOfTurn:
+				break;
+			case GamePhases.CleanUp:
+				foreach (Player p in Players) {
+					foreach (CardInstance ac in p.InPlay.Cards) {
+						if (ac.Damages.Count > 0) {
+							ac.Damages.Clear ();
+							ac.UpdateOverlay ();
+						}
+					}
+				}
+				break;
+			}
+		}
+		void processPhaseEnd (PhaseEventArg pea)
+		{
+			CheckStackForResolutions ();
+
+			switch (pea.Phase) {
+			case GamePhases.Untap:
+				break;
+			case GamePhases.Upkeep:
+				break;
+			case GamePhases.Draw:
+				break;
+			case GamePhases.Main2:
+			case GamePhases.Main1:
+				if (CurrentPhase == GamePhases.Main1 && !cp.HaveUntapedCreatureOnTable)
+					CurrentPhase = GamePhases.EndOfCombat;
+				break;
+			case GamePhases.BeforeCombat:
+				break;
+			case GamePhases.DeclareAttacker:
+				foreach (CardInstance c in pea.Player.InPlay.Cards) {
+					if (c.Combating)
+					if (!c.IsTapped)
+						c.Tap ();
+					else
+						Debugger.Break ();
+				}
+				break;
+			case GamePhases.DeclareBlocker:
+				break;
+			case GamePhases.FirstStrikeDame:
+				break;
+			case GamePhases.CombatDamage:
+				break;
+			case GamePhases.EndOfCombat:
+				foreach (Player p in Players) {
+					bool updateLayout = false;
+					foreach (CardInstance c in p.InPlay.Cards) {
+						if (c.Combating) {
+							updateLayout = true;
+							c.Combating = false;
+						}
+					}
+					if (updateLayout)
+						p.InPlay.UpdateLayout ();
+				}
+				break;
+			case GamePhases.EndOfTurn:
+				break;
+			case GamePhases.CleanUp:
+				currentPlayer++;
+
+				priorityPlayer = _currentPlayer;
+				CurrentPhase = GamePhases.Untap;
+				//Players[_priorityPlayer].pbTimer.Visible = true;					
+				break;
+			}
+
+			foreach (Player p in Players)
+				p.ManaPool = null;
+
+			if (pea.Phase != GamePhases.CleanUp)
+				CurrentPhase++;
+
+			MagicEvent (new PhaseEventArg {
+				Type = MagicEventType.BeginPhase,
+				Phase = _currentPhase,
+				Player = Players [currentPlayer]
+			});
+
+
+		}
+			
+		public void ClickOnCard (CardInstance c)
+		{
+
+
+			//            if (Magic3D.pCurrentSpell.Visible) //promt for something
+			//            {
+			if (ip.CurrentSpell != null)
+			{
+				if (ip.CurrentSpell.SelectedTargets.Count < ip.CurrentSpell.RequiredTargetCount)
+				if (ip.CurrentSpell.TryToAddTarget(c))
+					return;
+			}
+			else if (TryToAssignTargetForDamage(c))
+			{
+				CheckStackForUnasignedDamage();
+				return;
+			}
+			//            }
+
+			switch (c.CurrentGroup.GroupName) {
+			case CardGroupEnum.Library:
+				break;
+			case CardGroupEnum.Hand:
+				#region hand
+				if (c.Controler != ip || c.Controler != cp)
+					return;
+
+				switch (CurrentPhase) {
+				case GamePhases.Untap:
+					break;
+				case GamePhases.Upkeep:
+					break;
+				case GamePhases.Draw:
+					break;
+				case GamePhases.Main1:
+				case GamePhases.Main2:
+					if (c.Model.Types == CardTypes.Land) {
+						if (cp.AllowedLandsToBePlayed>0)
+							MagicEvent (new MagicEventArg (MagicEventType.PlayLand, c));
+					} else
+						ip.CurrentSpell = new Spell (c);
+					break;
+				case GamePhases.BeforeCombat:
+					break;
+				case GamePhases.DeclareAttacker:
+
+					break;
+				case GamePhases.DeclareBlocker:
+					break;
+				case GamePhases.FirstStrikeDame:
+					break;
+				case GamePhases.CombatDamage:
+					break;
+				case GamePhases.EndOfCombat:
+					break;
+				case GamePhases.EndOfTurn:
+					break;
+				case GamePhases.CleanUp:
+					break;
+				default:
+					break;
+				}
+				break;
+				#endregion
+			case CardGroupEnum.InPlay:
+				#region inPlay
+				if (c.Controler != ip &&
+					CurrentPhase != GamePhases.DeclareBlocker &&
+					CurrentPhase != GamePhases.CombatDamage)
+					return;
+
+				if (c.IsTapped)
+					return;
+
+				#region ManaAbilities
+				//could be played anywhen
+				Ability[] manaAbilities = c.getAbilitiesByType(AbilityEnum.Mana);
+				if (manaAbilities.Count()>0)
+				{
+					if (manaAbilities.Count()==1){
+						if (manaAbilities[0].ActivationCost.CostType == CostTypes.Tap) {
+							c.Tap ();
+							MagicEvent (new AbilityEventArg(manaAbilities[0],c));
+						}
+					}else{
+						//show choice
+					}
+				}
+				#endregion
+
+				switch (CurrentPhase) {
+				case GamePhases.Untap:
+					break;
+				case GamePhases.Upkeep:
+					break;
+				case GamePhases.Draw:
+					break;
+				case GamePhases.Main1:
+				case GamePhases.Main2:
+					if (c.Model.Abilities.Count > 0) {
+						foreach (Ability ab in c.Model.Abilities) {
+
+						}
+					}
+					break;
+				case GamePhases.BeforeCombat:
+					break;
+				case GamePhases.DeclareAttacker:
+					if (!c.Combating && !c.CanAttack)
+						break;
+					c.Combating = !c.Combating;
+					c.CurrentGroup.UpdateLayout ();
+					break;
+				case GamePhases.DeclareBlocker:
+					if (c.Controler == ip) {
+						if (c.Combating) {
+							c.Combating = false;
+							c.BlockedCreature.BlockingCreatures.Remove (ip.CurrentBlockingCreature);
+							c.BlockedCreature = null;
+							c.Controler.InPlay.UpdateLayout ();
+						}
+						c.Controler.CurrentBlockingCreature = c;
+						break;
+					} else if (ip.CurrentBlockingCreature != null && c.Combating) {
+						if (ip.CurrentBlockingCreature.Combating) {
+							//remove blocker
+							ip.CurrentBlockingCreature.Combating = false;
+							ip.CurrentBlockingCreature.BlockedCreature.BlockingCreatures.Remove (ip.CurrentBlockingCreature);
+							ip.CurrentBlockingCreature.BlockedCreature = null;
+						} else if (ip.CurrentBlockingCreature.CanBlock (c)) {
+							//try to add blocker
+							c.BlockingCreatures.Add (ip.CurrentBlockingCreature);
+							ip.CurrentBlockingCreature.BlockedCreature = c;
+							ip.CurrentBlockingCreature.Combating = true;
+							ip.CurrentBlockingCreature = null;
+						} else
+							break;
+
+						ip.InPlay.UpdateLayout ();
+					}
+					break;
+				case GamePhases.FirstStrikeDame:
+					break;
+				case GamePhases.CombatDamage:
+					break;
+				case GamePhases.EndOfCombat:
+					break;
+				case GamePhases.EndOfTurn:
+					break;
+				case GamePhases.CleanUp:
+					break;
+				default:
+					break;
+				}
+				break;
+				#endregion
+			case CardGroupEnum.Graveyard:
+				c.CurrentGroup.toogleShowAll ();
+				break;
+			case CardGroupEnum.Exhiled:
+				break;
+			default:
+				break;
+			}
+		}
+
+		public Spell NextSpellOnStack {
+			get { return MagicStack.Count == 0 ? null : MagicStack.Peek () as Spell; }
+		}
+		public void PushSpellOnStack (Spell s)
+		{
+			//should show spell to player...
+
+			MagicStack.Push (s);
+
+			s.Source.Controler.Hand.RemoveCard (s.Source);
+
+			SpellStackLayout.Cards = MagicStack.OfType<Spell> ().Select (sp => sp.Source).ToList ();
+			SpellStackLayout.UpdateLayout ();
+		}
+		public Spell PopSpellFromStack ()
+		{
+			Spell tmp = MagicStack.Pop () as Spell;
+			SpellStackLayout.Cards = MagicStack.OfType<Spell> ().Select (sp => sp.Source).ToList ();
+			SpellStackLayout.UpdateLayout ();
+
+			//AttachAbility ab = tmp.getAttachAbilityIfPresent;
+			//if (ab != null)
+			//{
+			//    tmp.Source.AttachedTo = tmp.SelectedTargets.FirstOrDefault() as CardInstance;
+			//}
+			return tmp;
+		}
+
+		#region Mouse handling
+
+		Vector3 computeVMouseAtHeight (Vector3 M, float z)
+		{
+			float t = (z - M.Z) / Magic.vMouse.Z;
+			float x = M.X + t * Magic.vMouse.X;
+			float y = M.Y + t * Magic.vMouse.Y;
+			return new Vector3 (x, y, z);
+		}
+
+		public void processMouseMove (Point<float> ptM)
+		{
+//			Vector3 M = new Vector3( glHelper.UnProject (ref Magic.projection, Magic.modelview, Magic.viewport, new Vector2 (ptM.X, ptM.Y))) ;
+//			Magic.vMouse = Vector3.Normalize (Magic.vEye - M);
 //
-//            start();
-//        }
-//
-//        void onDrawFirst(Button sender)
-//        {
-//            Interface.UnloadPanel(sender.panel);
-//
-//            _currentPlayer = 1;
-//            _priorityPlayer = 1;
-//
-//            start();
-//        }
+//			Vector3 vMPos = Vector3.Zero;
+//			vMPos = computeVMouseAtHeight (M, cg.z); 
+//						if (cg.PointIsIn (vMPos)) {
+//							selOk = true;
+//							cg.IsSelected = true;
+//						} else
+//							cg.IsSelected = false;
+//						break;
+//					case CardGroupEnum.Hand:
+			ptM.Y = Magic.viewport [3] - ptM.Y;
 
-        void start()
-        {
-            State = EngineStates.CurrentPlayer;
-
-            initialDraw();
-
-            _currentPhase = GamePhases.Main1;
-            MagicEvent(new PhaseEventArg
-            {
-                Type = MagicEventType.BeginPhase,
-                Phase = _currentPhase,
-                Player = cp
-            });
-
-        }
-
-        public void StartNewGame()
-        {
-            InitTurn();
-
-            foreach (Player p in Players)
-                p.Reset();
-
-            State = EngineStates.Init;
-			//Interface.addPanel(new MsgBoxYesNo("You won the toss, Play first?", OnPlayFirst, onDrawFirst));
-        }
-
-        public Spell NextSpellOnStack
-        {
-            get { return MagicStack.Count == 0 ? null : MagicStack.Peek() as Spell; }
-        }
-
-        public void PushSpellOnStack(Spell s)
-        {
-            //should show spell to player...
-
-            MagicStack.Push(s);
-
-            s.Source.Controler.Hand.RemoveCard(s.Source);
-
-            SpellStackLayout.Cards = MagicStack.OfType<Spell>().Select(sp => sp.Source).ToList();
-            SpellStackLayout.UpdateLayout();
-        }
-
-        public Spell PopSpellFromStack()
-        {
-            Spell tmp = MagicStack.Pop() as Spell;
-            SpellStackLayout.Cards = MagicStack.OfType<Spell>().Select(sp => sp.Source).ToList();
-            SpellStackLayout.UpdateLayout();
-
-            //AttachAbility ab = tmp.getAttachAbilityIfPresent;
-            //if (ab != null)
-            //{
-            //    tmp.Source.AttachedTo = tmp.SelectedTargets.FirstOrDefault() as CardInstance;
-            //}
-            return tmp;
-        }
+			if (CardInstance.selectedCard != null) {
+				if (CardInstance.selectedCard.mouseIsIn (ptM))
+					return;
+				else
+					CardInstance.selectedCard = null;
+			}
 
 
+			foreach (CardGroup cg in ip.allGroups) {
+				foreach (CardInstance c in cg.Cards) {
+					if (c.mouseIsIn (ptM)) {
+						CardInstance.selectedCard = c;
+						break;
+					}
+				}
+				if (CardInstance.selectedCard != null)
+					break;
+			}			
+//			if (!selOk)
+//				vMPos = computeVMouseAtHeight (M, 0);
+			//Magic.diceMat = Matrix4.CreateTranslation (vMPos);
+		}
+		public void processMouseDown (MouseButtonEventArgs e)
+		{
+			if (CardInstance.selectedCard == null)
+				return;
 
-        public void ClickOnCard(CardInstance c)
-        {
-            if (ip != pp)
-            {
-                c.SwitchFocus();
-                return;
-            }
+			switch (e.Button) {
+			case MouseButton.Left:
+				ClickOnCard (CardInstance.selectedCard);
+				break;
+			default:
+				CardInstance.selectedCard.SwitchFocus ();
+				break;
+			}
+		}
+		#endregion
 
-//            if (Magic3D.pCurrentSpell.Visible) //promt for something
-//            {
-//                if (ip.CurrentSpell != null)
-//                {
-//                    if (ip.CurrentSpell.SelectedTargets.Count < ip.CurrentSpell.RequiredTargetCount)
-//                        if (ip.CurrentSpell.TryToAddTarget(c))
-//                            return;
-//                }
-//                else if (TryToAssignTargetForDamage(c))
-//                {
-//                    CheckStackForUnasignedDamage();
-//                    return;
-//                }
-//            }
+		public void CheckStackForResolutions ()
+		{
+			while (MagicStack.Count > 0) {
+				if (MagicStack.Peek () is Spell) {
+					MagicEvent (new SpellEventArg { Spell = PopSpellFromStack () });
+					continue;
+				}
 
-            switch (c.CurrentGroup.GroupName)
-            {
-                case CardGroups.Library:
-                    break;
-                case CardGroups.Hand:
-                    #region hand
-                    if (c.Controler != ip)
-                        return;
+				if (MagicStack.Peek () is Damage) {
+					(MagicStack.Pop () as Damage).Deal ();
+					continue;
+				}
+			}
+		}
 
-                    switch (CurrentPhase)
-                    {
-                        case GamePhases.Untap:
-                            break;
-                        case GamePhases.Upkeep:
-                            break;
-                        case GamePhases.Draw:
-                            break;
-                        case GamePhases.Main1:
-                        case GamePhases.Main2:
-                            if (c.Model.Types == CardTypes.Land)
-                            {
-                                if (!landPlayed)
-                                    MagicEvent(new MagicEventArg(MagicEventType.PlayLand, c));
-                            }
-                            else
-                                ip.CurrentSpell = new Spell(c);
-
-                            break;
-                        case GamePhases.BeforeCombat:
-                            break;
-                        case GamePhases.DeclareAttacker:
-
-                            break;
-                        case GamePhases.DeclareBlocker:
-                            break;
-                        case GamePhases.FirstStrikeDame:
-                            break;
-                        case GamePhases.CombatDamage:
-                            break;
-                        case GamePhases.EndOfCombat:
-                            break;
-                        case GamePhases.EndOfTurn:
-                            break;
-                        case GamePhases.CleanUp:
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                    #endregion
-                case CardGroups.InPlay:
-                    #region inPlay
-                    if (c.Controler != ip &&
-                        CurrentPhase != GamePhases.DeclareBlocker &&
-                        CurrentPhase != GamePhases.CombatDamage)
-                    {
-                        c.SwitchFocus();
-                        return;
-                    }
-
-                    switch (CurrentPhase)
-                    {
-                        case GamePhases.Untap:
-                            break;
-                        case GamePhases.Upkeep:
-                            break;
-                        case GamePhases.Draw:
-                            break;
-                        case GamePhases.Main1:
-                        case GamePhases.Main2:
-                            if (c.IsTapped == true)
-                                break;
-                            if (c.Model.Abilities.Count > 0)
-                            {
-                                foreach (Ability a in c.Model.Abilities)
-                                {
-                                    if (a.ActivationCost.CostType == CostTypes.Tap)
-                                    {
-                                        c.Tap();
-                                        MagicEvent(new SpellEventArg { Spell = a });
-                                    }
-                                }
-                            }
-                            break;
-                        case GamePhases.BeforeCombat:
-                            break;
-                        case GamePhases.DeclareAttacker:
-                            if (!c.Combating && !c.CanAttack)
-                                break;
-                            c.Combating = !c.Combating;
-                            c.CurrentGroup.UpdateLayout();
-                            break;
-                        case GamePhases.DeclareBlocker:
-                            if (c.Controler == ip)
-                            {
-                                if (c.Combating)
-                                {
-                                    c.Combating = false;
-                                    c.BlockedCreature.BlockingCreatures.Remove(ip.CurrentBlockingCreature);
-                                    c.BlockedCreature = null;
-                                    c.Controler.InPlay.UpdateLayout();
-                                }
-                                c.Controler.CurrentBlockingCreature = c;
-                                break;
-                            }
-                            else if (ip.CurrentBlockingCreature != null && c.Combating)
-                            {
-                                if (ip.CurrentBlockingCreature.Combating)
-                                {
-                                    //remove blocker
-                                    ip.CurrentBlockingCreature.Combating = false;
-                                    ip.CurrentBlockingCreature.BlockedCreature.BlockingCreatures.Remove(ip.CurrentBlockingCreature);
-                                    ip.CurrentBlockingCreature.BlockedCreature = null;
-                                }
-                                else if (ip.CurrentBlockingCreature.CanBlock(c))
-                                {
-                                    //try to add blocker
-                                    c.BlockingCreatures.Add(ip.CurrentBlockingCreature);
-                                    ip.CurrentBlockingCreature.BlockedCreature = c;
-                                    ip.CurrentBlockingCreature.Combating = true;
-                                    ip.CurrentBlockingCreature = null;
-                                }
-                                else
-                                    break;
-
-                                ip.InPlay.UpdateLayout();
-                            }
-                            break;
-                        case GamePhases.FirstStrikeDame:
-                            break;
-                        case GamePhases.CombatDamage:
-                            break;
-                        case GamePhases.EndOfCombat:
-                            break;
-                        case GamePhases.EndOfTurn:
-                            break;
-                        case GamePhases.CleanUp:
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                    #endregion
-                case CardGroups.Graveyard:
-                    c.CurrentGroup.showAll();
-                    break;
-                case CardGroups.Exhiled:
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        public void CheckStackForResolutions()
-        {
-            while (MagicStack.Count > 0)
-            {
-                if (MagicStack.Peek() is Spell)
-                {
-                    MagicEvent(new SpellEventArg { Spell = PopSpellFromStack() });
-                    continue;
-                }
-
-                if (MagicStack.Peek() is Damage)
-                {
-                    (MagicStack.Pop() as Damage).Deal();
-                    continue;
-                }
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>true if all damages are assigned</returns>
-        public bool CheckStackForUnasignedDamage()
-        {
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns>true if all damages are assigned</returns>
+		public bool CheckStackForUnasignedDamage ()
+		{
 //            foreach (Damage d in MagicStack.ToArray().OfType<Damage>())
 //            {
 //                if (d.Target == null)
@@ -784,67 +836,54 @@ namespace Magic3D
 //                    return false;
 //                }
 //            }
-            return true;
-        }
+			return true;
+		}
 
-        public bool TryToAssignTargetForDamage(CardInstance c)
-        {
-            foreach (Damage d in MagicStack.ToArray().OfType<Damage>())
-            {
-                if (d.Target == null)
-                {
-                    d.Target = c;
+		public bool TryToAssignTargetForDamage (CardInstance c)
+		{
+			foreach (Damage d in MagicStack.ToArray().OfType<Damage>()) {
+				if (d.Target == null) {
+					d.Target = c;
 					//Magic3D.pCurrentSpell.Visible = false;
-                    return true;
-                }
-            }
-            return false;
-        }
+					return true;
+				}
+			}
+			return false;
+		}
 
-        public void checkCurrentSpell()
-        {
-            if (pp.CurrentSpell != null)
-            {
-                if (pp.CurrentSpell.SelectedTargets.Count < pp.CurrentSpell.RequiredTargetCount)
-                {
+		public void checkCurrentSpell ()
+		{
+			if (pp.CurrentSpell != null) {
+				if (pp.CurrentSpell.SelectedTargets.Count < pp.CurrentSpell.RequiredTargetCount) {
 //                    if (pp.Type == Player.PlayerType.human)
 //                        Magic3D.pCurrentSpell.Update(pp.CurrentSpell);
-                }
+				}
 
-                if (pp.ManaPool != null)
-                {
-                    pp.CurrentSpell.RemainingCost = pp.CurrentSpell.RemainingCost.Pay(ref pp.ManaPool);
-                    if (pp.CurrentSpell.RemainingCost == null)
-                    {
-                        PushSpellOnStack(pp.CurrentSpell);
-                        pp.CurrentSpell = null;
-                        GivePriorityToNextPlayer();
-                    }
+				if (pp.ManaPool != null) {
+					pp.CurrentSpell.RemainingCost = pp.CurrentSpell.RemainingCost.Pay (ref pp.ManaPool);
+					pp.UpdateUi ();
+					if (pp.CurrentSpell.RemainingCost == null) {
+						PushSpellOnStack (pp.CurrentSpell);
+						pp.CurrentSpell = null;
+						GivePriorityToNextPlayer ();
+					}
 //                    else if (pp.Type == Player.PlayerType.human)
 //                        Magic3D.pCurrentSpell.Update(pp.CurrentSpell);
-                }
-            }
-        }
-
-        public void InitTurn()
-        {
-            landPlayed = false;
-        }
+				}
+			}
+		}
 
 
+		public void processRendering()
+		{
+			if (State < EngineStates.Loaded)
+				return;
 
+			foreach (Player p in Players) {
+				p.Render ();
+			}
 
-        public void initialDraw()
-        {
-            foreach (Player p in Players)
-            {
-                for (int i = 0; i < 7; i++)
-                    p.DrawOneCard();
-            }
-
-
-        }
-
-
-    }
+			SpellStackLayout.Render();
+		}
+	}
 }

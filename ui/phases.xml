@@ -1,0 +1,47 @@
+﻿<?xml version="1.0"?>
+<Container
+	HorizontalAlignment="Left" VerticalAlignment="Center"
+	Margin="10" Focusable="True" Fit="True" >
+	<Group Fit="True">
+		<VerticalStack>			
+			<Button Name="Untap" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_untap.svg"/>
+			</Button>
+			<Button Name="Upkeep" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_upkeep.svg"/>
+			</Button>
+			<Button Name="Draw" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_draw.svg"/>
+			</Button>
+			<Button Name="Main1" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_main1.svg"/>
+			</Button>
+			<Button Name="BeforeCombat" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_combat_start.svg"/>
+			</Button>
+			<Button Name="DeclareAttacker" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_combat_attackers.svg"/>
+			</Button>
+			<Button Name="DeclareBlocker" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_combat_blockers.svg"/>
+			</Button>
+			<Button Name="CombatDamage" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_combat_damage.svg"/>
+			</Button>
+			<Button Name="EndOfCombat" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_combat_end.svg"/>
+			</Button>
+			<Button Name="Main2" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_main2.svg"/>
+			</Button>
+			<Button Name="EndOfTurn" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_cleanup.svg"/>
+			</Button>
+			<Button Name="CleanUp" Margin="3" Width="40" Height="40">
+				<Image Margin="2" Background="Transparent" Path="image2/icon_phase_nextturn.svg"/>
+			</Button>
+		</VerticalStack>
+<!--		<Image Name="PhaseOverlay" Width="40" Height="40" 
+				Path="image2/PhaseOverlay.svg"/>-->
+	</Group>
+</Container>

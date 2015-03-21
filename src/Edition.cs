@@ -69,9 +69,7 @@ namespace Magic3D
 
         public static void LoadEditionsDatabase()
         {
-
             string[] editions = Directory.GetFiles(editionsPath, "*.txt");
-
 
             foreach (string f in editions)
             {

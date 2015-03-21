@@ -11,7 +11,7 @@ namespace Magic3D
 		public CardLayout CombatingCreature = new CardLayout();
 
 		public InPlayGroup()
-			: base(CardGroups.InPlay)
+			: base(CardGroupEnum.InPlay)
 		{
 			y = -2.5f;
 			HorizontalSpacing = 1.5f;
@@ -40,21 +40,22 @@ namespace Magic3D
 			CombatingCreature.HorizontalSpacing = 1.5f;
 			CombatingCreature.VerticalSpacing = 0.001f;
 			CombatingCreature.MaxHorizontalSpace = 7f;
-
 		}
 
 		public override void AddCard(CardInstance c)
 		{
 			base.AddCard(c);
-			UpdateLayout();
+			Magic.AddAnimation(UpdateLayout());
 		}
 		public override void RemoveCard(CardInstance c)
 		{
 			base.RemoveCard(c);
-			UpdateLayout();
+			Magic.AddAnimation(UpdateLayout());
 		}
-		public override void UpdateLayout()
+		public override CardsGroupAnimation UpdateLayout()
 		{
+			CardsGroupAnimation cga = new CardsGroupAnimation ();
+
 			LandsLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Land && !(c.IsAttached || c.Combating)).ToList();
 			CreatureLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Creature && !(c.IsAttached || c.Combating)).ToList();
 			OtherLayout.Cards = Cards.Where(c => c.Model.Types != CardTypes.Land && c.Model.Types != CardTypes.Creature
@@ -69,7 +70,7 @@ namespace Magic3D
 			{
 				CombatingCreature.Cards = Cards.Where(c => c.Model.Types == CardTypes.Creature && c.Combating).ToList();
 				if (CombatingCreature.Cards.Count == 0)
-					return;
+					return cga;
 				if (MagicEngine.CurrentEngine.cp == Cards[0].Controler)
 					CombatingCreature.UpdateLayout();
 				else
@@ -77,11 +78,9 @@ namespace Magic3D
 			}
 
 
-
+			return cga;
 			//base.UpdateLayout();
 		}
-
-
 	}
 }
 

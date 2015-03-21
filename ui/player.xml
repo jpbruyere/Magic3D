@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Container
+	HorizontalAlignment="Left" VerticalAlignment="Top"
+	Margin="10" Width="200" Height="100">
+	<Border Margin="10" BorderWidth="1" >
+		<Group>
+			<HorizontalStack HorizontalAlignment="Left" VerticalAlignment="Top">
+			<Image Name="pic" Margin="1" Path="image2/normal.svg" Height="20" Width="20" />
+			<Label Margin="0" Name="labName" Text="xxxx" Font="MagicMedieval, 20"
+				VerticalAlignment="Top"/>
+			</HorizontalStack>
+			<Label Name="labCpts" Text=" " Font="MagicMedieval bold, 10"
+				Margin="0"
+				VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+			<Label Name="labPts" Text="0" Font="MagicMedieval bold, 30"
+				Margin="0"
+				VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+			<ProgressBar Name="pgBar" 
+						VerticalAlignment="Bottom"
+						Width="60" Height="7"
+						Value="0"
+						Foreground="BlueCrayola" Background="DarkGray"
+						BorderWidth="1" BorderColor="White"/>
+<!--			<Button Margin="3" Width="40" Height="40"
+				VerticalAlignment="Bottom" HorizontalAlignment="Left">
+				<Image Path="image2/icon_phase_untap.svg"/>
+			</Button>-->
+		</Group>
+	</Border>
+</Container>
+

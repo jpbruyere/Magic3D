@@ -5,124 +5,12 @@ using System.Text;
 using System.Diagnostics;
 
 namespace Magic3D
-{
-    public enum EffectType
-    {
-        Unset,  
-        Loose,
-        LooseAllAbilities,
-        Gain,
-        Discard,
-        Pump,
-        AddPower,
-        AddTouchness,
-        SetPower,
-        SetTouchness,
-        Effect,
-        Counter,
-        Destroy,
-        Tap,
-        DoesNotUntap,
-        CantAttack,
-        TapAll,
-        LoseLife,
-        PreventDamage,
-        Charm,
-        DealDamage,
-        ChangeZone,
-        Draw,
-        DestroyAll,
-        RepeatEach,
-        Token,
-        GainControl,
-        Repeat,
-        Debuff,
-        ChooseColor,
-        Dig,
-        PumpAll,
-        RemoveCounterAll,
-        ChangeZoneAll,
-        DamageAll,
-        UntapAll,
-        PutCounter,
-        GainLife,
-        PutCounterAll,
-        StoreSVar,        
-        FlipACoin,
-        SacrificeAll,
-        Untap,
-        Mill,
-        Animate,
-        Fog,
-        RemoveCounter,
-        ExchangeZone,
-        AnimateAll,
-        ChooseCard,
-        Reveal,
-        ChooseSource,
-        MustBlock,
-        ExchangeControl,
-        RearrangeTopOfLibrary,
-        CopyPermanent,
-        SetState,
-        Balance,
-        RevealHand,
-        Sacrifice,
-        AddTurn,
-        TwoPiles,
-        ManaReflected,
-        SetLife,
-        DebuffAll,
-        Fight,
-        ChooseType,
-        Shuffle,
-        NameCard,
-        PermanentNoncreature,
-        PermanentCreature,
-        TapOrUntap,
-        GenericChoice,
-        Play,
-        BecomesBlocked,
-        AddOrRemoveCounter,
-        WinsGame,
-        Proliferate,
-        Scry,
-        MoveCounter,
-        GainOwnership,
-        ChangeTargets,
-        UnattachAll,
-        PeekAndReveal,
-        LosesGame,
-        DigUntil,
-        CopySpellAbility,
-        RollPlanarDice,
-        RegenerateAll,
-        DelayedTrigger,
-        MustAttack,
-        ProtectionAll,
-        RemoveFromCombat,
-        RestartGame,
-        PreventDamageAll,
-        ExchangeLife,
-        DeclareCombatants,
-        ControlPlayer,
-        Phases,
-        Clone,
-        Clash,
-        ChooseNumber,
-        EachDamage,
-        ReorderZone,
-        ChoosePlayer,
-        EndTurn,
-        MultiplePiles
-    }
-
-    public class Spell
+{    
+	public class Spell
     {
         public CardInstance Source;
         public Cost RemainingCost;
         
-
         public Spell()
         { }
 
@@ -146,10 +34,10 @@ namespace Magic3D
             if (!WaitForTarget)
                 return false;
 
-            if (c.CurrentGroup.GroupName != CardGroups.InPlay)
+			//other target group are possible, should change
+            if (c.CurrentGroup.GroupName != CardGroupEnum.InPlay)
                 return false;
-
-
+				
             foreach (CardTarget ct in ValidTargets.Values.OfType<CardTarget>())
             {
                 if (c.Model.Types == ct.ValidCardTypes)
@@ -166,7 +54,7 @@ namespace Magic3D
         {
             get
             {
-                Ability a = Source.getAbilityByType(AbilityEnum.Attach);
+				Ability a = Source.getAbilitiesByType(AbilityEnum.Attach).FirstOrDefault();
                 if (a == null)
                     return 0;
 
@@ -181,7 +69,7 @@ namespace Magic3D
         {
             get
             {
-                Ability a = Source.getAbilityByType(AbilityEnum.Attach);
+				Ability a = Source.getAbilitiesByType(AbilityEnum.Attach).FirstOrDefault();
                 if (a == null)
                     return null;
 
@@ -196,7 +84,7 @@ namespace Magic3D
         {
             get
             {
-                Ability a = Source.getAbilityByType(AbilityEnum.Attach);
+				Ability a = Source.getAbilitiesByType(AbilityEnum.Attach).FirstOrDefault();
                 if (a == null)
                     return new List<object>();
 
@@ -208,9 +96,9 @@ namespace Magic3D
             }
         }
 
-        public bool Resolve()
-        {
-            return Source.Model.Cost == RemainingCost ? true : false;
-        }
+//        public bool Resolve()
+//        {
+//            return Source.Model.Cost == RemainingCost ? true : false;
+//        }
     }
 }

@@ -20,6 +20,8 @@ namespace Magic3D
         }
 
         public static int InitialLifePoints = 20;
+		public bool Keep = false;
+		public int CardToDraw = 7;
 
         int _lifePoints;
         string _name;
@@ -41,11 +43,19 @@ namespace Magic3D
 
         public Matrix4 Transformations
         {
-            get { return Matrix4.CreateRotationZ(zAngle); }
+			get { return Matrix4.CreateRotationZ(zAngle); }
         }
         public float zAngle = 0.0f;
 
-        public PlayerType Type = PlayerType.human;
+		PlayerType _type = PlayerType.human;
+        public PlayerType Type
+		{
+			get { return _type; }
+			set {
+				_type = value;
+				(playerPanel.FindByName ("pic") as Image).ImagePath = "image2/HAL9000.svg";
+			}
+		}
         public Cost ManaPool;
 
 
@@ -67,11 +77,14 @@ namespace Magic3D
             {
                 _lifePoints = value;
 
-                if (labPoints != null)
-                    labPoints.Text = _lifePoints.ToString();
+                if (labPts != null)
+                    labPts.Text = _lifePoints.ToString();
             }
         }
-
+		public int AllowedLandsToBePlayed {
+			get;
+			set;
+		}
         public Spell CurrentSpell
         {
             get { return _currentSpell; }
@@ -141,7 +154,7 @@ namespace Magic3D
                     MagicEngine.CurrentEngine.Players[0];
             }
         }
-
+		public string deckPath = "Lightforce.dck";
         public Deck Deck
         {
             get { return _deck; }
@@ -165,19 +178,20 @@ namespace Magic3D
             Library = new Library();
 
 
-            Hand = new CardGroup(CardGroups.Hand);
+            Hand = new CardGroup(CardGroupEnum.Hand);
 			Hand.y = -7.5f;
 			Hand.z = 3.3f;
+			Hand.xAngle = MathHelper.Pi - Vector3.CalculateAngle (Magic.vLook, Vector3.UnitZ);
             Hand.HorizontalSpacing = 0.7f;
-            Hand.VerticalSpacing = -0.001f;
+            Hand.VerticalSpacing = 0.01f;
 
-            Graveyard = new CardGroup(CardGroups.Graveyard);
+            Graveyard = new CardGroup(CardGroupEnum.Graveyard);
             Graveyard.x = -4;
             Graveyard.y = -2.8f;
 
             InPlay = new InPlayGroup();
 
-            Exhiled = new CardGroup(CardGroups.Exhiled);
+            Exhiled = new CardGroup(CardGroupEnum.Exhiled);
             Exhiled.IsVisible = false;
 
             allGroups[0] = Library;
@@ -185,19 +199,28 @@ namespace Magic3D
             allGroups[2] = Graveyard;
             allGroups[3] = InPlay;
             allGroups[4] = Exhiled;
-
-            initInterface();
+			      
         }
 
         #region interface
 		//public Panel playerPanel;
-        Label labPoints;
+		public Container playerPanel;
+		public Label labPts;
+		public Label labCpts;
         Label labName;
-        public Label labCurrentPhase;
-        public ProgressBar pbTimer;
+		public ProgressBar pgBar;
 
-        void initInterface()
+		Color ActiveColor = new Color (0.6, 0.6, 0.7, 0.7);
+		Color InactiveColor = new Color (0.2, 0.2, 0.2, 0.5);
+
+		public void initInterface(OpenTKGameWindow mainWin)
         {
+			mainWin.LoadInterface ("ui/player.xml", out playerPanel);
+			labName = playerPanel.FindByName ("labName") as Label;
+			labPts = playerPanel.FindByName ("labPts") as Label;
+			labCpts = playerPanel.FindByName ("labCpts") as Label;
+			pgBar = playerPanel.FindByName ("pgBar") as ProgressBar;
+			playerPanel.Background = InactiveColor;
 //            playerPanel = Interface.addPanel(new go.Rectangle(10, 200, 150, 100));
 //            Group g = playerPanel.setChild(new Group());
 //            labPoints = g.addChild(new Label("###"));
@@ -216,13 +239,27 @@ namespace Magic3D
 //            pbTimer.VerticalAlignment = VerticalAlignment.Bottom;
 //            pbTimer.HorizontalAlignment = HorizontalAlignment.Right;
         }
-        #endregion
+		public void UpdateUi()
+		{
+			if (ManaPool == null)
+				labCpts.Text = "-";
+			else
+				labCpts.Text = ManaPool.ToString();
+			labPts.Text = LifePoints.ToString ();
+			if (MagicEngine.CurrentEngine.pp == this)
+				playerPanel.Background = ActiveColor;
+			else
+				playerPanel.Background = InactiveColor;
+		}
+		#endregion
 
         /// <summary>
         /// init life points, put all cards in library and shuffle
         /// </summary>
         public void Reset()
         {
+			Keep = false;
+			CardToDraw = 7;
             LifePoints = InitialLifePoints;
 
             foreach (CardGroup cg in allGroups)
@@ -231,35 +268,65 @@ namespace Magic3D
             foreach (CardInstance c in Deck.Cards)
             {
                 c.Controler = this;
-                foreach (Ability a in c.Model.Abilities)
-                    a.Source = c;
+//                foreach (Ability a in c.Model.Abilities)
+//                    a.Source = c;
 
                 c.ResetPositionAndRotation();
-                c.yAngle = MathHelper.Pi;
+				//c.yAngle = MathHelper.Pi;
                 Library.AddCard(c);
-            }
 
-            Library.ShuffleAndLayoutZ();
+
+            }
+			Library.Cards.Shuffle();
+			CardsGroupAnimation cga = Library.UpdateLayout ();
+			Magic.AddAnimation(cga);
         }
+		public void initialDraw ()
+		{
+			for (int i = 0; i < CardToDraw; i++)
+				DrawOneCard ();
+			CardsGroupAnimation cga = Hand.UpdateLayout ();
+			cga.AnimationFinished += delegate { 
+				MagicEngine.CurrentEngine.RaiseMagicEvent (
+					new MagicEventArg () { 
+						Type = MagicEventType.CardsDrawn,
+						Player = this
+					});
+			};
+			Magic.AddAnimation (cga);
+			Magic.AddAnimation (Library.UpdateLayout ());
+		}
+
+		public void TakeMulligan()
+		{
+			for (int i = 0; i < CardToDraw; i++) {
+				Library.AddCard (Hand.TakeTopOfStack);
+			}
+			CardToDraw--;
+
+			//Library.ShuffleAndLayoutZ();
+
+			initialDraw ();
+		}
 
         public void DrawOneCard()
         {
             CardInstance c = Library.TakeTopOfStack;
             Hand.AddCard(c);
-            Animation.StartAnimation(new AngleAnimation(c, "yAngle", 0, MathHelper.Pi * 0.1f));
-            Animation.StartAnimation(new AngleAnimation(c, "xAngle",
-				MathHelper.Pi - Vector3.CalculateAngle(Magic.vLook, Vector3.UnitZ), MathHelper.Pi * 0.03f));
+//            Animation.StartAnimation(new AngleAnimation(c, "yAngle", 0, MathHelper.Pi * 0.1f));
+//            Animation.StartAnimation(new AngleAnimation(c, "xAngle",
+//				MathHelper.Pi - Vector3.CalculateAngle(Magic.vLook, Vector3.UnitZ), MathHelper.Pi * 0.03f));
         }
         public void PutCardInPlay(CardInstance c)
         {
-            //Hand.RemoveCard(c);
+            Hand.RemoveCard(c);
             InPlay.AddCard(c);
-            Animation.StartAnimation(new AngleAnimation(c, "xAngle", 0, MathHelper.Pi * 0.3f));
+			//Animation.StartAnimation(new AngleAnimation(c, "xAngle", 0, MathHelper.Pi * 0.3f));
         }
 
         public void Render()
         {
-			Matrix4 mSave = Magic.texturedShader.ModelViewMatrix;            
+			Matrix4 mSave = Magic.texturedShader.ModelMatrix;            
 			Magic.texturedShader.ModelMatrix *= Transformations;
 
             foreach (CardGroup cg in allGroups)
@@ -288,16 +355,16 @@ namespace Magic3D
 
         public void Process()
         {
-//            if (Type == Player.PlayerType.ai)
-//            {
-//                Magic3D.btContinue.Visible = false;
-//                AIPlayerProcess();
-//            }
-//            else
-//            {
-//                Magic3D.btContinue.Visible = true;
-//                HumanPlayerProcess();
-//            }
+            if (Type == Player.PlayerType.ai)
+            {
+				//Magic3D.btContinue.Visible = false;
+                AIPlayerProcess();
+            }
+            else
+            {
+				//Magic3D.btContinue.Visible = true;
+                HumanPlayerProcess();
+            }
         }
 
         void HumanPlayerProcess()
@@ -351,11 +418,11 @@ namespace Magic3D
                     break;
             }
 
-            if (e.Chrono.ElapsedMilliseconds < MagicEngine.timerLength)
-                return;
-
-            PhaseDone = true;
-            e.Chrono.Stop();
+//            if (e.Chrono.ElapsedMilliseconds < MagicEngine.timerLength)
+//                return;
+//
+//            PhaseDone = true;
+//            e.Chrono.Stop();
         }
         void AIPlayerProcess()
         {
@@ -506,7 +573,7 @@ namespace Magic3D
                         if (CurrentSpell.RemainingCost.Contains(ma.ProducedMana))
                         {
                             c.Tap();
-                            engine.RaiseMagicEvent(new SpellEventArg { Spell = ma });
+							engine.RaiseMagicEvent(new AbilityEventArg(ma,c));
                             return;
                         }
                     }
@@ -556,6 +623,10 @@ namespace Magic3D
             return false;
         }
 
+		public override string ToString ()
+		{
+			return string.Format (Name);
+		}
 
     }
 }

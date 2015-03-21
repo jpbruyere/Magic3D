@@ -34,19 +34,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Xml" />
     <Reference Include="OpenTK.Compatibility">
       <HintPath>..\..\..\data2\src\opentk-git\Binaries\OpenTK\Release\OpenTK.Compatibility.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK">
       <HintPath>..\..\..\data2\src\opentk-git\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
     </Reference>
-    <Reference Include="golib">
-      <HintPath>..\..\..\data2\devel\GOLib\bin\Debug\golib.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.Cairo" />
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\card_back.jpg">
@@ -60,12 +57,93 @@
     </None>
     <None Include="src\tmp\magic3D_old.cs" />
     <None Include="src\tmp\SpellDialog.cs" />
+    <None Include="images\abstract1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="images\abstract2.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ui\test4.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_cleanup.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_combat_attackers.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_combat_blockers.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_combat_damage.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_combat_end.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_combat_start.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_draw.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_main1.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_main2.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_nextturn.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_untap.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\icon_phase_upkeep.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\Mana.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ui\phases.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ui\player.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\normal.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\PhaseOverlay.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ui\log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="image2\HAL9000.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ui\mainMenu.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\blender\coins\coin.mtl">
+      <Link>meshes\coin.mtl</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\blender\coins\coin.obj">
+      <Link>meshes\coin.obj</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\blender\coins\dollar.jpg">
+      <Link>meshes\dollar.jpg</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="src\tmp\magic3D.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\engine\Abilities.cs" />
     <Compile Include="src\engine\Ability.cs" />
     <Compile Include="src\engine\Attribut.cs" />
-    <Compile Include="src\engine\CardTypesEnum.cs" />
     <Compile Include="src\engine\Cost.cs" />
     <Compile Include="src\engine\Damage.cs" />
     <Compile Include="src\engine\Effect.cs" />
@@ -85,10 +163,19 @@
     <Compile Include="src\CardLayout.cs" />
     <Compile Include="src\InPlayGroup.cs" />
     <Compile Include="src\Library.cs" />
-    <Compile Include="src\tmp\magic3D.cs" />
     <Compile Include="src\tmp\NumericValue.cs" />
     <Compile Include="src\ExtentionMethods.cs" />
-    <Compile Include="src\Animation.cs" />
+    <Compile Include="src\glHelper.cs" />
+    <Compile Include="src\Geo2D\Rectangle.cs" />
+    <Compile Include="src\Geo2D\Point.cs" />
+    <Compile Include="src\Geo2D\Size.cs" />
+    <Compile Include="src\engine\Enums.cs" />
+    <Compile Include="src\engine\MagicEventArgs.cs" />
+    <Compile Include="src\MessageBoxYesNo.cs" />
+    <Compile Include="src\divers\Coin.cs" />
+    <Compile Include="src\divers\IRenderable.cs" />
+    <Compile Include="src\divers\IAnimatable.cs" />
+    <Compile Include="src\CardsGroupAnimation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">
@@ -253,6 +340,14 @@
       <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
       <Name>GGL</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\data2\devel\MiscUtil\MiscUtil\MiscUtil.csproj">
+      <Project>{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}</Project>
+      <Name>MiscUtil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\data2\devel\GOLib\GOLib.csproj">
+      <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
+      <Name>GOLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="meshes\" />
@@ -260,5 +355,9 @@
     <Folder Include="src\engine\" />
     <Folder Include="src\render\" />
     <Folder Include="src\tmp\" />
+    <Folder Include="ui\" />
+    <Folder Include="src\Geo2D\" />
+    <Folder Include="image2\" />
+    <Folder Include="src\divers\" />
   </ItemGroup>
 </Project>
