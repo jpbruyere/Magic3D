@@ -324,11 +324,11 @@ namespace Magic3D
 
 				break;
 			case GamePhases.BeforeCombat:
-				if (!cp.HaveUntapedCreatureOnTable)
+				if (!cp.HaveCreaturesOnTableToAttack)
 					SwitchToNextPhase ();
 				break;
 			case GamePhases.DeclareAttacker:
-				if (!cp.HaveUntapedCreatureOnTable)
+				if (!cp.HaveCreaturesOnTableToAttack)
 					SwitchToNextPhase ();
 				else if (cp.Type == Player.PlayerType.human)
 					stopChrono ();
@@ -406,7 +406,7 @@ namespace Magic3D
 				break;
 			case GamePhases.Main2:
 			case GamePhases.Main1:
-				if (CurrentPhase == GamePhases.Main1 && !cp.HaveUntapedCreatureOnTable)
+				if (CurrentPhase == GamePhases.Main1 && !cp.HaveCreaturesOnTableToAttack)
 					CurrentPhase = GamePhases.EndOfCombat;
 				break;
 			case GamePhases.BeforeCombat:

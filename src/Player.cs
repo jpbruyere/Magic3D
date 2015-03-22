@@ -139,7 +139,6 @@ namespace Magic3D
                 if (_currentSpell == value)
                     return;
 
-				Magic.AddLog ("Trying to cast: " + value.Source.Model.Name);
 
 //				if (_currentSpell != null) {
 //					if (_currentSpell.RemainingCost != _currentSpell.Source.Model.Cost) {
@@ -147,6 +146,9 @@ namespace Magic3D
 //						ManaPool = _currentSpell.Source.Model.Cost - _currentSpell.RemainingCost;
 //					}
 //				}
+
+				if (value != null)
+					Magic.AddLog ("Trying to cast: " + value.Source.Model.Name);
 
                 _currentSpell = value;
                 
@@ -281,6 +283,7 @@ namespace Magic3D
 		public void LoadDeck(string _deckPath){
 			Thread thread = new Thread(() => loadingThread(_deckPath));
 			thread.Start();
+			//loadingThread (_deckPath);
 		}
 		void loadingThread(string _deckPath){
 			Deck tmp = Deck.PreLoadDeck (Magic.deckPath + _deckPath);
@@ -439,11 +442,11 @@ namespace Magic3D
 			//            e.Chrono.Stop();
         }
  
-        public bool HaveUntapedCreatureOnTable
+        public bool HaveCreaturesOnTableToAttack
         {
             get
             {
-                return InPlay.Cards.Where(c => !c.IsTapped && c.Model.Types == CardTypes.Creature).Count() > 0 ? true : false;
+				return InPlay.Cards.Where(c => !c.IsTapped && c.Model.Types == CardTypes.Creature && !c.HasSummoningSickness).Count() > 0 ? true : false;
             }
         }
         public bool HaveAttackingCreature
