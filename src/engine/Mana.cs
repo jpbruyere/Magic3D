@@ -247,6 +247,46 @@ namespace Magic3D
         }
 
 
+		public static Cost operator +(Mana m1, Mana m2)
+		{
+			if (m1 == null)
+				return m2;
+			if (m1.IsSameType (m2))
+				return new Mana (m1.count + m2.count, m1.TypeOfMana);
+			Costs tmp = new Costs();
+			tmp.CostList.Add(m1);
+			tmp.CostList.Add(m2);
+			return tmp;
+		}
+		public static Cost operator -(Mana m1, Mana m2)
+		{
+			if (m1 == null)
+				return -m2;
+			if (m1.IsSameType (m2))
+				return new Mana (m1.count - m2.count, m1.TypeOfMana);
+
+			return m1;
+		}
+		public static Cost operator -(Mana m)
+		{
+			return new Mana(-m.count,m.TypeOfMana);
+		}
+		public static bool operator <(Mana m1, Mana m2)
+		{
+			if (m1 == null)
+				return true;
+			if (m1.IsSameType (m2))
+				return m1.count < m2.count;
+			return false;
+		}
+		public static bool operator >(Mana m1, Mana m2)
+		{
+			if (m1 == null)
+				return false;
+			if (m1.IsSameType (m2))
+				return m1.count > m2.count;
+			return false;
+		}
         public static bool operator ==(Mana m, ManaTypes mt)
         {
             return m.TypeOfMana == mt && m.count == 1 ? true : false;
