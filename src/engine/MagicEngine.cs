@@ -177,6 +177,7 @@ namespace Magic3D
 		public Player[] Players;
 		public Stack<object> MagicStack = new Stack<object> ();
 
+		#region CTOR
 		public MagicEngine (Player[] _players)
 		{
 			CurrentEngine = this;
@@ -189,9 +190,8 @@ namespace Magic3D
 			SpellStackLayout.VerticalSpacing = 0.01f;
 			SpellStackLayout.MaxHorizontalSpace = 3f;
 			SpellStackLayout.xAngle = Magic.FocusAngle;
-
-			//State = EngineStates.Loading;
 		}
+		#endregion
 
 		void startGame()
 		{
@@ -303,14 +303,21 @@ namespace Magic3D
 			switch (pea.Phase) {
 			case GamePhases.Untap:
 				cp.AllowedLandsToBePlayed = 1;
-				foreach (CardInstance c in cp.InPlay.Cards)
+				cp.CardToDraw = 1;
+				foreach (CardInstance c in cp.InPlay.Cards) {
+					c.HasSummoningSickness = false;
 					c.Untap ();
+				}
 				break;
 			case GamePhases.Upkeep:
 				break;
 			case GamePhases.Draw:
-				if (pea.Player == cp)
-					cp.DrawOneCard ();
+				if (pea.Player == cp) {
+					while(cp.CardToDraw>0){
+						cp.DrawOneCard ();
+						cp.CardToDraw--;
+					}
+				}
 				break;
 			case GamePhases.Main1:
 			case GamePhases.Main2:
@@ -443,8 +450,10 @@ namespace Magic3D
 				break;
 			}
 
-			foreach (Player p in Players)
+			foreach (Player p in Players) {
+				p.CurrentSpell = null;
 				p.ManaPool = null;
+			}
 
 			if (pea.Phase != GamePhases.CleanUp)
 				CurrentPhase++;
@@ -624,6 +633,7 @@ namespace Magic3D
 			}
 		}
 
+		#region Stack managment
 		public Spell NextSpellOnStack {
 			get { return MagicStack.Count == 0 ? null : MagicStack.Peek () as Spell; }
 		}
@@ -651,6 +661,40 @@ namespace Magic3D
 			//}
 			return tmp;
 		}
+		public void CheckStackForResolutions ()
+		{
+			while (MagicStack.Count > 0) {
+				if (MagicStack.Peek () is Spell) {
+					MagicEvent (new SpellEventArg { Spell = PopSpellFromStack () });
+					continue;
+				}
+
+				if (MagicStack.Peek () is Damage) {
+					(MagicStack.Pop () as Damage).Deal ();
+					continue;
+				}
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns>true if all damages are assigned</returns>
+		public bool CheckStackForUnasignedDamage ()
+		{
+			//            foreach (Damage d in MagicStack.ToArray().OfType<Damage>())
+			//            {
+			//                if (d.Target == null)
+			//                {
+			//                    Magic3D.pCurrentSpell.Promt.Text = d.Amount + " damage from " + d.Source.Model.Name + " to assign";
+			//                    Magic3D.pCurrentSpell.Visible = true;
+			//                    return false;
+			//                }
+			//            }
+			return true;
+		}
+
+		#endregion
 
 		#region Mouse handling
 
@@ -714,38 +758,6 @@ namespace Magic3D
 		}
 		#endregion
 
-		public void CheckStackForResolutions ()
-		{
-			while (MagicStack.Count > 0) {
-				if (MagicStack.Peek () is Spell) {
-					MagicEvent (new SpellEventArg { Spell = PopSpellFromStack () });
-					continue;
-				}
-
-				if (MagicStack.Peek () is Damage) {
-					(MagicStack.Pop () as Damage).Deal ();
-					continue;
-				}
-			}
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns>true if all damages are assigned</returns>
-		public bool CheckStackForUnasignedDamage ()
-		{
-//            foreach (Damage d in MagicStack.ToArray().OfType<Damage>())
-//            {
-//                if (d.Target == null)
-//                {
-//                    Magic3D.pCurrentSpell.Promt.Text = d.Amount + " damage from " + d.Source.Model.Name + " to assign";
-//                    Magic3D.pCurrentSpell.Visible = true;
-//                    return false;
-//                }
-//            }
-			return true;
-		}
 
 		public bool TryToAssignTargetForDamage (CardInstance c)
 		{

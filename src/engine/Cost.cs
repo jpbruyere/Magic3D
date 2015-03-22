@@ -92,7 +92,52 @@ namespace Magic3D
             sum += c2;
             return sum;
         }
-        public static bool operator <(Cost c1, Cost c2)
+		public static Cost operator -(Cost c1, Cost c2)
+		{
+			Mana m = c1 as Mana;
+			Mana n = c2 as Mana;
+			Costs cst1 = c1 as Costs;
+			if (cst1 != null)
+			{
+				for (int i = 0; i < cst1.CostList.Count; i++)
+				{
+					Mana cst1m = cst1.CostList[i] as Mana;
+					if (cst1m != null)
+					{
+						if (cst1m.IsSameType(n))
+						{
+							cst1m.count -= n.count;
+							return cst1;
+						}
+					}
+				}
+
+			}
+
+			if (!(m == null || n == null))
+			{
+				if (m.IsSameType(n))
+				{
+					m.count += n.count;
+					return m;
+				}
+			}
+
+			if (c1 == null)
+			if (c2 == null)
+				return null;
+			else
+				return c2;
+			else if (c2 == null)
+				return c1;
+
+			Costs sum = new Costs();
+			sum += c1;
+			sum += c2;
+			return sum;
+		}
+        
+		public static bool operator <(Cost c1, Cost c2)
         {
             if (c2 == null)
                 return false;

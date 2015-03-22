@@ -339,7 +339,7 @@ namespace Magic3D
         {
             x = y = z = xAngle = yAngle = zAngle = 0;
         }
-       public void SwitchFocus()
+       	public void SwitchFocus()
         {
             HasFocus = !HasFocus;
 

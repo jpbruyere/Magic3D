@@ -480,6 +480,7 @@ namespace Magic3D
 			if (engine == null)
 				return;
 
+			//animate only if cards are loaded
 			if (engine.deckLoaded)
 				Animation.ProcessAnimations();
 			else{

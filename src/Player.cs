@@ -139,6 +139,15 @@ namespace Magic3D
                 if (_currentSpell == value)
                     return;
 
+				Magic.AddLog ("Trying to cast: " + value.Source.Model.Name);
+
+//				if (_currentSpell != null) {
+//					if (_currentSpell.RemainingCost != _currentSpell.Source.Model.Cost) {
+//						//put already spent mana back into Manapool
+//						ManaPool = _currentSpell.Source.Model.Cost - _currentSpell.RemainingCost;
+//					}
+//				}
+
                 _currentSpell = value;
                 
 //                if (_currentSpell == null)
