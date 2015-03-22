@@ -48,12 +48,12 @@ namespace Magic3D
                 hSpace = MaxHorizontalSpace / (Cards.Count + 1);
 
 
-			Animation.StartAnimation(new FloatAnimation(c, "x", this.x + hSpace / 2 * Cards.Count, 0.3f));
+			Animation.StartAnimation(new FloatAnimation(c, "x", this.x + hSpace / 2 * Cards.Count, 0.2f));
 
             float halfWidth = hSpace * (Cards.Count) / 2;
 
 			foreach (CardInstance i in Cards)
-				Animation.StartAnimation (new FloatAnimation (i, "x", this.x - halfWidth + hSpace * Cards.IndexOf(i),0.1f));
+				Animation.StartAnimation (new FloatAnimation (i, "x", this.x - halfWidth + hSpace * Cards.IndexOf(i),0.2f));
 
             Animation.StartAnimation(new FloatAnimation(c, "y", this.y, 0.2f));
             Animation.StartAnimation(new FloatAnimation(c, "z", this.z + VerticalSpacing * Cards.Count, 0.2f));

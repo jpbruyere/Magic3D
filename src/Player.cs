@@ -20,45 +20,65 @@ namespace Magic3D
         }
 
         public static int InitialLifePoints = 20;
-		public bool Keep = false;
-		public int CardToDraw = 7;
 
         int _lifePoints;
         string _name;
+		PlayerType _type = PlayerType.human;
         Deck _deck;
         Spell _currentSpell;
         CardInstance _currentBlockingCreature;
         List<Damage> _damages = new List<Damage>();
 
-        public void AddDamages(Damage d)
-        {
-            LifePoints -= d.Amount;
+		public string deckPath = "Lightforce.dck";
+		public Cost ManaPool;
+		public bool Keep = false;
+		public int CardToDraw = 7;
+		public bool PhaseDone = false;
 
-            MagicEngine.CurrentEngine.RaiseMagicEvent(new DamageEventArg(d));
+		public Library Library;
+		public CardGroup Hand;
+		public CardGroup Graveyard;
+		public InPlayGroup InPlay;
+		public CardGroup Exhiled;
+		public CardGroup[] allGroups = new CardGroup[5];
 
-            if (LifePoints < 1)
-            {
-            }
-        }
+		#region CTOR
+		public Player()
+		{
+			Type = PlayerType.human;
 
-        public Matrix4 Transformations
-        {
-			get { return Matrix4.CreateRotationZ(zAngle); }
-        }
-        public float zAngle = 0.0f;
+			Library = new Library();
 
-		PlayerType _type = PlayerType.human;
+			Hand = new CardGroup(CardGroupEnum.Hand);
+			Hand.y = -7.5f;
+			Hand.z = 3.3f;
+			Hand.xAngle = MathHelper.Pi - Vector3.CalculateAngle (Magic.vLook, Vector3.UnitZ);
+			Hand.HorizontalSpacing = 0.7f;
+			Hand.VerticalSpacing = 0.01f;
+
+			Graveyard = new CardGroup(CardGroupEnum.Graveyard);
+			Graveyard.x = -4;
+			Graveyard.y = -2.8f;
+
+			InPlay = new InPlayGroup();
+
+			Exhiled = new CardGroup(CardGroupEnum.Exhiled);
+			Exhiled.IsVisible = false;
+
+			allGroups[0] = Library;
+			allGroups[1] = Hand;
+			allGroups[2] = Graveyard;
+			allGroups[3] = InPlay;
+			allGroups[4] = Exhiled;
+
+		}
+		#endregion
+		   
         public PlayerType Type
 		{
 			get { return _type; }
-			set {
-				_type = value;
-				(playerPanel.FindByName ("pic") as Image).ImagePath = "image2/HAL9000.svg";
-			}
+			set {			_type = value; }
 		}
-        public Cost ManaPool;
-
-
         public string Name
         {
             get { return _name; }
@@ -70,6 +90,15 @@ namespace Magic3D
                     labName.Text = _name;
             }
         }
+		public Deck Deck
+		{
+			get { return _deck; }
+			set
+			{
+				_deck = value;
+				_deck.Player = this;
+			}
+		}
         public int LifePoints
         {
             get { return _lifePoints; }
@@ -85,7 +114,8 @@ namespace Magic3D
 			get;
 			set;
 		}
-        public Spell CurrentSpell
+        
+		public Spell CurrentSpell
         {
             get { return _currentSpell; }
             set
@@ -104,7 +134,6 @@ namespace Magic3D
 //                }
             }
         }
-
         public CardInstance CurrentBlockingCreature
         {
             get { return _currentBlockingCreature; }
@@ -121,7 +150,6 @@ namespace Magic3D
 //                Magic3D.pCurrentSpell.Visible = true;
             }
         }
-
         public CardInstance[] AttackingCreature
         {
             get
@@ -132,7 +160,6 @@ namespace Magic3D
             }
 
         }
-
         public CardInstance[] BlockingCreature
         {
             get
@@ -154,55 +181,8 @@ namespace Magic3D
                     MagicEngine.CurrentEngine.Players[0];
             }
         }
-		public string deckPath = "Lightforce.dck";
-        public Deck Deck
-        {
-            get { return _deck; }
-            set
-            {
-                _deck = value;
-                _deck.Player = this;
-            }
-        }
 
-        public Library Library;
-        public CardGroup Hand;
-        public CardGroup Graveyard;
-        public InPlayGroup InPlay;
-        public CardGroup Exhiled;
-
-        public CardGroup[] allGroups = new CardGroup[5];
-
-        public Player()
-        {
-            Library = new Library();
-
-
-            Hand = new CardGroup(CardGroupEnum.Hand);
-			Hand.y = -7.5f;
-			Hand.z = 3.3f;
-			Hand.xAngle = MathHelper.Pi - Vector3.CalculateAngle (Magic.vLook, Vector3.UnitZ);
-            Hand.HorizontalSpacing = 0.7f;
-            Hand.VerticalSpacing = 0.01f;
-
-            Graveyard = new CardGroup(CardGroupEnum.Graveyard);
-            Graveyard.x = -4;
-            Graveyard.y = -2.8f;
-
-            InPlay = new InPlayGroup();
-
-            Exhiled = new CardGroup(CardGroupEnum.Exhiled);
-            Exhiled.IsVisible = false;
-
-            allGroups[0] = Library;
-            allGroups[1] = Hand;
-            allGroups[2] = Graveyard;
-            allGroups[3] = InPlay;
-            allGroups[4] = Exhiled;
-			      
-        }
-
-        #region interface
+		#region interface
 		//public Panel playerPanel;
 		public Container playerPanel;
 		public Label labPts;
@@ -213,7 +193,7 @@ namespace Magic3D
 		Color ActiveColor = new Color (0.6, 0.6, 0.7, 0.7);
 		Color InactiveColor = new Color (0.2, 0.2, 0.2, 0.5);
 
-		public void initInterface(OpenTKGameWindow mainWin)
+		public virtual void initInterface(OpenTKGameWindow mainWin)
         {
 			mainWin.LoadInterface ("ui/player.xml", out playerPanel);
 			labName = playerPanel.FindByName ("labName") as Label;
@@ -262,6 +242,7 @@ namespace Magic3D
 			
 			Library.ShuffleAndLayoutZ();
         }
+
 		public void initialDraw ()
 		{
 			for (int i = 0; i < CardToDraw; i++)
@@ -277,7 +258,6 @@ namespace Magic3D
 //			Magic.AddAnimation (cga);
 //			Magic.AddAnimation (Library.UpdateLayout ());
 		}
-
 		public void TakeMulligan()
 		{
 			for (int i = 0; i < CardToDraw; i++) {
@@ -304,233 +284,76 @@ namespace Magic3D
             InPlay.AddCard(c);
 			Animation.StartAnimation(new AngleAnimation(c, "xAngle", 0, MathHelper.Pi * 0.3f));
         }
+			
+		public void AddDamages(Damage d)
+		{
+			LifePoints -= d.Amount;
 
-        public void Render()
+			MagicEngine.CurrentEngine.RaiseMagicEvent(new DamageEventArg(d));
+
+			if (LifePoints < 1)
+			{
+			}
+		}
+			
+		public virtual void Process()
         {
-			Matrix4 mSave = Magic.texturedShader.ModelMatrix;            
-			Magic.texturedShader.ModelMatrix *= Transformations;
+			MagicEngine e = MagicEngine.CurrentEngine;
 
-            foreach (CardGroup cg in allGroups)
-            {
-                if (cg.IsVisible)
-                    cg.Render();
-            }
-			Magic.texturedShader.ModelMatrix = mSave;
+			if (e.pp != this)
+			{
+				Debug.WriteLine("canceling human player without priority");
+				return;
+			}                        
+
+			switch (e.CurrentPhase)
+			{
+			case GamePhases.Untap:
+				break;
+			case GamePhases.Upkeep:
+				break;
+			case GamePhases.Draw:
+				break;
+			case GamePhases.Main1:
+			case GamePhases.Main2:                        
+				//e.Chrono.Reset();
+				break;
+			case GamePhases.BeforeCombat:
+				//e.Chrono.Restart();
+				break;
+			case GamePhases.DeclareAttacker:
+				//if (cp != this)
+
+				//if (HaveUntapedCreatureOnTable)
+				//    e.Chrono.Stop();
+				//if (pp != cp || !cp.HaveUntapedCreatureOnTable)
+				//{
+				//    SwitchToNextPhase();
+				//    GivePriorityToNextPlayer();
+				//}
+
+				break;
+			case GamePhases.DeclareBlocker:
+				break;
+			case GamePhases.FirstStrikeDame:
+				break;
+			case GamePhases.CombatDamage:
+				break;
+			case GamePhases.EndOfCombat:
+				break;
+			case GamePhases.EndOfTurn:
+				break;
+			case GamePhases.CleanUp:
+				break;
+			}
+
+			//            if (e.Chrono.ElapsedMilliseconds < MagicEngine.timerLength)
+			//                return;
+			//
+			//            PhaseDone = true;
+			//            e.Chrono.Stop();
         }
-
-       
-
-        public void aiPayManaIfNeedeed()
-        {
-            if (CurrentSpell != null)
-            {
-                if (CurrentSpell.RemainingCost != null)
-                {
-
-                }
-            }
-
-        }
-
-        public bool PhaseDone = false;
-
-        public void Process()
-        {
-            if (Type == Player.PlayerType.ai)
-            {
-				//Magic3D.btContinue.Visible = false;
-                AIPlayerProcess();
-            }
-            else
-            {
-				//Magic3D.btContinue.Visible = true;
-                HumanPlayerProcess();
-            }
-        }
-
-        void HumanPlayerProcess()
-        {
-            MagicEngine e = MagicEngine.CurrentEngine;
-
-            if (e.pp != this)
-            {
-                Debug.WriteLine("canceling human player without priority");
-                return;
-            }                        
-
-            switch (e.CurrentPhase)
-            {
-                case GamePhases.Untap:
-                    break;
-                case GamePhases.Upkeep:
-                    break;
-                case GamePhases.Draw:
-                    break;
-                case GamePhases.Main1:
-                case GamePhases.Main2:                        
-                //e.Chrono.Reset();
-                    break;
-                case GamePhases.BeforeCombat:
-                    //e.Chrono.Restart();
-                    break;
-                case GamePhases.DeclareAttacker:
-                    //if (cp != this)
-
-                    //if (HaveUntapedCreatureOnTable)
-                    //    e.Chrono.Stop();
-                    //if (pp != cp || !cp.HaveUntapedCreatureOnTable)
-                    //{
-                    //    SwitchToNextPhase();
-                    //    GivePriorityToNextPlayer();
-                    //}
-
-                    break;
-                case GamePhases.DeclareBlocker:
-                    break;
-                case GamePhases.FirstStrikeDame:
-                    break;
-                case GamePhases.CombatDamage:
-                    break;
-                case GamePhases.EndOfCombat:
-                    break;
-                case GamePhases.EndOfTurn:
-                    break;
-                case GamePhases.CleanUp:
-                    break;
-            }
-
-//            if (e.Chrono.ElapsedMilliseconds < MagicEngine.timerLength)
-//                return;
-//
-//            PhaseDone = true;
-//            e.Chrono.Stop();
-        }
-        void AIPlayerProcess()
-        {
-            MagicEngine e = MagicEngine.CurrentEngine;
-
-            if (e.pp != this)
-            {
-                Debug.WriteLine("canceling ai without priority");
-                return;
-            }
-
-            if (CurrentSpell != null)
-            {
-                ActivateAvailableMana(e);
-                return;
-            }
-
-            if (e.cp == this)
-            {
-                switch (e.CurrentPhase)
-                {
-                    case GamePhases.Untap:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.Upkeep:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.Draw:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.Main1:
-                    case GamePhases.Main2:
-                        if (!CastAvailableAndAllowedCreature())
-                            PhaseDone = true;
-                        break;
-                    case GamePhases.BeforeCombat:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.DeclareAttacker:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.DeclareBlocker:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.FirstStrikeDame:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.CombatDamage:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.EndOfCombat:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.EndOfTurn:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.CleanUp:
-                        PhaseDone = true;
-                        break;
-                }
-            }
-            else
-            {
-                switch (e.CurrentPhase)
-                {
-                    case GamePhases.Untap:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.Upkeep:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.Draw:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.Main1:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.BeforeCombat:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.DeclareAttacker:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.DeclareBlocker:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.FirstStrikeDame:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.CombatDamage:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.EndOfCombat:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.Main2:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.EndOfTurn:
-                        PhaseDone = true;
-                        break;
-                    case GamePhases.CleanUp:
-                        PhaseDone = true;
-                        break;
-                }
-            }
-        }
-
-        public void AITryToPlayLand()
-        {            
-            CardInstance[] lands = Hand.Cards.Where(c => c.Model.Types == CardTypes.Land).ToArray();
-
-            if (lands.Length > 0)
-                MagicEngine.CurrentEngine.RaiseMagicEvent(new MagicEventArg(MagicEventType.PlayLand, lands[0]));
-
-        }
-
-        public void AITryToAttack()
-        {
-            foreach (CardInstance c in InPlay.Cards.Where(c => c.Model.Types == CardTypes.Creature))
-            {
-                if (c.CanAttack)
-                    c.Combating = true;
-            }
-            InPlay.UpdateLayout();
-        }
-
+ 
         public bool HaveUntapedCreatureOnTable
         {
             get
@@ -586,23 +409,26 @@ namespace Magic3D
             }
         }
 
-        public bool CastAvailableAndAllowedCreature()
-        {
-            Cost availableMana = AvailableManaOnTable;
+		#region Rendering
+		public float zAngle = 0.0f;
+		public Matrix4 Transformations
+		{
+			get { return Matrix4.CreateRotationZ(zAngle); }
+		}
 
-            foreach (CardInstance c in Hand.Cards)
-            {
-                if (c.Model.Types == CardTypes.Creature)
-                {
-                    if (c.Model.Cost < availableMana)
-                    {
-                        CurrentSpell = new Spell(c);
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
+		public void Render()
+		{
+			Matrix4 mSave = Magic.texturedShader.ModelMatrix;            
+			Magic.texturedShader.ModelMatrix *= Transformations;
+
+			foreach (CardGroup cg in allGroups)
+			{
+				if (cg.IsVisible)
+					cg.Render();
+			}
+			Magic.texturedShader.ModelMatrix = mSave;
+		}
+		#endregion
 
 		public override string ToString ()
 		{

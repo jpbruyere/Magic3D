@@ -248,12 +248,12 @@ namespace Magic3D
 			msgBox.btCancel.Text = "Mulligan";
 			this.AddWidget (msgBox);
 		}
+
 		void OnKeep(Object sender, MouseButtonEventArgs e)
 		{
 			DeleteWidget (msgBox);
 			engine.RaiseMagicEvent(new MagicEventArg(MagicEventType.Keep,Players[engine.interfacePlayer]));
 		}
-
 		void OnTakeMulligan(Object sender, MouseButtonEventArgs e)
 		{
 			engine.RaiseMagicEvent(new MagicEventArg(MagicEventType.Mulligan,Players[engine.interfacePlayer]));
@@ -263,19 +263,17 @@ namespace Magic3D
 		void onStartNewGame(Object sender, MouseButtonEventArgs e)
 		{
 			uiMainMenu.Visible = false;
-			Players = new Player[] { new Player(), new Player()};
+			Players = new Player[] { new Player(), new AiPlayer()};
 
 			Players [0].initInterface (this);
 			Players [1].initInterface (this);
 			Players [1].playerPanel.HorizontalAlignment = HorizontalAlignment.Right;
-			Players [1].Type = Player.PlayerType.ai;
 
 			Players[0].Name = "player 1";
 			Players[1].Name = "player 2";
 			Players [0].deckPath = "Lightforce.dck";
 			Players [1].deckPath = "Kor Armory.dck";
 			Players[1].zAngle = MathHelper.Pi;
-
 
 			engine = new MagicEngine (Players);
 			MagicEngine.MagicEvent += new Magic3D.MagicEngine.MagicEventHandler(MagicEngine_MagicEvent);
@@ -323,6 +321,7 @@ namespace Magic3D
 			engine.State = EngineStates.PlayDrawChoiceDone;
 			//engine.StartGame();
 		}
+
 		protected override void OnLoad (EventArgs e)
 		{
 			MagicCard c = new MagicCard();
@@ -354,7 +353,8 @@ namespace Magic3D
 			//Deck.LoadPreconstructedDecks();
 
 
-
+			//special event handlers fired only if mouse not in interface objects
+			//for scene mouse handling
 			this.MouseWheelChanged += new EventHandler<MouseWheelEventArgs>(Mouse_WheelChanged);
 			this.MouseMove += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
 			this.MouseButtonDown += new EventHandler<MouseButtonEventArgs>(Mouse_Down);;

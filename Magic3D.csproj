@@ -176,6 +176,7 @@
     <Compile Include="src\divers\IRenderable.cs" />
     <Compile Include="src\divers\IAnimatable.cs" />
     <Compile Include="src\Animation.cs" />
+    <Compile Include="src\AiPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">

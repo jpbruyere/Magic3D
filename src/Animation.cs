@@ -8,7 +8,7 @@ using OpenTK;
 
 namespace Magic3D
 {
-    public delegate void AnimationEvent();
+	public delegate void AnimationEventHandler(Animation a);
 
     public delegate float GetterDelegate();
     public delegate void SetterDelegate(float value);
@@ -32,9 +32,8 @@ namespace Magic3D
     public class Animation
     {
 
-		public AnimationEvent AnimationFinished;
+		public event AnimationEventHandler AnimationFinished;
 
-		public static bool CancelOnGoingAnim = true;
 		public static int DelayMs = 0;
 
         protected GetterDelegate getValue;
@@ -49,18 +48,19 @@ namespace Magic3D
         //public FieldInfo member;
         public Object AnimatedInstance;
 
-        
-
-        public static void StartAnimation(Animation a, int delayMs = 0, AnimationEvent OnEnd = null)
+		public static void StartAnimation(Animation a, int delayMs = 0, AnimationEventHandler OnEnd = null)
         {
-			if (CancelOnGoingAnim) {
-				Animation aa = null;
-				if (Animation.GetAnimation (a.AnimatedInstance, a.propertyName, ref aa))
-					aa.CancelAnimation ();
+
+			Animation aa = null;
+			if (Animation.GetAnimation (a.AnimatedInstance, a.propertyName, ref aa)) {
+				aa.CancelAnimation ();
 			}
+
+			//a.AnimationFinished += onAnimationFinished;
 
 			a.AnimationFinished += OnEnd;
 			a.delayMs = delayMs + DelayMs;
+
 
             if (a.delayMs > 0)
                 a.timer.Start();
@@ -115,18 +115,25 @@ namespace Magic3D
         public virtual void Process(){}
         public void CancelAnimation()
         {
+			//Debug.WriteLine("Cancel anim: " + this.ToString()); 
             AnimationList.Remove(this);
         }
-//        public static bool IsAnimated(object instance)
-//        {
-//            foreach (Animation a in AnimationList)
-//            {
-//                if (a.AnimatedInstance == instance)
-//                    return true;
-//            }
-//            return false;
-//        }
-		public static void onAnimationFinished(
+		public void RaiseAnimationFinishedEvent()
+		{
+			if (AnimationFinished != null)
+				AnimationFinished (this);
+		}
+
+		public static void onAnimationFinished(Animation a)
+		{
+			Debug.WriteLine ("\t\tAnimation finished: " + a.ToString ());
+		}
+
+		public override string ToString ()
+		{
+			return string.Format ("{0},{1}",(this.AnimatedInstance as CardInstance).Model.Name,
+				this.propertyName);
+		}
     }
     public class FloatAnimation : Animation
     {
@@ -145,7 +152,6 @@ namespace Magic3D
             getValue = (GetterDelegate)Delegate.CreateDelegate(typeof(GetterDelegate), instance, pi.GetGetMethod());
             setValue = (SetterDelegate)Delegate.CreateDelegate(typeof(SetterDelegate), instance, pi.GetSetMethod());
 
-
             float value = getValue();
 
             Step = step;
@@ -162,10 +168,11 @@ namespace Magic3D
         /// <summary>
         /// process one frame
         /// </summary>
-        /// <returns>Animation finished or not</returns>
         public override void Process()
         {
             float value = getValue();
+
+			//Debug.WriteLine ("Anim: {0} <= {1}", value, this.ToString ());
 
             if (Step > 0f)
             {
@@ -186,9 +193,14 @@ namespace Magic3D
 
             setValue(TargetValue);
             AnimationList.Remove(this);
-            if (AnimationFinished != null)
-                AnimationFinished();
+
+			RaiseAnimationFinishedEvent ();
         }
+
+		public override string ToString ()
+		{
+			return string.Format ("{0}:->{1}:{2}",base.ToString(),TargetValue,Step);
+		}
     }
 
     public class AngleAnimation : FloatAnimation

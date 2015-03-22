@@ -400,10 +400,7 @@ namespace Magic3D
 				break;
 			case GamePhases.Main1:
 			case GamePhases.Main2:
-				if (cp.Type == Player.PlayerType.ai && cp.AllowedLandsToBePlayed>0)
-					cp.AITryToPlayLand ();
-				else
-					stopChrono ();
+
 				break;
 			case GamePhases.BeforeCombat:
 				if (!cp.HaveUntapedCreatureOnTable)
@@ -414,8 +411,7 @@ namespace Magic3D
 					SwitchToNextPhase ();
 				else if (cp.Type == Player.PlayerType.human)
 					stopChrono ();
-				else
-					cp.AITryToAttack ();
+
 				break;
 			case GamePhases.DeclareBlocker:
 				if (!cp.HaveAttackingCreature) {
