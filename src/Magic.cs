@@ -239,40 +239,21 @@ namespace Magic3D
 		}
 		#endregion
 
-		public void createKeepMulliganChoice()
-		{
-			msgBox = new MessageBoxYesNo ("Keep or take mulligan ?");
-			msgBox.btOk.MouseClick += OnKeep;
-			msgBox.btOk.Text = "Keep";
-			msgBox.btCancel.MouseClick += OnTakeMulligan;
-			msgBox.btCancel.Text = "Mulligan";
-			this.AddWidget (msgBox);
-		}
 
-		void OnKeep(Object sender, MouseButtonEventArgs e)
-		{
-			DeleteWidget (msgBox);
-			engine.RaiseMagicEvent(new MagicEventArg(MagicEventType.Keep,Players[engine.interfacePlayer]));
-		}
-		void OnTakeMulligan(Object sender, MouseButtonEventArgs e)
-		{
-			engine.RaiseMagicEvent(new MagicEventArg(MagicEventType.Mulligan,Players[engine.interfacePlayer]));
-			//createKeepMulliganChoice ();
-		}
+
 
 		void onStartNewGame(Object sender, MouseButtonEventArgs e)
 		{
 			uiMainMenu.Visible = false;
-			Players = new Player[] { new Player(), new AiPlayer()};
+			Players = new Player[] 
+			{ 
+				new Player("player 1","Lightforce.dck"), 
+				new AiPlayer("player 2","Kor Armory.dck")
+			};
+			this.AddWidget (Players [0].playerPanel);
+			this.AddWidget (Players [1].playerPanel);
 
-			Players [0].initInterface (this);
-			Players [1].initInterface (this);
 			Players [1].playerPanel.HorizontalAlignment = HorizontalAlignment.Right;
-
-			Players[0].Name = "player 1";
-			Players[1].Name = "player 2";
-			Players [0].deckPath = "Lightforce.dck";
-			Players [1].deckPath = "Kor Armory.dck";
 			Players[1].zAngle = MathHelper.Pi;
 
 			engine = new MagicEngine (Players);
@@ -282,15 +263,17 @@ namespace Magic3D
 			Renderables.Add (coin);
 			AddAnimation (coin);
 			coin.AnimationFinished += onTossResult;
-
 		}
+
 		void onTossResult(object sender, EventArgs e)
 		{
 			Coin.TossEventArg tea = e as Coin.TossEventArg;
 
 			AddLog ("Toss result: " + tea.Result.ToString ());
 
-//			if (tea.Result == Coin.TossResultEnum.Head) {
+			if (tea.Result == Coin.TossResultEnum.Head) {
+				engine.ip.CurrentState = Player.PlayerStates.PlayDrawChoice;
+				engine.ip.Opponent.CurrentState = Player.PlayerStates.InitialDraw;
 				msgBox = new MessageBoxYesNo ("You won the toss, what will you do ?");
 				msgBox.btOk.MouseClick += OnPlayFirst;
 				msgBox.btOk.Text = "Play First";
@@ -300,15 +283,19 @@ namespace Magic3D
 				msgBox.btCancel.Fit = true;
 
 				this.AddWidget (msgBox);
-//			}
+			} else {
+				Renderables.Remove (coin);
+				engine.ip.CurrentState = Player.PlayerStates.InitialDraw;
+				engine.ip.Opponent.CurrentState = Player.PlayerStates.PlayDrawChoice;
+			}
 		}
 		void OnPlayFirst(Object sender, MouseButtonEventArgs e)
 		{
 			Renderables.Remove (coin);
-
 			DeleteWidget (msgBox);
-			engine.currentPlayer = engine.interfacePlayer;
-			engine.State = EngineStates.PlayDrawChoiceDone;
+			engine.currentPlayerIndex = engine.interfacePlayer;
+			engine.ip.CurrentState = Player.PlayerStates.InitialDraw;
+			//engine.State = EngineStates.PlayDrawChoiceDone;
 			//engine.StartGame();
 		}
 		void onDrawFirst(Object sender, MouseButtonEventArgs e)
@@ -316,9 +303,9 @@ namespace Magic3D
 			Renderables.Remove (coin);
 			//Interface.UnloadPanel(sender.panel);
 			DeleteWidget (msgBox);
-			engine.currentPlayer = 1;
-
-			engine.State = EngineStates.PlayDrawChoiceDone;
+			engine.currentPlayerIndex = engine.getPlayerIndex(engine.ip.Opponent);
+			engine.ip.CurrentState = Player.PlayerStates.InitialDraw;
+			//engine.State = EngineStates.PlayDrawChoiceDone;
 			//engine.StartGame();
 		}
 
@@ -407,12 +394,7 @@ namespace Magic3D
 			//this.CursorVisible = false;
 
 		}
-		public override void Dispose ()
-		{
-			if (engine != null)
-				engine.Dispose ();
-			base.Dispose ();
-		}
+
 
 		void MagicEngine_MagicEvent(MagicEventArg arg)
 		{
@@ -422,10 +404,6 @@ namespace Magic3D
 
 			switch (arg.Type)
 			{
-			case MagicEventType.CardsDrawn:
-				if (arg.Player.Type == Player.PlayerType.human)
-					createKeepMulliganChoice ();
-				break;
 			case MagicEventType.Unset:
 				break;
 			case MagicEventType.BeginPhase:
@@ -502,32 +480,22 @@ namespace Magic3D
 			if (engine == null)
 				return;
 
-			//skip if engine is loading decks
-			if (engine.State < EngineStates.Loaded)
-				return;
-
-			Animation.ProcessAnimations();
-
-			if (engine.State < EngineStates.PlayDrawChoiceDone)
-				return;
-
-
-
-			if (engine.State == EngineStates.PlayDrawChoiceDone) {
-				foreach (Player p in Players)
-					p.initialDraw ();
-				engine.State = EngineStates.Choice;
-				return;
+			if (engine.deckLoaded)
+				Animation.ProcessAnimations();
+			else{
+				bool ok = true;
+				foreach (Player p in Players) {
+					if (!p.DeckLoaded) {
+						ok = false;
+						break;
+					}
+				}
+				if (ok)
+					engine.deckLoaded = true;
 			}
 
-
-
-			engine.checkCurrentSpell();
-
-			engine.pp.Process();
-
-			if (engine.pp.PhaseDone)
-				engine.GivePriorityToNextPlayer();
+			engine.Process ();
+							
 		}
 		protected override void OnRenderFrame (FrameEventArgs e)
 		{
@@ -601,12 +569,10 @@ namespace Magic3D
 					
 				if (engine == null)
 					return;
-				if (engine.State == EngineStates.Loading)
+				if (!engine.deckLoaded)
 					return;
-
-				Point<float> ptM = new Point<float> ((float)e.X, (float)e.Y);
-				engine.processMouseMove (ptM);
-
+					
+				engine.processMouseMove (new Point<float> ((float)e.X, (float)e.Y));
 			}
 
 		}			

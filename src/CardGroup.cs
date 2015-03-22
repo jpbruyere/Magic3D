@@ -34,8 +34,6 @@ namespace Magic3D
         public bool IsVisible = true;
 		public bool IsSelected = false;
 
-
-
 		public virtual void AddCard(CardInstance c)
         {
             if (c == null)
@@ -57,7 +55,8 @@ namespace Magic3D
 
             Animation.StartAnimation(new FloatAnimation(c, "y", this.y, 0.2f));
             Animation.StartAnimation(new FloatAnimation(c, "z", this.z + VerticalSpacing * Cards.Count, 0.2f));
-
+			Animation.StartAnimation(new AngleAnimation(c, "yAngle", this.yAngle, MathHelper.Pi * 0.1f));
+			Animation.StartAnimation(new AngleAnimation(c, "xAngle", this.xAngle, MathHelper.Pi * 0.03f));
             Cards.Add(c);	
 		}
         public virtual void RemoveCard(CardInstance c)
@@ -120,7 +119,7 @@ namespace Magic3D
 			if (IsSelected) {
 
 				Magic.glowShader.Enable ();
-//
+
 				Magic.glowShader.ProjectionMatrix = Magic.projection;
 				Magic.glowShader.ModelViewMatrix = Magic.modelview;
 				Magic.glowShader.ModelMatrix = Matrix4.CreateScale(1.2f) * Transformations;
@@ -128,13 +127,14 @@ namespace Magic3D
 				Magic.glowShader.BorderWidth = 0.05f;
 
 				GL.BindTexture (TextureTarget.Texture2D, Magic.abstractTex);
-//				GL.CullFace(CullFaceMode.Front);
-//				MagicCard.cardMesh.Render (PrimitiveType.TriangleStrip);
-				GL.Disable(EnableCap.CullFace);
-				MagicCard.cardMesh.Render (PrimitiveType.TriangleStrip);
-				GL.Enable(EnableCap.CullFace);
-				Magic.texturedShader.Enable ();
 
+				GL.Disable(EnableCap.CullFace);
+
+				MagicCard.cardMesh.Render (PrimitiveType.TriangleStrip);
+
+				GL.Enable(EnableCap.CullFace);
+
+				Magic.texturedShader.Enable ();
 			}
 
 			base.Render ();

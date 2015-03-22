@@ -8,15 +8,15 @@ namespace Magic3D
 	public class AiPlayer : Player
 	{
 		#region CTOR
-		public AiPlayer () : base()
+		public AiPlayer (string _name, string _deckPath) : base(_name,_deckPath)
 		{
 			Type = PlayerType.ai;
 		}
 		#endregion
 
-		public override void initInterface (go.OpenTKGameWindow mainWin)
+		public override void initInterface ()
 		{
-			base.initInterface (mainWin);
+			base.initInterface ();
 			(playerPanel.FindByName ("pic") as Image).ImagePath = "image2/HAL9000.svg";
 		}
 
@@ -24,11 +24,30 @@ namespace Magic3D
 		{
 			MagicEngine e = MagicEngine.CurrentEngine;
 
-			if (e.pp != this)
-			{
-				Debug.WriteLine("canceling ai without priority");
+			switch (CurrentState) {
+			case PlayerStates.init:
+				return;
+			case PlayerStates.PlayDrawChoice:
+				//chose to play first
+				e.currentPlayerIndex = e.getPlayerIndex (this);
+				CurrentState = PlayerStates.InitialDraw;
+				return;
+			case PlayerStates.InitialDraw:
+				if (!DeckLoaded)
+					return;
+				initialDraw ();
+				CurrentState = PlayerStates.KeepMuliganChoice;
+				return;
+			case PlayerStates.KeepMuliganChoice:
+				//choose to keep
+				CurrentState = PlayerStates.Ready;
+				e.RaiseMagicEvent(new MagicEventArg(MagicEventType.PlayerIsReady,this));
 				return;
 			}
+
+
+			if (e.pp != this || e.State < EngineStates.CurrentPlayer)
+				return;
 
 			if (CurrentSpell != null)
 			{
@@ -163,6 +182,7 @@ namespace Magic3D
 
 			if (lands.Length > 0) {
 				MagicEngine.CurrentEngine.RaiseMagicEvent (new MagicEventArg (MagicEventType.PlayLand, lands [0]));
+				return true;
 			}
 			return false;
 		}

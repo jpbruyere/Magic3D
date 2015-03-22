@@ -354,13 +354,13 @@ namespace Magic3D
 
                 v = Vector3.Transform(v, Matrix4.Invert(Controler.Transformations));
 
-                Animation.StartAnimation(new FloatAnimation(this, "x", v.X, 0.5f));
-                Animation.StartAnimation(new FloatAnimation(this, "y", v.Y, 0.5f));
-                Animation.StartAnimation(new FloatAnimation(this, "z", v.Z, 0.7f));
+				Animation.StartAnimation(new FloatAnimation(this, "x", v.X, 0.9f));
+				Animation.StartAnimation(new FloatAnimation(this, "y", v.Y, 1.2f));
+				Animation.StartAnimation(new FloatAnimation(this, "z", v.Z, 0.9f));
 				float aCam = Magic.FocusAngle;
-                Animation.StartAnimation(new AngleAnimation(this, "xAngle", aCam, MathHelper.Pi * 0.03f));
+				Animation.StartAnimation(new AngleAnimation(this, "xAngle", aCam, MathHelper.Pi * 0.1f));
                 //Animation.StartAnimation(new AngleAnimation(this, "yAngle", -Controler.Value.zAngle, MathHelper.Pi * 0.03f));
-                Animation.StartAnimation(new AngleAnimation(this, "zAngle", -Controler.zAngle, MathHelper.Pi * 0.03f));
+                Animation.StartAnimation(new AngleAnimation(this, "zAngle", -Controler.zAngle, MathHelper.Pi * 0.3f));
 
 
                 focusedCard = this;
@@ -393,13 +393,19 @@ namespace Magic3D
         
 		public Rectangle<float> getProjectedBounds()
 		{
-			Matrix4 M = ModelMatrix * 
+			Matrix4 M = ModelMatrix * Controler.Transformations * 
 			            Magic.texturedShader.ModelViewMatrix *
 						Magic.texturedShader.ProjectionMatrix;
 			Rectangle<float> projR = Rectangle<float>.Zero;
-			projR.TopLeft = glHelper.Project (MagicCard.CardBounds.TopLeft, M, Magic.viewport [2], Magic.viewport [3]);
-			projR.BottomRight = glHelper.Project (MagicCard.CardBounds.BottomRight, M, Magic.viewport [2], Magic.viewport [3]);
-
+			Point<float> pt1 = glHelper.Project (MagicCard.CardBounds.TopLeft, M, Magic.viewport [2], Magic.viewport [3]);
+			Point<float> pt2 = glHelper.Project (MagicCard.CardBounds.BottomRight, M, Magic.viewport [2], Magic.viewport [3]);
+			if (pt1 < pt2) {
+				projR.TopLeft = pt1;
+				projR.BottomRight = pt2;
+			} else {
+				projR.TopLeft = pt2;
+				projR.BottomRight = pt1;
+			}
 			return projR;
 		}
 		public bool mouseIsIn(Point<float> m)

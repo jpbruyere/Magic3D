@@ -6,6 +6,8 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK;
 using go;
 using System.Diagnostics;
+using System.Threading;
+using OpenTK.Input;
 
 namespace Magic3D
 {
@@ -19,17 +21,28 @@ namespace Magic3D
             ai
         }
 
+		public enum PlayerStates
+		{
+			init,
+			PlayDrawChoice,
+			InitialDraw,
+			KeepMuliganChoice,
+			Ready
+		}
+
         public static int InitialLifePoints = 20;
 
         int _lifePoints;
         string _name;
-		PlayerType _type = PlayerType.human;
         Deck _deck;
         Spell _currentSpell;
         CardInstance _currentBlockingCreature;
         List<Damage> _damages = new List<Damage>();
 
+		public volatile PlayerStates CurrentState;
+		public volatile bool DeckLoaded = false;
 		public string deckPath = "Lightforce.dck";
+		public PlayerType Type = PlayerType.human;
 		public Cost ManaPool;
 		public bool Keep = false;
 		public int CardToDraw = 7;
@@ -43,8 +56,15 @@ namespace Magic3D
 		public CardGroup[] allGroups = new CardGroup[5];
 
 		#region CTOR
-		public Player()
+		public Player(string _name, string _deckPath)
 		{
+			CurrentState = PlayerStates.init;
+
+			initInterface ();
+
+			LoadDeck (_deckPath);
+
+			Name = _name;
 			Type = PlayerType.human;
 
 			Library = new Library();
@@ -54,7 +74,7 @@ namespace Magic3D
 			Hand.z = 3.3f;
 			Hand.xAngle = MathHelper.Pi - Vector3.CalculateAngle (Magic.vLook, Vector3.UnitZ);
 			Hand.HorizontalSpacing = 0.7f;
-			Hand.VerticalSpacing = 0.01f;
+			Hand.VerticalSpacing = 0.02f;
 
 			Graveyard = new CardGroup(CardGroupEnum.Graveyard);
 			Graveyard.x = -4;
@@ -74,11 +94,7 @@ namespace Magic3D
 		}
 		#endregion
 		   
-        public PlayerType Type
-		{
-			get { return _type; }
-			set {			_type = value; }
-		}
+     
         public string Name
         {
             get { return _name; }
@@ -188,14 +204,15 @@ namespace Magic3D
 		public Label labPts;
 		public Label labCpts;
         Label labName;
+		MessageBoxYesNo msgBox;
 		public ProgressBar pgBar;
 
-		Color ActiveColor = new Color (0.6, 0.6, 0.7, 0.7);
-		Color InactiveColor = new Color (0.2, 0.2, 0.2, 0.5);
+		Color ActiveColor = new Color (0.5, 0.5, 0.6, 0.7);
+		Color InactiveColor = new Color (0.1, 0.1, 0.1, 0.4);
 
-		public virtual void initInterface(OpenTKGameWindow mainWin)
+		public virtual void initInterface()
         {
-			mainWin.LoadInterface ("ui/player.xml", out playerPanel);
+			GraphicObject.Load ("ui/player.xml", out playerPanel, this);
 			labName = playerPanel.FindByName ("labName") as Label;
 			labPts = playerPanel.FindByName ("labPts") as Label;
 			labCpts = playerPanel.FindByName ("labCpts") as Label;
@@ -210,15 +227,77 @@ namespace Magic3D
 			else
 				labCpts.Text = ManaPool.ToString();
 			labPts.Text = LifePoints.ToString ();
-			if (MagicEngine.CurrentEngine.pp == this)
+
+			if (MagicEngine.CurrentEngine.cp == this)
 				playerPanel.Background = ActiveColor;
 			else
 				playerPanel.Background = InactiveColor;
+
+			if (MagicEngine.CurrentEngine.pp == this)
+				pgBar.Visible = true;
+			else
+				pgBar.Visible = false;
+		}
+		void createKeepMulliganChoice()
+		{
+			msgBox = new MessageBoxYesNo ("Keep or take mulligan ?");
+			msgBox.btOk.MouseClick += OnKeep;
+			msgBox.btOk.Text = "Keep";
+			msgBox.btCancel.MouseClick += OnTakeMulligan;
+			msgBox.btCancel.Text = "Mulligan";
+			playerPanel.TopContainer.AddWidget (msgBox);
+		}
+		void OnKeep(Object sender, MouseButtonEventArgs _e)
+		{
+			playerPanel.TopContainer.DeleteWidget (msgBox);
+			CurrentState = PlayerStates.Ready;
+			MagicEngine e = MagicEngine.CurrentEngine;
+			e.RaiseMagicEvent(new MagicEventArg(MagicEventType.PlayerIsReady,this));
+		}
+		void OnTakeMulligan(Object sender, MouseButtonEventArgs e)
+		{
+			playerPanel.TopContainer.DeleteWidget (msgBox);
+			for (int i = 0; i < CardToDraw; i++)
+				Library.AddCard (Hand.TakeTopOfStack);
+
+			CardToDraw--;
+
+			CurrentState = PlayerStates.InitialDraw;
+		}
+		//
+		#endregion
+
+		#region deck async loading
+
+		public void LoadDeck(string _deckPath){
+			Thread thread = new Thread(() => loadingThread(_deckPath));
+			thread.Start();
+		}
+		void loadingThread(string _deckPath){
+			Deck tmp = Deck.PreLoadDeck (Magic.deckPath + _deckPath);
+			int nbc = tmp.CardCount;
+			lock (pgBar) {
+				pgBar.Maximum = nbc;
+				pgBar.Value = 0;
+			}
+			for (int i = 0; i < nbc; i++) {
+				tmp.LoadNextCardsData ();
+				lock (pgBar) {
+					pgBar.Value++;
+				}
+			}
+			Deck = tmp;
+			lock (pgBar) {
+				pgBar.Visible = false;
+			}
+			Reset ();
+
+			DeckLoaded = true;
 		}
 		#endregion
 
         /// <summary>
-        /// init life points, put all cards in library and shuffle
+        /// init life points, put all cards in library
         /// </summary>
         public void Reset()
         {
@@ -239,44 +318,27 @@ namespace Magic3D
 				c.yAngle = MathHelper.Pi;
                 Library.AddCard(c);
             }
-			
-			Library.ShuffleAndLayoutZ();
         }
 
 		public void initialDraw ()
 		{
-			for (int i = 0; i < CardToDraw; i++)
-				DrawOneCard ();
-//			CardsGroupAnimation cga = Hand.UpdateLayout ();
-//			cga.AnimationFinished += delegate { 
-//				MagicEngine.CurrentEngine.RaiseMagicEvent (
-//					new MagicEventArg () { 
-//						Type = MagicEventType.CardsDrawn,
-//						Player = this
-//					});
-//			};
-//			Magic.AddAnimation (cga);
-//			Magic.AddAnimation (Library.UpdateLayout ());
-		}
-		public void TakeMulligan()
-		{
+			Animation.DelayMs = 300;
+			Library.ShuffleAndLayoutZ();
 			for (int i = 0; i < CardToDraw; i++) {
-				Library.AddCard (Hand.TakeTopOfStack);
+				Animation.DelayMs += i * 5;
+				DrawOneCard ();
 			}
-			CardToDraw--;
-
-			//Library.ShuffleAndLayoutZ();
-
-			initialDraw ();
+			Animation.DelayMs = 0;
 		}
+
 
  		public void DrawOneCard()
         {
             CardInstance c = Library.TakeTopOfStack;
             Hand.AddCard(c);
-            Animation.StartAnimation(new AngleAnimation(c, "yAngle", 0, MathHelper.Pi * 0.1f));
-            Animation.StartAnimation(new AngleAnimation(c, "xAngle",
-				MathHelper.Pi - Vector3.CalculateAngle(Magic.vLook, Vector3.UnitZ), MathHelper.Pi * 0.03f));
+//            Animation.StartAnimation(new AngleAnimation(c, "yAngle", 0, MathHelper.Pi * 0.1f));
+//            Animation.StartAnimation(new AngleAnimation(c, "xAngle",
+//				MathHelper.Pi - Vector3.CalculateAngle(Magic.vLook, Vector3.UnitZ), MathHelper.Pi * 0.03f));
         }
         public void PutCardInPlay(CardInstance c)
         {
@@ -300,11 +362,25 @@ namespace Magic3D
         {
 			MagicEngine e = MagicEngine.CurrentEngine;
 
-			if (e.pp != this)
-			{
-				Debug.WriteLine("canceling human player without priority");
+			switch (CurrentState) {
+			case PlayerStates.init:
 				return;
-			}                        
+			case PlayerStates.PlayDrawChoice:
+				return;
+			case PlayerStates.InitialDraw:
+				if (!DeckLoaded)
+					return;
+				initialDraw ();
+				CurrentState = PlayerStates.KeepMuliganChoice;
+				createKeepMulliganChoice ();
+				return;
+			case PlayerStates.KeepMuliganChoice:
+
+				return;
+			}
+
+			if (e.pp != this||e.State<EngineStates.CurrentPlayer)
+				return;
 
 			switch (e.CurrentPhase)
 			{

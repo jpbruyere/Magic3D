@@ -102,7 +102,18 @@ namespace Magic3D
 			return Operator.LessThanOrEqual(p1.X, p2.X) &&
 				Operator.LessThanOrEqual(p1.Y, p2.Y) ? true : false;
         }
-//		public static bool operator ==(Point<T> s, T i)
+		public static bool operator <(Point<T> p1, Point<T> p2)
+		{
+			return Operator.LessThan(p1.X, p2.X) &&
+				Operator.LessThan(p1.Y, p2.Y) ? true : false;
+		}
+		public static bool operator >(Point<T> p1, Point<T> p2)
+		{
+			return Operator.GreaterThan(p1.X, p2.X) &&
+				Operator.GreaterThan(p1.Y, p2.Y) ? true : false;
+		}
+
+		//		public static bool operator ==(Point<T> s, T i)
 //        {
 //			if (Operator s.X == i && s.Y == i)
 //                return true;

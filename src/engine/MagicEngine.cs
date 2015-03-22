@@ -13,21 +13,17 @@ namespace Magic3D
 	public enum EngineStates
 	{
 		Stopped,
-		Loading,
-		Loaded,
-		PlayDrawChoiceDone,
-		Choice,
+		WaitForPlayersToBeReady,
 		CurrentPlayer,
 		Opponents,
 		Resolve,
-		RequestStop
 	}
 //	class Sychronizer
 //	{
 //		public EngineStates State = EngineStates.Paused;
 //
 //	}
-	public class MagicEngine : IDisposable
+	public class MagicEngine
 	{
 		public delegate void MagicEventHandler (MagicEventArg arg);
 		public static event MagicEventHandler MagicEvent;
@@ -39,12 +35,12 @@ namespace Magic3D
 		}
 
 		public volatile EngineStates State = EngineStates.Stopped;
+		public bool deckLoaded = false;
 
 		//Sychronizer synchronizer = new Sychronizer ();
 
-		Random rnd = new Random ();
+		//Random rnd = new Random ();
 
-		public Thread engineThread;
 		int _currentPlayer;
 		int _priorityPlayer;
 		int _interfacePlayer = 0;
@@ -56,16 +52,14 @@ namespace Magic3D
 		/// player having his turn running
 		/// </summary>
 		public Player cp {
-			get { return Players [currentPlayer]; }
+			get { return Players [currentPlayerIndex]; }
 		}
-
 		/// <summary>
 		/// player controling the interface, redirection card click
 		/// </summary>
 		public Player ip {
 			get { return Players [_interfacePlayer]; }
 		}
-
 		/// <summary>
 		/// player having priority
 		/// </summary>
@@ -73,7 +67,7 @@ namespace Magic3D
 			get { return Players [_priorityPlayer]; }
 		}
 
-		public int currentPlayer {
+		public int currentPlayerIndex {
 			get { return _currentPlayer; }
 			set
 			{ 
@@ -87,7 +81,14 @@ namespace Magic3D
 
 			}
 		}
-
+		public int getPlayerIndex(Player _player)
+		{
+			for (int i = 0; i < Players.Count(); i++) {
+				if (Players [i] == _player)
+					return i;
+			}
+			return -1;
+		}
 		public int priorityPlayer {
 			get { return _priorityPlayer; }
 			set {
@@ -124,7 +125,7 @@ namespace Magic3D
 			MagicEvent (new PhaseEventArg {
 				Type = MagicEventType.EndPhase,
 				Phase = _currentPhase,
-				Player = Players [currentPlayer]
+				Player = Players [currentPlayerIndex]
 			});
 		}
 
@@ -176,20 +177,6 @@ namespace Magic3D
 		public Player[] Players;
 		public Stack<object> MagicStack = new Stack<object> ();
 
-//		public EngineStates State
-//		{
-//			get {
-//				lock (synchronizer) {
-//					return synchronizer.State;
-//				}
-//			}
-//			set {
-//				lock (synchronizer) {
-//					synchronizer.State = value;
-//				}
-//			}
-//		}
-
 		public MagicEngine (Player[] _players)
 		{
 			CurrentEngine = this;
@@ -203,116 +190,43 @@ namespace Magic3D
 			SpellStackLayout.MaxHorizontalSpace = 3f;
 			SpellStackLayout.xAngle = Magic.FocusAngle;
 
-			State = EngineStates.Loading;
-
-			engineThread = new Thread(engineLoop);
-			engineThread.Start();
+			//State = EngineStates.Loading;
 		}
 
-		#region IDisposable implementation
-
-
-		public void Dispose ()
+		void startGame()
 		{
-			State = EngineStates.RequestStop;
-			engineThread.Join ();
+			_currentPhase = GamePhases.Main1;
+			cp.AllowedLandsToBePlayed = 1;//it's normaly set in the untap phase...
+			cp.UpdateUi ();
+			State = EngineStates.CurrentPlayer;
+			MagicEvent (new PhaseEventArg {
+				Type = MagicEventType.BeginPhase,
+				Phase = _currentPhase,
+				Player = cp
+			});
 		}
 
-
-		#endregion
-
-		void engineLoop()
+		public void Process ()
 		{
-			bool run = true;
-			while (run) {
-				Thread.Sleep (10);
-				switch (State) {
-				case EngineStates.Stopped:
-					continue;
-				case EngineStates.Loading:
-					lock (Players) {
-						foreach (Player p in Players) {
-							if (p.Deck == null) {
-								p.Deck = Deck.PreLoadDeck (Magic.deckPath + p.deckPath);
-								int nbc = p.Deck.CardCount;
-								lock (p.pgBar) {
-									p.pgBar.Maximum = nbc;
-									p.pgBar.Value = 0;
-								}
-								for (int i = 0; i < nbc; i++) {
-									p.Deck.LoadNextCardsData ();
-									lock (p.pgBar) {
-										p.pgBar.Value++;
-									}
-								}
-								p.Reset ();
-								lock (p.pgBar) {
-									p.pgBar.Visible = false;
-								}
-							}
-						}
-					}
-					State = EngineStates.Loaded;
-					break;
-				case EngineStates.PlayDrawChoiceDone:
-					//initial draw
+			checkCurrentSpell();
 
-//					#region Keep/Mulligan ai logic goes here
-//					lock (Players) {
-//						foreach (Player p in Players) {
-//							if (p.Type == Player.PlayerType.ai && !p.Keep)
-//								MagicEvent (new MagicEventArg (MagicEventType.Keep, p));
-//						}
-//					}
-					break;
-//					#endregion
-//				case EngineStates.CurrentPlayer:
-//				case EngineStates.Opponents:
-//				case EngineStates.Resolve:
-//					break;
-				case EngineStates.RequestStop:
-					run = false;
-					break;
-				default:
-					break;
-				}
-			}
-		}
+			foreach (Player p in Players)
+				p.Process ();
 
-		public void StartGame ()
-		{
-			//			State = EngineStates.CurrentPlayer;
-
-
+			if (pp.PhaseDone)
+				GivePriorityToNextPlayer();
 		}
 
 
 		void MagicEngine_MagicEvent (MagicEventArg arg)
 		{
 			switch (arg.Type) {
-//			case MagicEventType.DecksLoaded:
-//
-//				break;
-			case MagicEventType.Keep:
-
-				arg.Player.Keep = true;
-
+			case MagicEventType.PlayerIsReady:
+				//check if all players are ready
 				foreach (Player p in Players)
-					if (!p.Keep)
-						break;
-
-				_currentPhase = GamePhases.Main1;
-				cp.AllowedLandsToBePlayed = 1;//it's normaly set in the untap phase...
-				State = EngineStates.CurrentPlayer;
-				MagicEvent (new PhaseEventArg {
-					Type = MagicEventType.BeginPhase,
-					Phase = _currentPhase,
-					Player = cp
-				});
-
-				break;
-			case MagicEventType.Mulligan:
-				arg.Player.TakeMulligan ();
+					if (p.CurrentState != Player.PlayerStates.Ready)
+						return;
+				startGame ();
 				break;
 			case MagicEventType.Unset:
 				break;
@@ -521,7 +435,7 @@ namespace Magic3D
 			case GamePhases.EndOfTurn:
 				break;
 			case GamePhases.CleanUp:
-				currentPlayer++;
+				currentPlayerIndex++;
 
 				priorityPlayer = _currentPlayer;
 				CurrentPhase = GamePhases.Untap;
@@ -538,7 +452,7 @@ namespace Magic3D
 			MagicEvent (new PhaseEventArg {
 				Type = MagicEventType.BeginPhase,
 				Phase = _currentPhase,
-				Player = Players [currentPlayer]
+				Player = Players [currentPlayerIndex]
 			});
 
 
@@ -771,20 +685,18 @@ namespace Magic3D
 					CardInstance.selectedCard = null;
 			}
 
-
-			foreach (CardGroup cg in ip.allGroups) {
-				foreach (CardInstance c in cg.Cards) {
-					if (c.mouseIsIn (ptM)) {
-						CardInstance.selectedCard = c;
-						break;
+			foreach (Player p in Players) {
+				foreach (CardGroup cg in p.allGroups) {
+					foreach (CardInstance c in cg.Cards) {
+						if (c.mouseIsIn (ptM)) {
+							CardInstance.selectedCard = c;
+							break;
+						}
 					}
-				}
-				if (CardInstance.selectedCard != null)
-					break;
-			}			
-//			if (!selOk)
-//				vMPos = computeVMouseAtHeight (M, 0);
-			//Magic.diceMat = Matrix4.CreateTranslation (vMPos);
+					if (CardInstance.selectedCard != null)
+						break;
+				}			
+			}
 		}
 		public void processMouseDown (MouseButtonEventArgs e)
 		{
@@ -872,7 +784,7 @@ namespace Magic3D
 
 		public void processRendering()
 		{
-			if (State < EngineStates.Loaded)
+			if (!deckLoaded)
 				return;
 
 			foreach (Player p in Players) {

@@ -21,11 +21,7 @@ namespace Magic3D
 
 	public enum MagicEventType
 	{
-		DecksLoaded,
-		TossResult,
-		CardsDrawn,
-		Keep,
-		Mulligan,
+		PlayerIsReady,
 		Unset,
 		BeginPhase,
 		EndPhase,
