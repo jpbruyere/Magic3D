@@ -453,30 +453,7 @@ namespace Magic3D
 				break;
 			}
 		}
-
-			
-		protected override void OnRenderFrame (FrameEventArgs e)
-		{
-			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-//			GL.Disable(EnableCap.DepthTest);
-//			GL.Disable(EnableCap.CullFace);
-//			GL.Disable(EnableCap.Blend);
-
-			drawScene();
-
-			base.OnRenderFrame (e);
-
-//			GL.Enable(EnableCap.DepthTest);
-//			GL.Enable(EnableCap.CullFace);
-
-
-
-//			AxesHelper.Render ();
-
-
-			SwapBuffers ();
-		}
+						
 		int frameCpt = 0;
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
@@ -525,15 +502,25 @@ namespace Magic3D
 			if (engine == null)
 				return;
 
+			//skip if engine is loading decks
+			if (engine.State < EngineStates.Loaded)
+				return;
+
+			Animation.ProcessAnimations();
 
 			if (engine.State < EngineStates.PlayDrawChoiceDone)
 				return;
+
+
+
 			if (engine.State == EngineStates.PlayDrawChoiceDone) {
 				foreach (Player p in Players)
 					p.initialDraw ();
 				engine.State = EngineStates.Choice;
 				return;
 			}
+
+
 
 			engine.checkCurrentSpell();
 
@@ -542,6 +529,16 @@ namespace Magic3D
 			if (engine.pp.PhaseDone)
 				engine.GivePriorityToNextPlayer();
 		}
+		protected override void OnRenderFrame (FrameEventArgs e)
+		{
+			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+			drawScene();
+
+			base.OnRenderFrame (e);
+			SwapBuffers ();
+		}
+
 		protected override void OnResize (EventArgs e)
 		{
 			base.OnResize (e);

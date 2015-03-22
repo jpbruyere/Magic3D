@@ -31,6 +31,9 @@ namespace Magic3D
 
     public class Animation
     {
+
+		public AnimationEvent AnimationFinished;
+
 		public static bool CancelOnGoingAnim = true;
 		public static int DelayMs = 0;
 
@@ -46,7 +49,7 @@ namespace Magic3D
         //public FieldInfo member;
         public Object AnimatedInstance;
 
-        public AnimationEvent OnAnimationEnd;
+        
 
         public static void StartAnimation(Animation a, int delayMs = 0, AnimationEvent OnEnd = null)
         {
@@ -56,15 +59,14 @@ namespace Magic3D
 					aa.CancelAnimation ();
 			}
 
-            a.OnAnimationEnd = OnEnd;
+			a.AnimationFinished += OnEnd;
 			a.delayMs = delayMs + DelayMs;
 
             if (a.delayMs > 0)
                 a.timer.Start();
             
-			lock (AnimationList) {
-				AnimationList.Add (a);
-			}
+			AnimationList.Add (a);
+
         }
 
         static Stack<Animation> anims = new Stack<Animation>();
@@ -115,15 +117,16 @@ namespace Magic3D
         {
             AnimationList.Remove(this);
         }
-        public static bool IsAnimated(object instance)
-        {
-            foreach (Animation a in AnimationList)
-            {
-                if (a.AnimatedInstance == instance)
-                    return true;
-            }
-            return false;
-        }
+//        public static bool IsAnimated(object instance)
+//        {
+//            foreach (Animation a in AnimationList)
+//            {
+//                if (a.AnimatedInstance == instance)
+//                    return true;
+//            }
+//            return false;
+//        }
+		public static void onAnimationFinished(
     }
     public class FloatAnimation : Animation
     {
@@ -183,8 +186,8 @@ namespace Magic3D
 
             setValue(TargetValue);
             AnimationList.Remove(this);
-            if (OnAnimationEnd != null)
-                OnAnimationEnd();
+            if (AnimationFinished != null)
+                AnimationFinished();
         }
     }
 

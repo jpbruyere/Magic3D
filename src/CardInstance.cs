@@ -16,7 +16,7 @@ using GLU = OpenTK.Graphics.Glu;
 namespace Magic3D
 {
     [Serializable]
-	public class CardInstance : IDamagable, IRenderable, IAnimatable
+	public class CardInstance : IDamagable, IRenderable
     {
 		public class CardAnimEventArg : EventArgs
 		{
@@ -210,12 +210,12 @@ namespace Magic3D
 
                 _isTapped = value;
 
-                if (_isTapped)
-					this.targetAngles.Z = -MathHelper.PiOver2;
+ 				if (_isTapped)
+                {
+                    Animation.StartAnimation(new FloatAnimation(this, "zAngle", -MathHelper.PiOver2, MathHelper.Pi * 0.1f));
+                }
                 else
-					this.targetAngles.Z = 0f;
-
-				Magic.AddAnimation (this);
+                    Animation.StartAnimation(new FloatAnimation(this, "zAngle", 0f, MathHelper.Pi * 0.1f));
             }
         }
         public void Tap()
@@ -334,22 +334,12 @@ namespace Magic3D
                 z = value.Z;
             }
         }
-		public virtual Vector3 Angles {
-			get { return new Vector3 (xAngle, yAngle, zAngle); }
-			set{
-				xAngle = value.X;
-				yAngle = value.Y;
-				zAngle = value.Z;
-			}
-		}
 
         public void ResetPositionAndRotation()
         {
             x = y = z = xAngle = yAngle = zAngle = 0;
-			targetAngles = Vector3.Zero;
-			targetPosition = Vector3.Zero;
         }
-        public void SwitchFocus()
+       public void SwitchFocus()
         {
             HasFocus = !HasFocus;
 
@@ -364,8 +354,13 @@ namespace Magic3D
 
                 v = Vector3.Transform(v, Matrix4.Invert(Controler.Transformations));
 
-				targetAngles = new Vector3 (Magic.FocusAngle,0,-Controler.zAngle);
-				targetPosition = v;
+                Animation.StartAnimation(new FloatAnimation(this, "x", v.X, 0.5f));
+                Animation.StartAnimation(new FloatAnimation(this, "y", v.Y, 0.5f));
+                Animation.StartAnimation(new FloatAnimation(this, "z", v.Z, 0.7f));
+				float aCam = Magic.FocusAngle;
+                Animation.StartAnimation(new AngleAnimation(this, "xAngle", aCam, MathHelper.Pi * 0.03f));
+                //Animation.StartAnimation(new AngleAnimation(this, "yAngle", -Controler.Value.zAngle, MathHelper.Pi * 0.03f));
+                Animation.StartAnimation(new AngleAnimation(this, "zAngle", -Controler.zAngle, MathHelper.Pi * 0.03f));
 
 
                 focusedCard = this;
@@ -388,8 +383,12 @@ namespace Magic3D
         }
         public void RestoreSavedPosition()
         {
-			targetPosition = new Vector3 (saved_x, saved_y, saved_z);
-			targetAngles = new Vector3 (saved_xAngle, saved_yAngle, saved_zAngle);
+     		Animation.StartAnimation(new FloatAnimation(this, "x", saved_x, 0.5f));
+            Animation.StartAnimation(new FloatAnimation(this, "y", saved_y, 0.5f));
+            Animation.StartAnimation(new FloatAnimation(this, "z", saved_z, 0.5f));
+            Animation.StartAnimation(new AngleAnimation(this, "xAngle", saved_xAngle, 0.5f));
+            Animation.StartAnimation(new AngleAnimation(this, "yAngle", saved_yAngle, 0.5f));
+            Animation.StartAnimation(new AngleAnimation(this, "zAngle", saved_zAngle, 0.5f));
         }
         
 		public Rectangle<float> getProjectedBounds()
@@ -463,71 +462,6 @@ namespace Magic3D
 				throw new NotImplementedException ();
 			}
 		}
-		#endregion
-
-		#region IAnimatable implementation
-		public Vector3 angularVelocity = new Vector3 (3.0f, 3.0f, 3.0f);
-		public Vector3 linearVelocity = new Vector3 (5.0f, 5.0f, 5.0f);
-		public Vector3 targetPosition = Vector3.Zero;
-		public Vector3 targetAngles = Vector3.Zero;
-		public int delayCycles = 0;
-		public int cycles = 0;
-
-		public event EventHandler<EventArgs> AnimationFinished = delegate {};
-
-		public void Animate (float ellapseTime = 0f)
-		{
-			cycles++;
-			if (cycles < delayCycles)
-				return;
-
-			bool complete = true;
-			float et = ellapseTime;
-
-			et = 1.0f;
-
-			Vector3 vDiff = (targetPosition - Position)*0.4f;
-
-			x += vDiff.X * et;
-			y += vDiff.Y * et;
-			z += vDiff.Z * et;
-
-			vDiff = targetPosition - Position;
-
-			if (vDiff.LengthFast < 0.05f) {
-				x = targetPosition.X;
-				y = targetPosition.Y;
-				z = targetPosition.Z;			
-			} else
-				complete = false;
-
-			vDiff = (targetAngles - Angles)*0.5f;
-
-			xAngle += vDiff.X * et;
-			yAngle += vDiff.Y * et;
-			zAngle += vDiff.Z * et;
-
-			xAngle %= MathHelper.TwoPi;
-			yAngle %= MathHelper.TwoPi;
-			zAngle %= MathHelper.TwoPi;
-
-			vDiff = targetAngles - Angles;
-
-			if (vDiff.LengthFast < 0.05f) {
-				xAngle = targetAngles.X;
-				yAngle = targetAngles.Y;
-				zAngle = targetAngles.Z;
-			} else
-				complete = false;
-
-			if (complete) {
-				cycles = 0;
-				delayCycles = 0;
-				AnimationFinished (this, null);
-				AnimationFinished = delegate {};
-			}
-		}
-
 		#endregion
 
 		#region Overlay

@@ -58,71 +58,64 @@ namespace Magic3D
 			}
 		}
 
-//		public void ShuffleAndLayoutZ()
-//		{
-//			Cards.Shuffle();
-//			float currentZ = this.z;
-//			foreach (CardInstance c in Cards)
-//			{		
-//				if (c.targetPosition.Z != currentZ)
-//					c.targetPosition.Z = currentZ;
-//
-//				currentZ += VerticalSpacing;
-//			}
-//		}
-		public virtual  CardsGroupAnimation UpdateLayout()
+		public void ShuffleAndLayoutZ()
 		{
-			CardsGroupAnimation cga = new CardsGroupAnimation ();
-			//vertical layouting            
+			Cards.Shuffle();
+			float currentZ = this.z;
+			foreach (CardInstance c in Cards)
+			{
+				Animation a = null;
+				if (Animation.GetAnimation(c, "z", ref a))
+					a.CancelAnimation();
+
+				if (c.z != currentZ)
+					Animation.StartAnimation(new FloatAnimation(c, "z", currentZ, 0.1f));
+
+				currentZ += VerticalSpacing;
+			}
+		}
+		public virtual  void UpdateLayout()
+		{
+//vertical layouting            
+
 			float hSpace = HorizontalSpacing;
 
-			if (HorizontalSpacing * (Cards.Count + 1) > MaxHorizontalSpace)
-				hSpace = MaxHorizontalSpace / (Cards.Count + 1);
+			if (HorizontalSpacing * Cards.Count > MaxHorizontalSpace)
+				hSpace = MaxHorizontalSpace / Cards.Count;
+
 
 			float halfWidth = hSpace * (Cards.Count) / 2;
 
-			for (int i = 0; i < Cards.Count; i++) {
-				Cards [i].targetPosition = 
-					new Vector3 (
-					this.x - halfWidth + hSpace * i, 
-					this.y,
-					this.z + VerticalSpacing * i);
-				Cards [i].targetAngles =
-					new Vector3 (
-					this.xAngle,
-					this.yAngle,
-					this.zAngle);
-				cga.AddCard (Cards [i]);
+			float cX = this.x - halfWidth;
+			float cY = this.y;
+			float cZ = this.z;
+
+			foreach (CardInstance c in Cards) {
+				Animation.StartAnimation (new FloatAnimation (c, "x", cX, 0.2f));
+				Animation.StartAnimation (new FloatAnimation (c, "y", cY, 0.2f));
+				Animation.StartAnimation (new FloatAnimation (c, "z", cZ, 0.2f));
+				Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
+				Animation.StartAnimation (new AngleAnimation (c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
+
+				float aX = cX;
+				float aY = cY;
+				float aZ = cZ;
+				foreach (CardInstance ac in c.AttachedCards) {
+					aX += 0.15f;
+					aY += 0.15f;
+					aZ -= 0.001f;
+
+					Animation.StartAnimation (new FloatAnimation (ac, "x", aX, 0.2f));
+					Animation.StartAnimation (new FloatAnimation (ac, "y", aY, 0.2f));
+					Animation.StartAnimation (new FloatAnimation (ac, "z", aZ, 0.2f));
+					Animation.StartAnimation (new AngleAnimation (ac, "xAngle", xAngle, MathHelper.Pi * 0.3f));
+					Animation.StartAnimation (new AngleAnimation (ac, "yAngle", yAngle, MathHelper.Pi * 0.3f));
+				}
+
+
+				cX += hSpace;
+				cZ += VerticalSpacing;
 			}
-			return cga;
-//			foreach (CardInstance c in Cards)
-//			{
-//				Animation.StartAnimation(new FloatAnimation(c, "x", cX, 0.2f));
-//				Animation.StartAnimation(new FloatAnimation(c, "y", cY, 0.2f));
-//				Animation.StartAnimation(new FloatAnimation(c, "z", cZ, 0.2f));
-//				Animation.StartAnimation(new AngleAnimation(c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
-//				Animation.StartAnimation(new AngleAnimation(c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
-//
-//				float aX = cX;
-//				float aY = cY;
-//				float aZ = cZ;
-//				foreach (CardInstance ac in c.AttachedCards)
-//				{
-//					aX += 0.15f;
-//					aY += 0.15f;
-//					aZ -= 0.001f;
-//
-//					Animation.StartAnimation(new FloatAnimation(ac, "x", aX, 0.2f));
-//					Animation.StartAnimation(new FloatAnimation(ac, "y", aY, 0.2f));
-//					Animation.StartAnimation(new FloatAnimation(ac, "z", aZ, 0.2f));
-//					Animation.StartAnimation(new AngleAnimation(ac, "xAngle", xAngle, MathHelper.Pi * 0.3f));
-//					Animation.StartAnimation(new AngleAnimation(ac, "yAngle", yAngle, MathHelper.Pi * 0.3f));
-//				}
-//
-//
-//				cX += hSpace;
-//				cZ += VerticalSpacing;
-//			}
 		}
 		public void UpdateDefendersLayout()
 		{            
@@ -143,11 +136,11 @@ namespace Magic3D
 				float cY = this.y + vSpace * idx;
 				float cZ = this.z + zSpace * idx;
 
-//				Animation.StartAnimation(new FloatAnimation(c, "x", cX, 0.2f));
-//				Animation.StartAnimation(new FloatAnimation(c, "y", cY, 0.2f));
-//				Animation.StartAnimation(new FloatAnimation(c, "z", cZ, 0.2f));
-//				Animation.StartAnimation(new AngleAnimation(c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
-//				Animation.StartAnimation(new AngleAnimation(c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
+			Animation.StartAnimation(new FloatAnimation(c, "x", cX, 0.2f));
+				Animation.StartAnimation(new FloatAnimation(c, "y", cY, 0.2f));
+				Animation.StartAnimation(new FloatAnimation(c, "z", cZ, 0.2f));
+				Animation.StartAnimation(new AngleAnimation(c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
+				Animation.StartAnimation(new AngleAnimation(c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
 
 				float aX = cX;
 				float aY = cY;
@@ -193,11 +186,11 @@ namespace Magic3D
 
 				foreach (CardInstance c in Cards)
 				{
-//					Animation.StartAnimation(new FloatAnimation(c, "x", cX, 0.2f));
-//					Animation.StartAnimation(new FloatAnimation(c, "y", v.Y, 0.1f));
-//					Animation.StartAnimation(new FloatAnimation(c, "z", cZ, 0.1f));
-//					Animation.StartAnimation(new AngleAnimation(c, "xAngle", aCam, MathHelper.Pi * 0.1f), 100);
-//					Animation.StartAnimation(new AngleAnimation(c, "yAngle", 0, MathHelper.Pi * 0.1f), 100);
+			Animation.StartAnimation(new FloatAnimation(c, "x", cX, 0.2f));
+					Animation.StartAnimation(new FloatAnimation(c, "y", v.Y, 0.1f));
+					Animation.StartAnimation(new FloatAnimation(c, "z", cZ, 0.1f));
+					Animation.StartAnimation(new AngleAnimation(c, "xAngle", aCam, MathHelper.Pi * 0.1f), 100);
+					Animation.StartAnimation(new AngleAnimation(c, "yAngle", 0, MathHelper.Pi * 0.1f), 100);
 
 					cX += hSpace;
 					cZ += vSpace;

@@ -221,23 +221,7 @@ namespace Magic3D
 			labCpts = playerPanel.FindByName ("labCpts") as Label;
 			pgBar = playerPanel.FindByName ("pgBar") as ProgressBar;
 			playerPanel.Background = InactiveColor;
-//            playerPanel = Interface.addPanel(new go.Rectangle(10, 200, 150, 100));
-//            Group g = playerPanel.setChild(new Group());
-//            labPoints = g.addChild(new Label("###"));
-//            labPoints.FontSize = 20;
-//            labPoints.VerticalAlignment = VerticalAlignment.Stretch;
-//            labPoints.HorizontalAlignment = HorizontalAlignment.Stretch;
-//            //labPoints.textAlignment = Alignment.VerticalStretch;
-//            labPoints.HorizontalAlignment = HorizontalAlignment.Right;
-//            VerticalStack vs = g.addChild(new VerticalStack());
-//            labName = vs.addChild(new Label("PlayerName"));
-//            labName.FontSize = 14;
-//            labCurrentPhase = vs.addChild(new Label("Init"));
-//            labCurrentPhase.HorizontalAlignment = HorizontalAlignment.Stretch;
-//            labName.FontSize = 14;
-//            pbTimer = g.addChild(new ProgressBar(MagicEngine.timerLength));
-//            pbTimer.VerticalAlignment = VerticalAlignment.Bottom;
-//            pbTimer.HorizontalAlignment = HorizontalAlignment.Right;
+
         }
 		public void UpdateUi()
 		{
@@ -272,29 +256,26 @@ namespace Magic3D
 //                    a.Source = c;
 
                 c.ResetPositionAndRotation();
-				//c.yAngle = MathHelper.Pi;
+				c.yAngle = MathHelper.Pi;
                 Library.AddCard(c);
-
-
             }
-			Library.Cards.Shuffle();
-			CardsGroupAnimation cga = Library.UpdateLayout ();
-			Magic.AddAnimation(cga);
+			
+			Library.ShuffleAndLayoutZ();
         }
 		public void initialDraw ()
 		{
 			for (int i = 0; i < CardToDraw; i++)
 				DrawOneCard ();
-			CardsGroupAnimation cga = Hand.UpdateLayout ();
-			cga.AnimationFinished += delegate { 
-				MagicEngine.CurrentEngine.RaiseMagicEvent (
-					new MagicEventArg () { 
-						Type = MagicEventType.CardsDrawn,
-						Player = this
-					});
-			};
-			Magic.AddAnimation (cga);
-			Magic.AddAnimation (Library.UpdateLayout ());
+//			CardsGroupAnimation cga = Hand.UpdateLayout ();
+//			cga.AnimationFinished += delegate { 
+//				MagicEngine.CurrentEngine.RaiseMagicEvent (
+//					new MagicEventArg () { 
+//						Type = MagicEventType.CardsDrawn,
+//						Player = this
+//					});
+//			};
+//			Magic.AddAnimation (cga);
+//			Magic.AddAnimation (Library.UpdateLayout ());
 		}
 
 		public void TakeMulligan()
@@ -309,19 +290,19 @@ namespace Magic3D
 			initialDraw ();
 		}
 
-        public void DrawOneCard()
+ 		public void DrawOneCard()
         {
             CardInstance c = Library.TakeTopOfStack;
             Hand.AddCard(c);
-//            Animation.StartAnimation(new AngleAnimation(c, "yAngle", 0, MathHelper.Pi * 0.1f));
-//            Animation.StartAnimation(new AngleAnimation(c, "xAngle",
-//				MathHelper.Pi - Vector3.CalculateAngle(Magic.vLook, Vector3.UnitZ), MathHelper.Pi * 0.03f));
+            Animation.StartAnimation(new AngleAnimation(c, "yAngle", 0, MathHelper.Pi * 0.1f));
+            Animation.StartAnimation(new AngleAnimation(c, "xAngle",
+				MathHelper.Pi - Vector3.CalculateAngle(Magic.vLook, Vector3.UnitZ), MathHelper.Pi * 0.03f));
         }
         public void PutCardInPlay(CardInstance c)
         {
             Hand.RemoveCard(c);
             InPlay.AddCard(c);
-			//Animation.StartAnimation(new AngleAnimation(c, "xAngle", 0, MathHelper.Pi * 0.3f));
+			Animation.StartAnimation(new AngleAnimation(c, "xAngle", 0, MathHelper.Pi * 0.3f));
         }
 
         public void Render()

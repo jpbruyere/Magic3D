@@ -45,17 +45,15 @@ namespace Magic3D
 		public override void AddCard(CardInstance c)
 		{
 			base.AddCard(c);
-			Magic.AddAnimation(UpdateLayout());
+			UpdateLayout();
 		}
 		public override void RemoveCard(CardInstance c)
 		{
 			base.RemoveCard(c);
-			Magic.AddAnimation(UpdateLayout());
+			UpdateLayout();
 		}
-		public override CardsGroupAnimation UpdateLayout()
+		public override void UpdateLayout()
 		{
-			CardsGroupAnimation cga = new CardsGroupAnimation ();
-
 			LandsLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Land && !(c.IsAttached || c.Combating)).ToList();
 			CreatureLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Creature && !(c.IsAttached || c.Combating)).ToList();
 			OtherLayout.Cards = Cards.Where(c => c.Model.Types != CardTypes.Land && c.Model.Types != CardTypes.Creature
@@ -70,15 +68,12 @@ namespace Magic3D
 			{
 				CombatingCreature.Cards = Cards.Where(c => c.Model.Types == CardTypes.Creature && c.Combating).ToList();
 				if (CombatingCreature.Cards.Count == 0)
-					return cga;
+					return;
 				if (MagicEngine.CurrentEngine.cp == Cards[0].Controler)
 					CombatingCreature.UpdateLayout();
 				else
 					CombatingCreature.UpdateDefendersLayout();
 			}
-
-
-			return cga;
 			//base.UpdateLayout();
 		}
 	}

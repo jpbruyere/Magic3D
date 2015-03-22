@@ -42,20 +42,48 @@ namespace Magic3D
                 return;
 
             c.CurrentGroup = this;
-            Cards.Add(c);
-			Magic.AddAnimation (UpdateLayout ());
-        }
-		public virtual void RemoveCard(CardInstance c)
-		{
-			Cards.Remove(c);
+            float hSpace = HorizontalSpacing;
 
-			c.CurrentGroup = null;
+            if (HorizontalSpacing * (Cards.Count + 1) > MaxHorizontalSpace)
+                hSpace = MaxHorizontalSpace / (Cards.Count + 1);
 
-			MagicEngine.CurrentEngine.RaiseMagicEvent(new MagicEventArg(MagicEventType.QuitZone, c));
 
-			Magic.AddAnimation(UpdateLayout ());		
+			Animation.StartAnimation(new FloatAnimation(c, "x", this.x + hSpace / 2 * Cards.Count, 0.3f));
+
+            float halfWidth = hSpace * (Cards.Count) / 2;
+
+			foreach (CardInstance i in Cards)
+				Animation.StartAnimation (new FloatAnimation (i, "x", this.x - halfWidth + hSpace * Cards.IndexOf(i),0.1f));
+
+            Animation.StartAnimation(new FloatAnimation(c, "y", this.y, 0.2f));
+            Animation.StartAnimation(new FloatAnimation(c, "z", this.z + VerticalSpacing * Cards.Count, 0.2f));
+
+            Cards.Add(c);	
 		}
-        
+        public virtual void RemoveCard(CardInstance c)
+        {
+            Cards.Remove(c);
+
+            c.CurrentGroup = null;
+
+            MagicEngine.CurrentEngine.RaiseMagicEvent(new MagicEventArg(MagicEventType.QuitZone, c));
+
+            float hSpace = HorizontalSpacing;
+
+            if (HorizontalSpacing * (Cards.Count + 1) > MaxHorizontalSpace)
+                hSpace = MaxHorizontalSpace / (Cards.Count + 1);
+
+            float halfWidth = hSpace * (Cards.Count) / 2;
+
+            foreach (CardInstance i in Cards)
+            {
+                Animation.StartAnimation(new FloatAnimation(i, "x", this.x - halfWidth + hSpace * Cards.IndexOf(i)));
+                Animation.StartAnimation(new FloatAnimation(c, "z", this.z + VerticalSpacing * Cards.IndexOf(i)));
+            }
+
+            //Animation.StartAnimation(new FloatAnimation(c, "y", this.y, 0.2f));
+
+        }   
 
 		public CardInstance TakeTopOfStack
         {
