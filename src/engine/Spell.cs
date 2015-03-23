@@ -100,5 +100,9 @@ namespace Magic3D
 //        {
 //            return Source.Model.Cost == RemainingCost ? true : false;
 //        }
+		public override string ToString ()
+		{
+			return Source.Model.Name;
+		}
     }
 }

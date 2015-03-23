@@ -224,18 +224,47 @@ namespace Magic3D
 		go.Container uiPhases;
 		go.Container uiMainMenu;
 		MessageBoxYesNo msgBox;
-		static go.Container uiLogs;
-		static go.VerticalStack vsLogs;
 
 		Label labFps, labFpsMin, labFpsMax, labUpdate;
 
+		static go.Container uiLogs;
+		static go.VerticalStack vsLogs;
+		static Label[] llogs = new Label[4];
+		static List<String> logBuffer = new List<string> ();
+		static int logBuffPtr = 0;
+
+		public void InitLogPanel()
+		{
+			LoadInterface("ui/log.xml", out uiLogs);
+			uiLogs.MouseWheelChanged += onLogsWheel ;
+			vsLogs = uiLogs.FindByName ("logs") as VerticalStack;
+			for (int i = 0; i < 4; i++) {
+				llogs [i] = vsLogs.FindByName ("line" + (i + 1)) as Label;
+			}
+		}
 		public static void AddLog(string msg)
 		{
-			for (int i = 1; i < 4; i++) {
-				(vsLogs.FindByName ("line" + i) as Label).Text =
-					(vsLogs.FindByName ("line" + (i + 1)) as Label).Text;
+			logBuffer.Add (msg);
+			logBuffPtr = 0;
+			syncLogUi ();
+		}
+		static void syncLogUi()
+		{
+			for (int i = 0; i < 4; i++) {
+				int ptr = logBuffer.Count - (i + 1 + logBuffPtr);
+				if (ptr < 0)
+					break;
+				llogs[3-i].Text = logBuffer[ptr];
 			}
-			(vsLogs.FindByName ("line4") as Label).Text = msg;
+		}
+		void onLogsWheel(object sender, MouseWheelEventArgs e){
+			logBuffPtr += e.Delta;
+			int limUp = logBuffer.Count - 4;
+			if (logBuffPtr > limUp)
+				logBuffPtr = limUp;
+			if (logBuffPtr < 0)
+				logBuffPtr = 0;
+			syncLogUi ();
 		}
 		#endregion
 
@@ -315,10 +344,11 @@ namespace Magic3D
 
 			base.OnLoad (e);
 
-			LoadInterface("ui/log.xml", out uiLogs);
+			InitLogPanel ();
+
 			LoadInterface("ui/mainMenu.xml", out uiMainMenu);
-			vsLogs = uiLogs.FindByName ("logs") as VerticalStack;
-//			AddLog ("Starting magic 3d");
+
+
 
 			LoadInterface("ui/test4.xml", out g);
 			LoadInterface("ui/phases.xml", out uiPhases);

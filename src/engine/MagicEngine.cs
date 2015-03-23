@@ -18,11 +18,7 @@ namespace Magic3D
 		Opponents,
 		Resolve,
 	}
-//	class Sychronizer
-//	{
-//		public EngineStates State = EngineStates.Paused;
-//
-//	}
+
 	public class MagicEngine
 	{
 		public delegate void MagicEventHandler (MagicEventArg arg);
@@ -238,7 +234,7 @@ namespace Magic3D
 				break;
 			case MagicEventType.PlayLand:
 				cp.Hand.RemoveCard (arg.Source);
-				cp.PutCardInPlay (arg.Source);
+				cp.InPlay.AddCard(arg.Source);
 				cp.AllowedLandsToBePlayed--;
 				break;
 			case MagicEventType.ActivateAbility:
@@ -258,7 +254,7 @@ namespace Magic3D
 				//    Debugger.Break();
 				SpellEventArg sea = arg as SpellEventArg;
 				if (sea.Spell.SelectedTargets.Count > 0) {
-					Ability a = sea.Spell.Source.getAbilitiesByType (AbilityEnum.Attach).FirstOrDefault();
+					Ability a = sea.Spell.Source.getAbilitiesByType (AbilityEnum.Attach).FirstOrDefault ();
 					if (a != null) {
 						CardInstance c = sea.Spell.SelectedTargets [0] as CardInstance;
 
@@ -277,7 +273,11 @@ namespace Magic3D
 						c.UpdateOverlay ();
 					}
 				}
-				sea.Spell.Source.Controler.PutCardInPlay (sea.Spell.Source);
+				//sumoning sickness
+				if ((sea.Spell.Source.Model.Types == CardTypes.Creature) &&
+				    !sea.Spell.Source.HasAbility (AbilityEnum.Haste))
+					sea.Spell.Source.HasSummoningSickness = true;
+				sea.Spell.Source.Controler.InPlay.AddCard (sea.Spell.Source);
 				break;
 			case MagicEventType.TapCard:
 
@@ -412,11 +412,15 @@ namespace Magic3D
 			case GamePhases.BeforeCombat:
 				break;
 			case GamePhases.DeclareAttacker:
+				if (!pea.Player.HaveAttackingCreature) {
+					CurrentPhase = GamePhases.EndOfCombat;
+					break;
+				}
 				foreach (CardInstance c in pea.Player.InPlay.Cards) {
-					if (c.Combating)
-					if (!c.IsTapped)
-						c.Tap ();
-					else
+					if (c.Combating) {
+						if (!c.IsTapped)
+							c.Tap ();
+					}else
 						Debugger.Break ();
 				}
 				break;
@@ -538,7 +542,7 @@ namespace Magic3D
 					CurrentPhase != GamePhases.CombatDamage)
 					return;
 
-				if (c.IsTapped)
+				if (c.IsTapped || c.HasSummoningSickness)
 					return;
 
 				#region ManaAbilities

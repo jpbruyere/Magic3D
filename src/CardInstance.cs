@@ -38,7 +38,6 @@ namespace Magic3D
 		}
 		#endregion
 
-
         #region selection
 		/// <summary>
 		/// The focused card zoomed in the middle of screen
@@ -48,11 +47,8 @@ namespace Magic3D
 
 		public static go.Color notSelectedColor = new go.Color(0.9f, 0.9f, 0.9f, 1f);
 		public static go.Color SelectedColor = new go.Color(1f, 1f, 1f, 1f);
+		public static go.Color SicknessColor = new go.Color(0.8f, 0.7f, 1f, 1f);
         #endregion
-
-
-
-
 
 
 		bool _isTapped = false;
@@ -130,7 +126,7 @@ namespace Magic3D
         }
         public bool HasAbility(AbilityEnum ab)
         {
-            if (getAbilitiesByType(ab)==null || HasEffect(EffectType.LooseAllAbilities))
+			if (getAbilitiesByType(ab).Count()==0 || HasEffect(EffectType.LooseAllAbilities))
                 return false;
 
             foreach (Effect e in Effects)
@@ -422,6 +418,8 @@ namespace Magic3D
 				Magic.texturedShader.Color = SelectedColor;
 			else if (Combating)
 				Magic.texturedShader.Color = go.Color.Red;
+			else if (HasSummoningSickness)
+				Magic.texturedShader.Color = SicknessColor;
 			else
 				Magic.texturedShader.Color = notSelectedColor;
 

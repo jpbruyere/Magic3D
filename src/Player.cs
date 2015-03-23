@@ -352,12 +352,12 @@ namespace Magic3D
 //            Animation.StartAnimation(new AngleAnimation(c, "xAngle",
 //				MathHelper.Pi - Vector3.CalculateAngle(Magic.vLook, Vector3.UnitZ), MathHelper.Pi * 0.03f));
         }
-        public void PutCardInPlay(CardInstance c)
-        {
-            Hand.RemoveCard(c);
-            InPlay.AddCard(c);
-			Animation.StartAnimation(new AngleAnimation(c, "xAngle", 0, MathHelper.Pi * 0.3f));
-        }
+//        public void PutCardInPlay(CardInstance c)
+//        {
+//            Hand.RemoveCard(c);
+//            InPlay.AddCard(c);
+//			Animation.StartAnimation(new AngleAnimation(c, "xAngle", 0, MathHelper.Pi * 0.3f));
+//        }
 			
 		public void AddDamages(Damage d)
 		{
