@@ -130,7 +130,7 @@ namespace Magic3D
 
 				GL.Disable(EnableCap.CullFace);
 
-				MagicCard.cardMesh.Render (PrimitiveType.TriangleStrip);
+				MagicCard.CardMesh.Render (PrimitiveType.TriangleStrip);
 
 				GL.Enable(EnableCap.CullFace);
 

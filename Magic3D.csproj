@@ -48,284 +48,559 @@
   <ItemGroup>
     <None Include="images\card_back.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="meshes\d20-s2.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\d20.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
-    <None Include="src\tmp\magic3D_old.cs" />
-    <None Include="src\tmp\SpellDialog.cs" />
+    <None Include="src\tmp\magic3D_old.cs">
+      <LogicalName>
+      </LogicalName>
+    </None>
+    <None Include="src\tmp\SpellDialog.cs">
+      <LogicalName>
+      </LogicalName>
+    </None>
     <None Include="images\abstract1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\abstract2.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="ui\test4.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_cleanup.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_combat_attackers.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_combat_blockers.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_combat_damage.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_combat_end.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_combat_start.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_draw.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_main1.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_main2.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_nextturn.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_untap.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\icon_phase_upkeep.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\Mana.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="ui\phases.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="ui\player.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\normal.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\PhaseOverlay.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="ui\log.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="image2\HAL9000.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="ui\mainMenu.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="..\..\blender\coins\coin.mtl">
       <Link>meshes\coin.mtl</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="..\..\blender\coins\coin.obj">
       <Link>meshes\coin.obj</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="..\..\blender\coins\dollar.jpg">
       <Link>meshes\dollar.jpg</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
-    <None Include="src\tmp\magic3D.cs" />
+    <None Include="src\tmp\magic3D.cs">
+      <LogicalName>
+      </LogicalName>
+    </None>
+    <None Include="images\40px-Charge-icon.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\engine\Abilities.cs" />
-    <Compile Include="src\engine\Ability.cs" />
-    <Compile Include="src\engine\Attribut.cs" />
-    <Compile Include="src\engine\Cost.cs" />
-    <Compile Include="src\engine\Damage.cs" />
-    <Compile Include="src\engine\Effect.cs" />
-    <Compile Include="src\Magic.cs" />
-    <Compile Include="src\engine\MagicEngine.cs" />
-    <Compile Include="src\engine\Mana.cs" />
-    <Compile Include="src\engine\Spell.cs" />
-    <Compile Include="src\engine\Target.cs" />
-    <Compile Include="src\Player.cs" />
-    <Compile Include="src\MagicCard.cs" />
-    <Compile Include="src\Edition.cs" />
-    <Compile Include="src\CardGroup.cs" />
-    <Compile Include="src\Deck.cs" />
-    <Compile Include="src\CardInstance.cs" />
-    <Compile Include="src\engine\svarEnum.cs" />
-    <Compile Include="src\engine\Trigger.cs" />
-    <Compile Include="src\CardLayout.cs" />
-    <Compile Include="src\InPlayGroup.cs" />
-    <Compile Include="src\Library.cs" />
-    <Compile Include="src\tmp\NumericValue.cs" />
-    <Compile Include="src\ExtentionMethods.cs" />
-    <Compile Include="src\glHelper.cs" />
-    <Compile Include="src\Geo2D\Rectangle.cs" />
-    <Compile Include="src\Geo2D\Point.cs" />
-    <Compile Include="src\Geo2D\Size.cs" />
-    <Compile Include="src\engine\Enums.cs" />
-    <Compile Include="src\engine\MagicEventArgs.cs" />
-    <Compile Include="src\MessageBoxYesNo.cs" />
-    <Compile Include="src\divers\Coin.cs" />
-    <Compile Include="src\divers\IRenderable.cs" />
-    <Compile Include="src\divers\IAnimatable.cs" />
-    <Compile Include="src\Animation.cs" />
-    <Compile Include="src\AiPlayer.cs" />
+    <Compile Include="src\engine\Abilities.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Ability.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Attribut.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Cost.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Damage.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Effect.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\Magic.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\MagicEngine.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Mana.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Spell.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Target.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\Player.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\MagicCard.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\Edition.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\Deck.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\CardInstance.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\svarEnum.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Trigger.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\CardLayout.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\InPlayGroup.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\Library.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\tmp\NumericValue.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\ExtentionMethods.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\glHelper.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\Geo2D\Rectangle.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\Geo2D\Point.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\Geo2D\Size.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Enums.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\MagicEventArgs.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\MessageBoxYesNo.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\divers\Coin.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\divers\IRenderable.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\divers\IAnimatable.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\Animation.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\AiPlayer.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\CardGroup.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\NewCost.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="images\40px-Charge-icon.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="images\40px-Cloak-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Deathtouch-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Firststrike-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Flash-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Flying-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Haste-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Indestructible-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Legendary-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Lifelink-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Protection-black-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Protection-blue-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Protection-dragons-and-demons.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Protection-green-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Protection-ranged-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Protection-red-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Protection-white-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Reach-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Regenerate-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Trample-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Unblockable-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\40px-Vigilance-icon.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\manaw.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manab.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manag.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manar.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manau.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\mana2w.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\mana2b.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\mana2r.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\mana2g.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\mana2u.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manabg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manabr.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\managu.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manan.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manarg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manarw.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manaub.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manaur.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manawb.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manawg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manawu.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manax.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\manay.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\tap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
     <None Include="images\snow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -337,6 +612,56 @@
   </Target>
   -->
   <ItemGroup>
+    <Folder Include="meshes\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="src\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="src\engine\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="src\render\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="src\tmp\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="ui\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="src\Geo2D\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="image2\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="src\divers\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="shaders\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="shaders\effect0.frag" />
+    <EmbeddedResource Include="shaders\effect0 %28copier%29.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\data2\devel\GOLib\GOLib.csproj">
+      <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
+      <Name>GOLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\data2\devel\GGL\GGL.csproj">
       <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
       <Name>GGL</Name>
@@ -345,20 +670,5 @@
       <Project>{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}</Project>
       <Name>MiscUtil</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\data2\devel\GOLib\GOLib.csproj">
-      <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
-      <Name>GOLib</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="meshes\" />
-    <Folder Include="src\" />
-    <Folder Include="src\engine\" />
-    <Folder Include="src\render\" />
-    <Folder Include="src\tmp\" />
-    <Folder Include="ui\" />
-    <Folder Include="src\Geo2D\" />
-    <Folder Include="image2\" />
-    <Folder Include="src\divers\" />
   </ItemGroup>
 </Project>

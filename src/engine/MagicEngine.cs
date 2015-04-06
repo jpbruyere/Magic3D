@@ -212,8 +212,7 @@ namespace Magic3D
 			if (pp.PhaseDone)
 				GivePriorityToNextPlayer();
 		}
-
-
+			
 		void MagicEngine_MagicEvent (MagicEventArg arg)
 		{
 			switch (arg.Type) {
@@ -323,12 +322,12 @@ namespace Magic3D
 			case GamePhases.Main2:
 
 				break;
-			case GamePhases.BeforeCombat:
-				if (!cp.HaveCreaturesOnTableToAttack)
+			case GamePhases.BeforeCombat:				
+				if (cp.CreaturesAbleToAttack.Count() > 0)
 					SwitchToNextPhase ();
 				break;
 			case GamePhases.DeclareAttacker:
-				if (!cp.HaveCreaturesOnTableToAttack)
+				if (cp.CreaturesAbleToAttack.Count() > 0)
 					SwitchToNextPhase ();
 				else if (cp.Type == Player.PlayerType.human)
 					stopChrono ();
@@ -406,7 +405,7 @@ namespace Magic3D
 				break;
 			case GamePhases.Main2:
 			case GamePhases.Main1:
-				if (CurrentPhase == GamePhases.Main1 && !cp.HaveCreaturesOnTableToAttack)
+				if (CurrentPhase == GamePhases.Main1 && cp.CreaturesAbleToAttack.Count() == 0)
 					CurrentPhase = GamePhases.EndOfCombat;
 				break;
 			case GamePhases.BeforeCombat:
@@ -473,10 +472,6 @@ namespace Magic3D
 			
 		public void ClickOnCard (CardInstance c)
 		{
-
-
-			//            if (Magic3D.pCurrentSpell.Visible) //promt for something
-			//            {
 			if (ip.CurrentSpell != null)
 			{
 				if (ip.CurrentSpell.SelectedTargets.Count < ip.CurrentSpell.RequiredTargetCount)
@@ -488,7 +483,6 @@ namespace Magic3D
 				CheckStackForUnasignedDamage();
 				return;
 			}
-			//            }
 
 			switch (c.CurrentGroup.GroupName) {
 			case CardGroupEnum.Library:
@@ -497,7 +491,15 @@ namespace Magic3D
 				#region hand
 				if (c.Controler != ip || c.Controler != cp)
 					return;
-
+				if (CurrentPhase == GamePhases.Main1 || CurrentPhase == GamePhases.Main2){
+					if (c.Model.Types == CardTypes.Land) {
+						if (cp.AllowedLandsToBePlayed>0)
+							MagicEvent (new MagicEventArg (MagicEventType.PlayLand, c));
+					} else
+						ip.CurrentSpell = new Spell (c);					
+				}else if (CurrentPhase != GamePhases.CleanUp){
+					
+				}
 				switch (CurrentPhase) {
 				case GamePhases.Untap:
 					break;
@@ -507,25 +509,13 @@ namespace Magic3D
 					break;
 				case GamePhases.Main1:
 				case GamePhases.Main2:
-					if (c.Model.Types == CardTypes.Land) {
-						if (cp.AllowedLandsToBePlayed>0)
-							MagicEvent (new MagicEventArg (MagicEventType.PlayLand, c));
-					} else
-						ip.CurrentSpell = new Spell (c);
 					break;
 				case GamePhases.BeforeCombat:
-					break;
 				case GamePhases.DeclareAttacker:
-
-					break;
 				case GamePhases.DeclareBlocker:
-					break;
 				case GamePhases.FirstStrikeDame:
-					break;
 				case GamePhases.CombatDamage:
-					break;
 				case GamePhases.EndOfCombat:
-					break;
 				case GamePhases.EndOfTurn:
 					break;
 				case GamePhases.CleanUp:
@@ -686,18 +676,16 @@ namespace Magic3D
 		/// <returns>true if all damages are assigned</returns>
 		public bool CheckStackForUnasignedDamage ()
 		{
-			//            foreach (Damage d in MagicStack.ToArray().OfType<Damage>())
-			//            {
-			//                if (d.Target == null)
-			//                {
-			//                    Magic3D.pCurrentSpell.Promt.Text = d.Amount + " damage from " + d.Source.Model.Name + " to assign";
-			//                    Magic3D.pCurrentSpell.Visible = true;
-			//                    return false;
-			//                }
-			//            }
+            foreach (Damage d in MagicStack.ToArray().OfType<Damage>())
+            {
+                if (d.Target == null)
+                {
+					Magic.AddLog(d.Amount + " damage from " + d.Source.Model.Name + " to assign");                    
+                    return false;
+                }
+            }
 			return true;
 		}
-
 		#endregion
 
 		#region Mouse handling
@@ -781,6 +769,7 @@ namespace Magic3D
 				if (pp.CurrentSpell.SelectedTargets.Count < pp.CurrentSpell.RequiredTargetCount) {
 //                    if (pp.Type == Player.PlayerType.human)
 //                        Magic3D.pCurrentSpell.Update(pp.CurrentSpell);
+					return;
 				}
 
 				if (pp.ManaPool != null) {

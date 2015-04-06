@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using OpenTK.Graphics.OpenGL;
-using OpenTK;
-using go;
-using GGL;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
+using System.Text;
 using Cairo;
+using GGL;
+using go;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
 
 using GLU = OpenTK.Graphics.Glu;
 
@@ -18,6 +18,7 @@ namespace Magic3D
     [Serializable]
 	public class CardInstance : IDamagable, IRenderable
     {
+		#region CardAnimEvent
 		public class CardAnimEventArg : EventArgs
 		{
 			public CardInstance card;
@@ -25,6 +26,7 @@ namespace Magic3D
 				card = _card;
 			}
 		}
+		#endregion
 
 		#region CTOR
 		public CardInstance(MagicCard mc)
@@ -76,7 +78,6 @@ namespace Magic3D
             int sum = 0;
             foreach (Damage dm in Damages)
                 sum += dm.Amount;
-
             if (sum > Toughness)
                 PutIntoGraveyard();
             else
@@ -155,10 +156,10 @@ namespace Magic3D
         {
             get
             {
-				if (_isTapped||HasSummoningSickness)
+				if (_isTapped || HasSummoningSickness)
                     return false;
 
-                if (getAbilitiesByType(AbilityEnum.Defender) != null)
+                if (getAbilitiesByType (AbilityEnum.Defender) != null)
                     return false;
 
                 if (HasEffect(EffectType.CantAttack))
@@ -167,7 +168,6 @@ namespace Magic3D
                 return true;
             }
         }
-
         public bool CanBlock(CardInstance blockedCard)
         { 
             if (_isTapped)
@@ -414,17 +414,15 @@ namespace Magic3D
 		#region IRenderable implementation
 		public void Render ()
 		{
+			Matrix4 mSave = Magic.texturedShader.ModelMatrix;            
+			Magic.texturedShader.ModelMatrix = ModelMatrix * Magic.texturedShader.ModelMatrix;
+
 			if (CardInstance.selectedCard == this)
 				Magic.texturedShader.Color = SelectedColor;
 			else if (Combating)
 				Magic.texturedShader.Color = go.Color.Red;
-			else if (HasSummoningSickness)
-				Magic.texturedShader.Color = SicknessColor;
-			else
+			else 
 				Magic.texturedShader.Color = notSelectedColor;
-
-			Matrix4 mSave = Magic.texturedShader.ModelMatrix;            
-			Magic.texturedShader.ModelMatrix = ModelMatrix * Magic.texturedShader.ModelMatrix;
 
 			Model.Render();
 
@@ -438,14 +436,28 @@ namespace Magic3D
 						mO = Matrix4.CreateRotationZ (-Controler.zAngle);
 
 					mO *= Matrix4.CreateTranslation(0.25f, -0.6125f, 0f);
+
 					Magic.texturedShader.ModelMatrix = mO * Magic.texturedShader.ModelMatrix;
 
 					MagicCard.pointsMesh.Render(PrimitiveType.TriangleStrip);
+
 				}
+			}
+
+			if (HasSummoningSickness) {				
+			
+//				Magic.testShader.Enable ();
+//				Magic.testShader.ProjectionMatrix = Magic.projection;
+//				Magic.testShader.ModelViewMatrix = Magic.modelview;
+				Magic.texturedShader.ModelMatrix = Matrix4.CreateTranslation (0, 0, 0.1f) * Magic.texturedShader.ModelMatrix ;
+				GL.BindTexture (TextureTarget.Texture2D, Magic.testShader.Texture);
+				MagicCard.CardMesh.Render (PrimitiveType.TriangleStrip);
+				GL.BindTexture (TextureTarget.Texture2D, 0);
+
+//				Magic.testShader.Disable ();
 			}
 			Magic.texturedShader.ModelMatrix = mSave;
 			Magic.texturedShader.Color = go.Color.White;
-
 		}
 
 		public Matrix4 ModelMatrix {

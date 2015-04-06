@@ -34,17 +34,17 @@ namespace Magic3D
 		static string cardsDBPath = rootDir + @"MagicCardDataBase/";
         static Random rnd = new Random();
         
-		public static vaoMesh cardMesh;
+		public static vaoMesh CardMesh;
 		static vaoMesh abilityMesh;
 		public static vaoMesh pointsMesh;
 
-        static int cardBack = 0;
+        public static int cardBack = 0;
 
         public string Name;
         public Cost Cost;
         public MultiformAttribut<CardTypes> Types = new MultiformAttribut<CardTypes>();
         public List<Ability> Abilities = new List<Ability>();
-        public List<string> Triggers = new List<string>();
+        public List<Trigger> Triggers = new List<Trigger>();
         public List<string> Konstrains = new List<string>();
         public List<string> R = new List<string>();
         public List<string> DeckNeeds = new List<string>();
@@ -86,8 +86,7 @@ namespace Magic3D
         {
             get { return texture == null ? 0 : texture[_selectedTexture]; }
         }
-
-
+			
         //public bool HasType(CardTypes ct)
         //{
         //    return Types.Contains(ct) ? true : false;
@@ -99,7 +98,7 @@ namespace Magic3D
         public static ImageSurface imgManaB;
         public static ImageSurface imgManaU;
 
-        static MagicCard()
+        public static void InitCardMesh()
         {
             initCardModel();
 
@@ -118,13 +117,13 @@ namespace Magic3D
 				
 			GL.CullFace(CullFaceMode.Front);
             GL.BindTexture(TextureTarget.Texture2D, cardBack);
-			cardMesh.Render (PrimitiveType.TriangleStrip);
+			CardMesh.Render (PrimitiveType.TriangleStrip);
 
 			//Magic.texturedShader.ModelMatrix = Matrix4.CreateRotationY (MathHelper.Pi) * Magic.texturedShader.ModelMatrix;
 
 			GL.CullFace(CullFaceMode.Back);
             GL.BindTexture(TextureTarget.Texture2D, Texture);
-			cardMesh.Render (PrimitiveType.TriangleStrip);
+			CardMesh.Render (PrimitiveType.TriangleStrip);
 
 			GL.BindTexture(TextureTarget.Texture2D, 0);
         }
@@ -183,10 +182,7 @@ namespace Magic3D
             //updateGraphic(file);
             return t;        
         }
-
-        
-
-
+			
         void updateGraphic(string file)
         {
             int width = 100;
@@ -240,8 +236,7 @@ namespace Magic3D
             bmp.UnlockBits(data);
 
         }
-
-
+			
         public static List<MagicCard> MissingPicToDownload = new List<MagicCard>();
 
         public static void PictureDownloader()
@@ -299,7 +294,7 @@ namespace Magic3D
         {
 			cardBack = new Texture(@"images/card_back.jpg");
 
-			cardMesh = new vaoMesh(0, 0, 0, CardWidth, CardHeight);
+			CardMesh = new vaoMesh(0, 0, 0, CardWidth, CardHeight);
             
 			abilityMesh = new vaoMesh(0, 0, 0.001f, 0.1f, 0.1f);
 			pointsMesh = new vaoMesh(0, 0, 0.002f, 0.50f, 0.2f);            
@@ -424,7 +419,7 @@ namespace Magic3D
 							Effect.Parse(tmp[1],ref aa);
 							break;
 						case "t":
-							c.Triggers.Add(tmp[1]);
+							c.Triggers.Add(Trigger.Parse(tmp[1]));
 							break;
 						case "svar":
 							switch (tmp[1].ToLower())

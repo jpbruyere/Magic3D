@@ -52,6 +52,19 @@ namespace Magic3D
             Prevention,
         }
 
+		public enum ModeEnum
+		{
+			NotSet,
+			Continuous,
+			RaiseCost,
+			ReduceCost,
+			CantBeCast,
+			CantPlayLand,
+			CantAttack,
+			ETBTapped
+		}
+
+
         public EffectType TypeOfEffect;
         public CardInstance Source;
         public Cost CounterEffectCost;
@@ -71,6 +84,8 @@ namespace Magic3D
         {
             string[] tmp = s.Split(new char[] { '|' });
 
+			ModeEnum Mode = Effect.ModeEnum.NotSet;
+
             foreach (string t in tmp)
             {
                 string[] tmp2 = t.Split(new char[] { '$' });
@@ -78,7 +93,8 @@ namespace Magic3D
                 int v;
                 switch (tmp2[0].Trim())
                 {
-                    case "Mode":
+				case "Mode":
+					Mode = (ModeEnum)Enum.Parse (typeof(ModeEnum), tmp2 [1]);
                         break;
                     case "Affected":
                         break;
@@ -274,7 +290,7 @@ namespace Magic3D
             }
         }
     }
-
+	 
     [Serializable]
     public class ControlEffect : Effect
     {

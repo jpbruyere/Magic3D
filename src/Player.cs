@@ -15,16 +15,19 @@ namespace Magic3D
 
     public class Player : IDamagable
     {
+		//TODO: to remove 2 class separate
         public enum PlayerType
         {
             human,
             ai
         }
-
+		/// <summary>
+		/// Overall game status
+		/// </summary>
 		public enum PlayerStates
 		{
 			init,
-			PlayDrawChoice,
+			PlayDrawChoice,		
 			InitialDraw,
 			KeepMuliganChoice,
 			Ready
@@ -139,7 +142,6 @@ namespace Magic3D
                 if (_currentSpell == value)
                     return;
 
-
 //				if (_currentSpell != null) {
 //					if (_currentSpell.RemainingCost != _currentSpell.Source.Model.Cost) {
 //						//put already spent mana back into Manapool
@@ -151,14 +153,6 @@ namespace Magic3D
 					Magic.AddLog ("Trying to cast: " + value.Source.Model.Name);
 
                 _currentSpell = value;
-                
-//                if (_currentSpell == null)
-//                    Magic3D.pCurrentSpell.Visible = false;
-//                else if (MagicEngine.CurrentEngine.pp.Type == PlayerType.human)
-//                {
-//                    Magic3D.pCurrentSpell.Visible = true;
-//                    Magic3D.pCurrentSpell.Update(_currentSpell);
-//                }
             }
         }
         public CardInstance CurrentBlockingCreature
@@ -342,8 +336,6 @@ namespace Magic3D
 			}
 			Animation.DelayMs = 0;
 		}
-
-
  		public void DrawOneCard()
         {
             CardInstance c = Library.TakeTopOfStack;
@@ -351,14 +343,7 @@ namespace Magic3D
 //            Animation.StartAnimation(new AngleAnimation(c, "yAngle", 0, MathHelper.Pi * 0.1f));
 //            Animation.StartAnimation(new AngleAnimation(c, "xAngle",
 //				MathHelper.Pi - Vector3.CalculateAngle(Magic.vLook, Vector3.UnitZ), MathHelper.Pi * 0.03f));
-        }
-//        public void PutCardInPlay(CardInstance c)
-//        {
-//            Hand.RemoveCard(c);
-//            InPlay.AddCard(c);
-//			Animation.StartAnimation(new AngleAnimation(c, "xAngle", 0, MathHelper.Pi * 0.3f));
-//        }
-			
+        }			
 		public void AddDamages(Damage d)
 		{
 			LifePoints -= d.Amount;
@@ -391,7 +376,7 @@ namespace Magic3D
 				return;
 			}
 
-			if (e.pp != this||e.State<EngineStates.CurrentPlayer)
+			if (e.pp != this || e.State < EngineStates.CurrentPlayer)
 				return;
 
 			switch (e.CurrentPhase)
@@ -442,18 +427,47 @@ namespace Magic3D
 			//            e.Chrono.Stop();
         }
  
-        public bool HaveCreaturesOnTableToAttack
+        public IEnumerable<CardInstance> CreaturesAbleToAttack
         {
             get
             {
-				return InPlay.Cards.Where(c => !c.IsTapped && c.Model.Types == CardTypes.Creature && !c.HasSummoningSickness).Count() > 0 ? true : false;
+				foreach (CardInstance c in InPlay.Cards) {
+					if (c.Model.Types == CardTypes.Creature && 
+						!c.IsTapped && !c.HasSummoningSickness) {						
+							yield return c;
+					}
+				}
             }
         }
         public bool HaveAttackingCreature
         {
             get { return AttackingCreature.Length > 0 ? true : false; }
         }
+//		public bool PlayableSpell
+//		{
+//			get{
+//				MagicEngine e = MagicEngine.CurrentEngine;
+//
+//				if (e.cp == this) {
+//					if (e.CurrentPhase == GamePhases.Main1 || e.CurrentPhase == GamePhases.Main2) {
+//						
+//					}
+//				}
+//
+//			}
+//		}
+		public IEnumerable<CardInstance> PlayableInstants{
+			get {
+				Cost availableMana = AvailableManaOnTable;
 
+				foreach (CardInstance c in Hand.Cards) {
+					if (c.Model.Types == CardTypes.Instant) {
+						if (c.Model.Cost < availableMana)
+							yield return c;
+					}
+				}
+			}
+		}
         public void ActivateAvailableMana(MagicEngine engine)
         {
             foreach (CardInstance c in InPlay.Cards.Where(crd => !crd.IsTapped))

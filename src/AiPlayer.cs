@@ -147,7 +147,8 @@ namespace Magic3D
 					PhaseDone = true;
 					break;
 				}
-			}		}
+			}		
+		}
 
 		public void aiPayManaIfNeedeed()
 		{
@@ -176,6 +177,7 @@ namespace Magic3D
 			}
 			return false;
 		}
+
 		public bool AITryToPlayLand()
 		{            
 			CardInstance[] lands = Hand.Cards.Where(c => c.Model.Types == CardTypes.Land).ToArray();
