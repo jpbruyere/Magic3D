@@ -1,0 +1,10 @@
+﻿<?xml version="1.0"?>
+<Container Width="900" Height="300"	
+	Margin="10" Focusable="True" Background="0,5;0,5;0,5;0,5">
+		<Label Name="txtCard" Multiline="true"
+				TextAlignment="TopLeft" Font="mono,10"						
+								 Margin="1" Width="0" Height="0"
+								Foreground="White"
+								Background="Transparent"
+								Text="editable text" />	
+</Container>

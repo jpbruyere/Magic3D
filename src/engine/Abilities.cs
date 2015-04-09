@@ -48,5 +48,7 @@ namespace Magic3D
 
         Mana,
 
+		LooseLife,
+		GainLife,
     }
 }

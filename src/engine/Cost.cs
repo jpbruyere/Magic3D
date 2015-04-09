@@ -141,10 +141,17 @@ namespace Magic3D
         {
             if (c2 == null)
                 return false;
+			if (c1 == null) {
+				if (c2.CostType == CostTypes.Mana) {
+					if ((c2 as Mana).count == 0)
+						return false;
+				}
+				return true;
+			}
             Cost left = c1.Clone();
             Cost right = c2.Clone();
-            Cost result = left.Pay(ref right);
-            return result == null ? true : false;
+            Cost result = right.Pay(ref left);
+            return result == null ? false : true;
         }
         public static bool operator >(Cost c1, Cost c2)
         {
@@ -154,7 +161,13 @@ namespace Magic3D
             Cost right = c1.Clone();
             return left.Pay(ref right) == null ? true : false;
         }
-        public static Cost Parse(string costString)
+		public static bool operator ==(Cost c, CostTypes ct){
+			return c == null ? false : c.CostType == ct;
+		} 
+		public static bool operator !=(Cost c, CostTypes ct){
+			return ct == null ? true : c.CostType != ct;
+		} 
+		public static Cost Parse(string costString)
         {
             if (costString.ToLower() == "no cost")
                 return null;
@@ -248,6 +261,15 @@ namespace Magic3D
             return sum;
         }
 
+		public static bool IsNullOrCountIsZero(Cost c)
+		{
+			if (c == null)
+				return true;
+			Mana m = c as Mana;
+			if (m == null)
+				return false;
+			return m.count == 0;
+		}
         public virtual bool Contains(Cost c)
         {
             Costs cst = this as Costs;

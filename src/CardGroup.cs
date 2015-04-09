@@ -10,6 +10,7 @@ namespace Magic3D
 {
     public enum CardGroupEnum
     {
+		Any,
         Library,
         Hand,
         InPlay,
@@ -63,9 +64,7 @@ namespace Magic3D
         {
             Cards.Remove(c);
 
-            c.CurrentGroup = null;
-
-            MagicEngine.CurrentEngine.RaiseMagicEvent(new MagicEventArg(MagicEventType.QuitZone, c));
+            //c.CurrentGroup = null;
 
             float hSpace = HorizontalSpacing;
 

@@ -90,20 +90,23 @@ namespace Magic3D
 			float cY = this.y;
 			float cZ = this.z;
 
+			float attachedCardsSpacing = 0.01f;
+
 			foreach (CardInstance c in Cards) {
-				Animation.StartAnimation (new FloatAnimation (c, "x", cX, 0.2f));
-				Animation.StartAnimation (new FloatAnimation (c, "y", cY, 0.2f));
-				Animation.StartAnimation (new FloatAnimation (c, "z", cZ, 0.2f));
+				float aX = cX;
+				float aY = cY;
+				float aZ = cZ + c.AttachedCards.Count * attachedCardsSpacing;
+
+				Animation.StartAnimation (new FloatAnimation (c, "x", aX, 0.2f));
+				Animation.StartAnimation (new FloatAnimation (c, "y", aY, 0.2f));
+				Animation.StartAnimation (new FloatAnimation (c, "z", aZ, 0.2f));
 				Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
 				Animation.StartAnimation (new AngleAnimation (c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
 
-				float aX = cX;
-				float aY = cY;
-				float aZ = cZ;
 				foreach (CardInstance ac in c.AttachedCards) {
 					aX += 0.15f;
 					aY += 0.15f;
-					aZ -= 0.001f;
+					aZ -= attachedCardsSpacing;
 
 					Animation.StartAnimation (new FloatAnimation (ac, "x", aX, 0.2f));
 					Animation.StartAnimation (new FloatAnimation (ac, "y", aY, 0.2f));

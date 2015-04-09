@@ -211,6 +211,11 @@
       <LogicalName>
       </LogicalName>
     </None>
+    <None Include="ui\text.goml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <LogicalName>
+      </LogicalName>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\engine\Abilities.cs">

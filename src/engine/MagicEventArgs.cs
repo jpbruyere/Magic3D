@@ -42,13 +42,26 @@ namespace Magic3D
 			return tmp;
 		}
 	}
+	public class ChangeZoneEventArg : MagicEventArg
+	{
+		public CardGroupEnum Origine = CardGroupEnum.Any;
+		public CardGroupEnum Destination = CardGroupEnum.Any;
 
+		public ChangeZoneEventArg(CardInstance _source, CardGroupEnum _origine, CardGroupEnum _destination)
+		{
+			Type = MagicEventType.ChangeZone;
+			Source = _source;
+			Origine = _origine;
+			Destination = _destination;
+		}
+	}
 	public class SpellEventArg : MagicEventArg
 	{
 		public Spell Spell;
 
-		public SpellEventArg ()
+		public SpellEventArg (Spell _spell)
 		{
+			Spell = _spell;
 			Type = MagicEventType.CastSpell;
 		}
 		public override string ToString ()

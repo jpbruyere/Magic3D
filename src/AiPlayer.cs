@@ -8,10 +8,7 @@ namespace Magic3D
 	public class AiPlayer : Player
 	{
 		#region CTOR
-		public AiPlayer (string _name, string _deckPath) : base(_name,_deckPath)
-		{
-			Type = PlayerType.ai;
-		}
+		public AiPlayer (string _name, string _deckPath) : base(_name,_deckPath){}
 		#endregion
 
 		public override void initInterface ()
@@ -49,7 +46,7 @@ namespace Magic3D
 			if (e.pp != this || e.State < EngineStates.CurrentPlayer)
 				return;
 
-			if (CurrentSpell != null)
+			if (CurrentAction != null)
 			{
 				ActivateAvailableMana(e);
 				return;
@@ -152,9 +149,9 @@ namespace Magic3D
 
 		public void aiPayManaIfNeedeed()
 		{
-			if (CurrentSpell != null)
+			if (CurrentAction != null)
 			{
-				if (CurrentSpell.RemainingCost != null)
+				if (CurrentAction.RemainingCost != null)
 				{
 
 				}
@@ -170,7 +167,7 @@ namespace Magic3D
 				{
 					if (c.Model.Cost < availableMana)
 					{
-						CurrentSpell = new Spell(c);
+						CurrentAction = new Spell(c);
 						return true;
 					}
 				}
@@ -197,7 +194,6 @@ namespace Magic3D
 			}
 			InPlay.UpdateLayout();
 		}
-
 	}
 }
 

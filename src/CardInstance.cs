@@ -36,7 +36,7 @@ namespace Magic3D
 			if (Model.Types != CardTypes.Creature)
 				return;
 
-			UpdateOverlay();
+
 		}
 		#endregion
 
@@ -49,7 +49,7 @@ namespace Magic3D
 
 		public static go.Color notSelectedColor = new go.Color(0.9f, 0.9f, 0.9f, 1f);
 		public static go.Color SelectedColor = new go.Color(1f, 1f, 1f, 1f);
-		public static go.Color SicknessColor = new go.Color(0.8f, 0.7f, 1f, 1f);
+		public static go.Color AttackingColor = new go.Color(1.0f, 0.8f, 0.8f, 1f);
         #endregion
 
 
@@ -59,16 +59,41 @@ namespace Magic3D
 
         public MagicCard Model;
         public CardGroup CurrentGroup;
-        public bool HasFocus = false;
-
-        public EffectList Effects = new EffectList();
-        public List<CardInstance> AttachedCards = new List<CardInstance>();
-        public List<CardInstance> BlockingCreatures = new List<CardInstance>();
-        public List<Damage> Damages = new List<Damage>();
-        public CardInstance BlockedCreature = null;
-        public bool IsAttached = false;
+		public bool HasFocus = false;
 		public bool HasSummoningSickness = false;
 
+        public EffectList Effects = new EffectList();
+		public List<CardInstance> BlockingCreatures = new List<CardInstance>();
+		public List<Damage> Damages = new List<Damage>();
+		public CardInstance BlockedCreature = null;
+
+		#region Attachment
+        public List<CardInstance> AttachedCards = new List<CardInstance>();
+		public void AttachCard(CardInstance c)
+		{			
+			c.AttachedTo = this;
+			AttachedCards.Add (c);
+
+			updateArrows ();
+
+			Controler.InPlay.UpdateLayout ();
+		}
+		public void DetacheCard(CardInstance c)
+		{
+			c.AttachedTo = null;
+			AttachedCards.Remove (c);
+
+			updateArrows ();
+
+			if (!c.HasType (CardTypes.Equipment))
+				c.PutIntoGraveyard ();			
+		}
+		public CardInstance AttachedTo = null;
+		public bool IsAttached {
+			get { return AttachedTo == null ? false : true; }
+		}
+		#endregion
+			
         public void AddDamages(Damage d)
         {
             Damages.Add(d);
@@ -83,31 +108,41 @@ namespace Magic3D
             else
                 UpdateOverlay();
         }
+		public void ChangeZone(CardGroupEnum _newZone){			
+			CardGroupEnum _oldZone = CurrentGroup.GroupName;
 
+			CurrentGroup.RemoveCard (this);
+			Controler.allGroups.Where(g=>g.GroupName==_newZone).FirstOrDefault().AddCard (this);
+
+
+			MagicEngine.CurrentEngine.RaiseMagicEvent (
+				new ChangeZoneEventArg (this, _oldZone, _newZone));
+
+			UpdateOverlay ();
+		}
         public void PutIntoGraveyard()
         {
             Reset();
-            CurrentGroup.RemoveCard(this);
-            Controler.Graveyard.AddCard(this);
+			ChangeZone (CardGroupEnum.Graveyard);			
         }
 
         public void Reset()
         {
             ResetPositionAndRotation();
             ResetOverlay();
-            Damages.Clear();
+
+			Damages.Clear();
             Combating = false;
             if (BlockedCreature != null)
             {
                 BlockedCreature.BlockingCreatures.Remove(this);
                 BlockedCreature = null;
             }
-            tapped = false;        
-        }
+            tappedWithoutEvent = false;
 
-        public Ability AttachAb
-        {
-            get { return Model.Abilities.Where(a => a.AbilityType == AbilityEnum.Attach).FirstOrDefault(); }
+			if (!IsAttached)
+				return;
+			AttachedTo.DetacheCard (this);
         }
 
 		public Ability[] getAbilitiesByType(AbilityEnum ae)
@@ -115,7 +150,6 @@ namespace Magic3D
 			return Model.Abilities.Where (a => a.AbilityType == ae).ToArray();
         }
 			        
-
         public bool HasEffect(EffectType et)
         {
             foreach (Effect e in Effects)
@@ -142,7 +176,11 @@ namespace Magic3D
             }
             return true;
         }
-        
+		public bool HasType(CardTypes t)
+		{
+			return Model.Types == t;
+		}
+
         public bool Combating
         {
             get { return _combating; }
@@ -151,15 +189,14 @@ namespace Magic3D
                 _combating = value;                 
             }
         }
-
         public bool CanAttack
         {
             get
             {
-				if (_isTapped || HasSummoningSickness)
+				if (_isTapped || HasSummoningSickness ||!HasType(CardTypes.Creature))
                     return false;
 
-                if (getAbilitiesByType (AbilityEnum.Defender) != null)
+                if (HasAbility (AbilityEnum.Defender))
                     return false;
 
                 if (HasEffect(EffectType.CantAttack))
@@ -180,23 +217,13 @@ namespace Magic3D
 
             return true;
         }
-        
-        public Player Controler
-        {
-            get
-            {
-                ControlEffect ce = Effects.OfType<ControlEffect>().LastOrDefault();
-                return ce == null ? _controler : ce.Controler;
-            }
-            set { _controler = value; }
-        }
-
+       
 		//TODO: remove redundant function
         public bool IsTapped
         {
             get { return _isTapped; }
         }
-        bool tapped
+        public bool tappedWithoutEvent
         {
             get { return _isTapped; }
             set
@@ -216,22 +243,33 @@ namespace Magic3D
         }
         public void Tap()
         {
-            tapped = true;
+            tappedWithoutEvent = true;
             MagicEngine.CurrentEngine.RaiseMagicEvent(new MagicEventArg(MagicEventType.TapCard, this));
         }
-        public void Untap()
+        public void TryToUntap()
         {
             Effect e = Effects.Where(ef => ef.TypeOfEffect == EffectType.DoesNotUntap).LastOrDefault();
 
             if (e == null)
-                tapped = false;
+                tappedWithoutEvent = false;
         }
 
-        public int Power
+		public Player Controler
+		{
+			get
+			{
+				ControlEffect ce = Effects.OfType<ControlEffect>().LastOrDefault();
+				return ce == null ? _controler : ce.Controler;
+			}
+			set { _controler = value; }
+		}
+
+		public int Power
         {
             get
             {
                 int tmp = Model.Power;
+
                 foreach (NumericEffect e in Effects.OfType<NumericEffect>())
                 {
                     switch (e.TypeOfEffect)
@@ -244,7 +282,11 @@ namespace Magic3D
                             break;
                     }
                 }
-
+				foreach (CardInstance c in AttachedCards) {
+					foreach (Ability a in c.getAbilitiesByType(AbilityEnum.Attach)) {
+						
+					}
+				}
                 return tmp;
             }
         }
@@ -420,45 +462,74 @@ namespace Magic3D
 			if (CardInstance.selectedCard == this)
 				Magic.texturedShader.Color = SelectedColor;
 			else if (Combating)
-				Magic.texturedShader.Color = go.Color.Red;
+				Magic.texturedShader.Color = AttackingColor;
 			else 
 				Magic.texturedShader.Color = notSelectedColor;
 
 			Model.Render();
 
-			if (pointsTexture != 0 && CurrentGroup != null)
-			{
+			if (pointsTexture != 0 && CurrentGroup != null && !HasFocus)
+			{				
 				if (CurrentGroup.GroupName == CardGroupEnum.InPlay)
 				{
 					Matrix4 mO = Matrix4.Identity;
 					GL.BindTexture(TextureTarget.Texture2D, pointsTexture);
-					if (!HasFocus)
-						mO = Matrix4.CreateRotationZ (-Controler.zAngle);
 
-					mO *= Matrix4.CreateTranslation(0.25f, -0.6125f, 0f);
+						mO = Matrix4.CreateRotationX (Magic.FocusAngle) * Matrix4.CreateRotationZ (-Controler.zAngle);
+					if (_isTapped)
+						mO *= Matrix4.CreateRotationZ (MathHelper.PiOver2);
+
+					mO *= Matrix4.CreateTranslation(0.25f, -0.6125f, 0.1f);
 
 					Magic.texturedShader.ModelMatrix = mO * Magic.texturedShader.ModelMatrix;
-
+					Magic.texturedShader.Color = go.Color.White;
 					MagicCard.pointsMesh.Render(PrimitiveType.TriangleStrip);
-
 				}
 			}
 
-			if (HasSummoningSickness) {				
-			
-//				Magic.testShader.Enable ();
-//				Magic.testShader.ProjectionMatrix = Magic.projection;
-//				Magic.testShader.ModelViewMatrix = Magic.modelview;
-				Magic.texturedShader.ModelMatrix = Matrix4.CreateTranslation (0, 0, 0.1f) * Magic.texturedShader.ModelMatrix ;
-				GL.BindTexture (TextureTarget.Texture2D, Magic.testShader.Texture);
+			if (HasSummoningSickness) {			
+				Magic.texturedShader.ModelMatrix = Matrix4.CreateTranslation (0, 0, 0.1f) * ModelMatrix * mSave ;
+				GL.BindTexture (TextureTarget.Texture2D, Magic.wirlpoolShader.Texture);
 				MagicCard.CardMesh.Render (PrimitiveType.TriangleStrip);
 				GL.BindTexture (TextureTarget.Texture2D, 0);
-
-//				Magic.testShader.Disable ();
 			}
+
+
 			Magic.texturedShader.ModelMatrix = mSave;
 			Magic.texturedShader.Color = go.Color.White;
+
+			if (arrows == null)
+				return;
+
+			renderArrow ();
+
 		}
+
+		#region Arrows
+		vaoMesh arrows;
+		void updateArrows(){
+			if (arrows!=null)
+				arrows.Dispose ();
+			arrows = null;
+
+			float z = 1.0f;
+			foreach (CardInstance ac in AttachedCards) {
+				arrows += new Arrow3d (ac.Position, this.Position, Vector3.UnitZ * z);
+				z += 0.2f;
+			}
+		}
+		void renderArrow(){
+			Magic.arrowShader.Enable ();
+			Magic.arrowShader.ProjectionMatrix = Magic.projection;
+			Magic.arrowShader.ModelViewMatrix = Magic.modelview;
+			Magic.arrowShader.ModelMatrix = Matrix4.Identity;
+			GL.PointSize (2f);
+			GL.Disable (EnableCap.CullFace);
+			arrows.Render (PrimitiveType.TriangleStrip);
+			GL.Enable (EnableCap.CullFace);
+			Magic.arrowShader.Disable ();
+		}
+		#endregion
 
 		public Matrix4 ModelMatrix {
 			get
@@ -540,6 +611,9 @@ namespace Magic3D
 		}
 		public void UpdateOverlay()
 		{
+			if (!(this.HasType (CardTypes.Creature) && CurrentGroup.GroupName == CardGroupEnum.InPlay))
+				return;
+			
 			int width = 100;
 			int height = 40;
 			int x = 0;
@@ -629,12 +703,6 @@ namespace Magic3D
 		}
 
 		#endregion
-
-        public bool IsInLibrary
-        {
-            get { return CurrentGroup.GroupName == CardGroupEnum.Library ? true : false; }
-        }
-			
 
         public override string ToString()
         {

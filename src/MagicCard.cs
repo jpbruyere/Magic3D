@@ -40,6 +40,7 @@ namespace Magic3D
 
         public static int cardBack = 0;
 
+		public string FilePath;
         public string Name;
         public Cost Cost;
         public MultiformAttribut<CardTypes> Types = new MultiformAttribut<CardTypes>();
@@ -68,7 +69,7 @@ namespace Magic3D
         public string picFileNameWithoutExtension
         {
             get
-            {
+            {				
                 string[] tmp = picturePath.Split(new char[] { '/' });
                 string[] f = tmp[tmp.Length - 1].Split(new char[] { '.' });
                 return f[0];
@@ -361,6 +362,7 @@ namespace Magic3D
 		public static void LoadCardData(string path)
 		{
 			MagicCard c = new MagicCard();
+			c.FilePath = path;
 
 			using (Stream s = new FileStream(path, FileMode.Open))
 			{
@@ -416,12 +418,30 @@ namespace Magic3D
 							Ability aa = c.Abilities.FirstOrDefault();
 							if (aa == null)
 								aa = new Ability();
-							Effect.Parse(tmp[1],ref aa);
+							aa.Effects = Effect.Parse(tmp[1]).ToList();
 							break;
 						case "t":
 							c.Triggers.Add(Trigger.Parse(tmp[1]));
 							break;
 						case "svar":
+							#region TRIGGERS
+							if (tmp [1].ToLower ().StartsWith ("trig")) {
+								TrigExec te;
+								if (!Enum.TryParse (tmp [1], true, out te)) {
+									Debug.WriteLine ("unknow trigger: " + tmp [1]);
+									break;
+								}
+								IEnumerable<Trigger> trigs = c.Triggers.Where (tt => tt.Exec == te);
+								if (trigs.Count () == 0) {
+									Debug.WriteLine ("cant find trigGainLife trigger");
+									break;
+								}else if(trigs.Count () > 1)
+									Debug.WriteLine ("Multiple corresponding triggers.");
+								c.Abilities.Add (Ability.Parse (tmp [2], trigs.FirstOrDefault ()));
+
+								break;
+							}
+							#endregion
 							switch (tmp[1].ToLower())
 							{
 							case "darkeffect":
@@ -437,15 +457,11 @@ namespace Magic3D
 								break;
 							case "remaideck":
 								break;
-							case "triggainlife":
-								break;
 							case "piccount":
 								c.nbrImg = int.Parse(tmp[2]);
 								break;
 							default:
-								if (!Svars.Contains(tmp[1]))
-									Svars.Add(tmp[1]);
-
+								Debug.WriteLine ("Unknow SVAR: " + tmp[1]);
 								break;
 							}
 							break;

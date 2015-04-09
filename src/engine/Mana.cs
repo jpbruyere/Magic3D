@@ -257,7 +257,8 @@ namespace Magic3D
         }
         public virtual bool IsSameType(Mana m)
         {
-            return m.TypeOfMana == TypeOfMana && TypeOfMana != ManaTypes.Composite && count > 0 && m.count > 0 ? true : false;
+			return m==null ? false : m.TypeOfMana == TypeOfMana && 
+				TypeOfMana != ManaTypes.Composite && count > 0 && m.count > 0 ? true : false;
         }
         public override string ToString()
         {

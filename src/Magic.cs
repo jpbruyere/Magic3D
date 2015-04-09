@@ -1,19 +1,16 @@
 #define MONO_CAIRO_DEBUG_DISPOSE
 
-
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
+using GGL;
+using go;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
-
-using System.Diagnostics;
-
-using go;
-using System.Threading;
-using GGL;
-using System.Collections.Generic;
-//using GameLib;
 using GLU = OpenTK.Graphics.Glu;
 
 namespace Magic3D
@@ -96,7 +93,8 @@ namespace Magic3D
 
 		public static GameLib.SingleLightSimpleShader texturedShader;
 		public static GameLib.GlowShader glowShader;
-		public static GameLib.EffectShader testShader;
+		public static GameLib.EffectShader wirlpoolShader;
+		public static GameLib.EffectShader arrowShader;
 
 		public static Color activeColor = Color.White;
 
@@ -127,6 +125,7 @@ namespace Magic3D
 
 			drawTable ();
 
+
 			if (engine != null)
 				engine.processRendering ();
 
@@ -136,7 +135,8 @@ namespace Magic3D
 				Renderables [i].Render ();
 				i++;
 			}
-				
+
+
 		}
 			
 		#region table
@@ -160,7 +160,6 @@ namespace Magic3D
 			table.Render(PrimitiveType.TriangleStrip);
 		}
 		#endregion
-
 		#region dice
 		vaoMesh dice;
 		public static Matrix4 diceMat = Matrix4.Identity;
@@ -180,6 +179,12 @@ namespace Magic3D
 		}
 		#endregion
 
+		void initArrow()
+		{
+			arrowShader = new GameLib.EffectShader ("GGL.Shaders.GameLib.red");
+
+		}
+			
 		#region interface
 		public Player[] Players;
 		MagicEngine engine;
@@ -187,11 +192,14 @@ namespace Magic3D
 		go.Container uiPhases;
 		go.Container uiMainMenu;
 		MessageBoxYesNo msgBox;
+		go.Container wCardText;
+		go.Label txtCard;
 
 		Label labFps, labFpsMin, labFpsMax, labUpdate;
 
 		static go.Container uiLogs;
-		static go.VerticalStack vsLogs;
+		public static go.Button btOk;
+
 		static Label[] llogs = new Label[4];
 		static List<String> logBuffer = new List<string> ();
 		static int logBuffPtr = 0;
@@ -200,10 +208,17 @@ namespace Magic3D
 		{
 			LoadInterface("ui/log.xml", out uiLogs);
 			uiLogs.MouseWheelChanged += onLogsWheel ;
-			vsLogs = uiLogs.FindByName ("logs") as VerticalStack;
 			for (int i = 0; i < 4; i++) {
-				llogs [i] = vsLogs.FindByName ("line" + (i + 1)) as Label;
+				llogs [i] = uiLogs.FindByName ("line" + (i + 1)) as Label;
 			}
+			btOk = uiLogs.FindByName ("btOk") as Button;
+			//btOk.Visible = false;
+		}
+
+		void BtOk_MouseClick (object sender, MouseButtonEventArgs e)
+		{			
+			MagicEngine.CurrentEngine.ip.CurrentAction.Validate ();
+			btOk.Visible = false;			
 		}
 		public static void AddLog(string msg)
 		{
@@ -233,15 +248,13 @@ namespace Magic3D
 		}
 		#endregion
 
-
-
 		void onStartNewGame(Object sender, MouseButtonEventArgs e)
 		{
 			uiMainMenu.Visible = false;
 			Players = new Player[] 
 			{ 
-				new Player("player 1","Lightforce.dck"), 
-				new AiPlayer("player 2","Kor Armory.dck")
+				new Player("player 1","Kor Armory.dck"), 
+				new AiPlayer("player 2","Lightforce.dck")
 			};
 			this.AddWidget (Players [0].playerPanel);
 			this.AddWidget (Players [1].playerPanel);
@@ -262,6 +275,8 @@ namespace Magic3D
 			AddAnimation (coin);
 			coin.AnimationFinished += onTossResult;
 			#endif
+
+			btOk.Visible = false;
 		}
 		void onTossResult(object sender, EventArgs e)
 		{
@@ -306,9 +321,7 @@ namespace Magic3D
 			//engine.State = EngineStates.PlayDrawChoiceDone;
 			//engine.StartGame();
 		}
-
-
-
+			
 		void MagicEngine_MagicEvent(MagicEventArg arg)
 		{
 			Container b;
@@ -338,7 +351,7 @@ namespace Magic3D
 				break;
 			case MagicEventType.TapCard:
 				break;
-			case MagicEventType.QuitZone:
+			case MagicEventType.ChangeZone:
 				break;
 			default:
 				break;
@@ -357,6 +370,10 @@ namespace Magic3D
 			InitLogPanel ();
 			LoadInterface("ui/test4.xml", out g);
 			LoadInterface("ui/phases.xml", out uiPhases);
+			LoadInterface ("ui/text.goml", out wCardText);
+			txtCard = wCardText.FindByName ("txtCard") as Label;
+			wCardText.Visible = false;
+
 			labFps = g.FindByName ("labFps") as Label;
 			labFpsMin = g.FindByName ("labFpsMin") as Label;
 			labFpsMax = g.FindByName ("labFpsMax") as Label;
@@ -403,8 +420,9 @@ namespace Magic3D
 
 			texturedShader = new GameLib.SingleLightSimpleShader ();
 			glowShader = new GameLib.GlowShader ();
-			testShader = new GameLib.EffectShader ("GGL.Shaders.GameLib.wirlpool2",256,256);
+			wirlpoolShader = new GameLib.EffectShader ("GGL.Shaders.GameLib.wirlpool2",256,256);
 
+			initArrow ();
 
 			initTableModel ();
 
@@ -475,7 +493,7 @@ namespace Magic3D
 				return;
 
 			//animate only if cards are loaded
-			if (engine.deckLoaded)
+			if (engine.DecksLoaded)
 				Animation.ProcessAnimations();
 			else{
 				bool ok = true;
@@ -486,12 +504,12 @@ namespace Magic3D
 					}
 				}
 				if (ok)
-					engine.deckLoaded = true;
+					engine.DecksLoaded = true;
 			}
 
 			engine.Process ();
 
-			testShader.Update (time);
+			wirlpoolShader.Update (time);
 
 			Rectangle r = this.ClientRectangle;
 			GL.Viewport( r.X, r.Y, r.Width, r.Height);
@@ -522,6 +540,19 @@ namespace Magic3D
 				break;
 			case Key.Escape:
 				this.CursorVisible = true;
+				break;
+			case Key.H:				
+				if (wCardText.Visible) {
+					wCardText.Visible = false;
+					break;
+				}
+				if (CardInstance.selectedCard == null)
+					return;
+				using (Stream s = new FileStream(CardInstance.selectedCard.Model.FilePath,FileMode.Open))
+					using (StreamReader sr = new StreamReader (s))
+						txtCard.Text = sr.ReadToEnd ();
+					
+				wCardText.Visible = true;
 				break;
 			case Key.T:
 				//startTossing ();
@@ -568,7 +599,7 @@ namespace Magic3D
 					
 				if (engine == null)
 					return;
-				if (!engine.deckLoaded)
+				if (!engine.DecksLoaded)
 					return;
 					
 				engine.processMouseMove (new Point<float> ((float)e.X, (float)e.Y));
