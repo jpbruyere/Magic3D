@@ -53,6 +53,11 @@ namespace Magic3D
 		public CardGroup Exhiled;
 		public CardGroup[] allGroups = new CardGroup[5];
 
+		public CardGroup GetGroup(CardGroupEnum zone)
+		{
+			return allGroups.Where (g => g.GroupName == zone).FirstOrDefault ();
+		}
+
 		#region CTOR
 		public Player(string _name, string _deckPath)
 		{
@@ -71,7 +76,7 @@ namespace Magic3D
 			Hand.z = 3.3f;
 			Hand.xAngle = MathHelper.Pi - Vector3.CalculateAngle (Magic.vLook, Vector3.UnitZ);
 			Hand.HorizontalSpacing = 0.7f;
-			Hand.VerticalSpacing = 0.02f;
+			Hand.VerticalSpacing = -0.01f;
 
 			Graveyard = new CardGroup(CardGroupEnum.Graveyard);
 			Graveyard.x = -4;

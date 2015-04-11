@@ -102,48 +102,51 @@ namespace Magic3D
 			}
 			else
 			{
-				switch (e.CurrentPhase)
-				{
-				case GamePhases.Untap:
-					PhaseDone = true;
-					break;
-				case GamePhases.Upkeep:
-					PhaseDone = true;
-					break;
-				case GamePhases.Draw:
-					PhaseDone = true;
-					break;
-				case GamePhases.Main1:
-					PhaseDone = true;
-					break;
-				case GamePhases.BeforeCombat:
-					PhaseDone = true;
-					break;
-				case GamePhases.DeclareAttacker:
-					PhaseDone = true;
-					break;
-				case GamePhases.DeclareBlocker:
-					PhaseDone = true;
-					break;
-				case GamePhases.FirstStrikeDame:
-					PhaseDone = true;
-					break;
-				case GamePhases.CombatDamage:
-					PhaseDone = true;
-					break;
-				case GamePhases.EndOfCombat:
-					PhaseDone = true;
-					break;
-				case GamePhases.Main2:
-					PhaseDone = true;
-					break;
-				case GamePhases.EndOfTurn:
-					PhaseDone = true;
-					break;
-				case GamePhases.CleanUp:
-					PhaseDone = true;
-					break;
+				if (e.pp == this) {
+					e.GivePriorityToNextPlayer ();
 				}
+//				switch (e.CurrentPhase)
+//				{
+//				case GamePhases.Untap:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.Upkeep:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.Draw:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.Main1:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.BeforeCombat:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.DeclareAttacker:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.DeclareBlocker:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.FirstStrikeDame:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.CombatDamage:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.EndOfCombat:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.Main2:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.EndOfTurn:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.CleanUp:
+//					PhaseDone = true;
+//					break;
+//				}
 			}		
 		}
 
@@ -165,11 +168,11 @@ namespace Magic3D
 			{
 				if (c.Model.Types == CardTypes.Creature)
 				{
-					if (c.Model.Cost < availableMana)
-					{
-						CurrentAction = new Spell(c);
-						return true;
-					}
+					if (availableMana < c.Model.Cost)
+						continue;
+					
+					CurrentAction = new Spell(c);
+					return true;
 				}
 			}
 			return false;

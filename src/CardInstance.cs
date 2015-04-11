@@ -62,7 +62,7 @@ namespace Magic3D
 		public bool HasFocus = false;
 		public bool HasSummoningSickness = false;
 
-        public EffectList Effects = new EffectList();
+        public EffectGroup Effects = new EffectGroup();
 		public List<CardInstance> BlockingCreatures = new List<CardInstance>();
 		public List<Damage> Damages = new List<Damage>();
 		public CardInstance BlockedCreature = null;
@@ -75,6 +75,7 @@ namespace Magic3D
 			AttachedCards.Add (c);
 
 			updateArrows ();
+			UpdateOverlay ();
 
 			Controler.InPlay.UpdateLayout ();
 		}
@@ -84,6 +85,7 @@ namespace Magic3D
 			AttachedCards.Remove (c);
 
 			updateArrows ();
+			UpdateOverlay ();
 
 			if (!c.HasType (CardTypes.Equipment))
 				c.PutIntoGraveyard ();			
@@ -112,8 +114,7 @@ namespace Magic3D
 			CardGroupEnum _oldZone = CurrentGroup.GroupName;
 
 			CurrentGroup.RemoveCard (this);
-			Controler.allGroups.Where(g=>g.GroupName==_newZone).FirstOrDefault().AddCard (this);
-
+			Controler.GetGroup(_newZone).AddCard (this);
 
 			MagicEngine.CurrentEngine.RaiseMagicEvent (
 				new ChangeZoneEventArg (this, _oldZone, _newZone));
@@ -139,7 +140,7 @@ namespace Magic3D
                 BlockedCreature = null;
             }
             tappedWithoutEvent = false;
-
+			HasSummoningSickness = false;
 			if (!IsAttached)
 				return;
 			AttachedTo.DetacheCard (this);
@@ -152,11 +153,15 @@ namespace Magic3D
 			        
         public bool HasEffect(EffectType et)
         {
-            foreach (Effect e in Effects)
-            {
-                if (e.TypeOfEffect == et)
-                    return true;
-            }
+			foreach (CardInstance ca in AttachedCards) {
+				foreach (Ability a in ca.Model.Abilities) {
+					foreach (Effect e in a.Effects)
+					{
+						if (e.TypeOfEffect == et)
+							return true;
+					}					
+				}
+			}
             return false;
         }
         public bool HasAbility(AbilityEnum ab)
@@ -176,6 +181,15 @@ namespace Magic3D
             }
             return true;
         }
+		public bool HasColor(ManaTypes color)
+		{
+			if (!Model.Colors.Contains (color))
+				return false;
+
+			//TODO:test with color gain or loose effects
+
+			return true;
+		}
 		public bool HasType(CardTypes t)
 		{
 			return Model.Types == t;
@@ -214,7 +228,9 @@ namespace Magic3D
                 ! (this.HasAbility(AbilityEnum.Flying) || this.HasAbility(AbilityEnum.Reach)))
                 return false;
 
-
+			if (HasEffect(EffectType.CantBlock))
+				return false;
+			
             return true;
         }
        
@@ -284,7 +300,10 @@ namespace Magic3D
                 }
 				foreach (CardInstance c in AttachedCards) {
 					foreach (Ability a in c.getAbilitiesByType(AbilityEnum.Attach)) {
-						
+						foreach (NumericEffect e in a.Effects.OfType<NumericEffect>().
+							Where(ef=>ef.TypeOfEffect == EffectType.AddPower)) {
+							tmp += e.NumericValue;
+						}
 					}
 				}
                 return tmp;
@@ -307,6 +326,14 @@ namespace Magic3D
                             break;
                     }
                 }
+				foreach (CardInstance c in AttachedCards) {
+					foreach (Ability a in c.getAbilitiesByType(AbilityEnum.Attach)) {
+						foreach (NumericEffect e in a.Effects.OfType<NumericEffect>().
+							Where(ef=>ef.TypeOfEffect == EffectType.AddTouchness)) {
+							tmp += e.NumericValue;
+						}
+					}
+				}
                 foreach (Damage d in Damages)
                     tmp -= d.Amount;
 
@@ -326,18 +353,39 @@ namespace Magic3D
         public float x
         {
             get { return _x; }
-            set { _x = value; }
+            set { 
+				if (_x == value)
+					return;
+				
+				_x = value; 
+
+				//updateArrows ();
+			}
         }
         public float y
         {
             get { return _y; }
-            set { _y = value; }
-        }
+			set { 
+				if (_y == value)
+					return;
+
+				_y = value; 
+
+				//updateArrows ();
+			}        
+		}
         public float z
         {
             get { return _z; }
-            set { _z = value; }
-        }
+			set { 
+				if (_z == value)
+					return;
+
+				_z = value; 
+
+				//updateArrows ();
+			}        
+		}
         public float xAngle
         {
             get { return _xAngle; }
@@ -431,12 +479,21 @@ namespace Magic3D
         
 		public Rectangle<float> getProjectedBounds()
 		{
-			Matrix4 M = ModelMatrix * Controler.Transformations * 
+			Matrix4 M = ModelMatrix * Controler.Transformations *
 			            Magic.texturedShader.ModelViewMatrix *
 						Magic.texturedShader.ProjectionMatrix;
 			Rectangle<float> projR = Rectangle<float>.Zero;
-			Point<float> pt1 = glHelper.Project (MagicCard.CardBounds.TopLeft, M, Magic.viewport [2], Magic.viewport [3]);
-			Point<float> pt2 = glHelper.Project (MagicCard.CardBounds.BottomRight, M, Magic.viewport [2], Magic.viewport [3]);
+			Point<float> topLeft, bottomRight;
+			if (_isTapped) {
+				topLeft = MagicCard.CardBounds.BottomLeft;
+				bottomRight = MagicCard.CardBounds.TopRight;
+			} else {
+				topLeft = MagicCard.CardBounds.TopLeft;
+				bottomRight = MagicCard.CardBounds.BottomRight;
+			}
+			
+			Point<float> pt1 = glHelper.Project (topLeft, M, Magic.viewport [2], Magic.viewport [3]);
+			Point<float> pt2 = glHelper.Project (bottomRight, M, Magic.viewport [2], Magic.viewport [3]);
 			if (pt1 < pt2) {
 				projR.TopLeft = pt1;
 				projR.BottomRight = pt2;
@@ -488,7 +545,7 @@ namespace Magic3D
 			}
 
 			if (HasSummoningSickness) {			
-				Magic.texturedShader.ModelMatrix = Matrix4.CreateTranslation (0, 0, 0.1f) * ModelMatrix * mSave ;
+				Magic.texturedShader.ModelMatrix = Matrix4.CreateTranslation (0, 0, 0.3f) * ModelMatrix * mSave ;
 				GL.BindTexture (TextureTarget.Texture2D, Magic.wirlpoolShader.Texture);
 				MagicCard.CardMesh.Render (PrimitiveType.TriangleStrip);
 				GL.BindTexture (TextureTarget.Texture2D, 0);
@@ -537,9 +594,11 @@ namespace Magic3D
 				Matrix4 transformation;
 
 
-				Matrix4 Rot = Matrix4.CreateRotationX(xAngle);
-				Rot *= Matrix4.CreateRotationY(yAngle);
-				Rot *= Matrix4.CreateRotationZ(zAngle);
+				Matrix4 Rot = 
+					Matrix4.CreateRotationX (xAngle) *
+					Matrix4.CreateRotationY (yAngle) *
+					Matrix4.CreateRotationZ (zAngle);
+
 				//Matrix4 Rot = Matrix4.CreateRotationZ(zAngle);
 				transformation = Rot * Matrix4.CreateTranslation(x, y, z);
 

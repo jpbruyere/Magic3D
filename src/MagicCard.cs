@@ -418,7 +418,7 @@ namespace Magic3D
 							Ability aa = c.Abilities.FirstOrDefault();
 							if (aa == null)
 								aa = new Ability();
-							aa.Effects = Effect.Parse(tmp[1]).ToList();
+							aa.Effects = EffectGroup.Parse(tmp[1]);
 							break;
 						case "t":
 							c.Triggers.Add(Trigger.Parse(tmp[1]));

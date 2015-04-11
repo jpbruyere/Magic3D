@@ -379,6 +379,7 @@ namespace Magic3D
 		Tap,
 		DoesNotUntap,
 		CantAttack,
+		CantBlock,
 		TapAll,
 		LoseLife,
 		PreventDamage,

@@ -119,13 +119,9 @@ namespace Magic3D
 				return false;
 
 			//other target group are possible, should change
-			if (c.CurrentGroup.GroupName != CardGroupEnum.InPlay)
-				return false;
-
 			foreach (CardTarget ct in ValidTargets.Values.OfType<CardTarget>())
 			{
-				if (c.Model.Types == ct.ValidCardTypes)
-				{
+				if (ct.Accept(c)){
 					SelectedTargets.Add(c);
 					PrintNextMessage ();					
 					return true;

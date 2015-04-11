@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Reflection;
 using System.Collections;
+using System.Diagnostics;
 
 namespace Magic3D
 {
@@ -42,6 +43,229 @@ namespace Magic3D
 
             }
         }
+
+	public class EffectGroup : List<Effect>
+	{
+		public Effect.ModeEnum Mode;
+		public CardInstance Source;
+		public Cost CounterEffectCost;
+		public Trigger TrigStart;
+		public Trigger TrigEnd;
+		//public EffectList ContainingList;
+		public MultiformAttribut<Target> Affected;
+
+		public virtual void Apply(CardInstance _source, object _target = null)
+		{
+			foreach (Effect e in this) {
+				e.Apply (_source, _target);
+			}
+		}
+
+		public static EffectGroup Parse(string s)
+		{
+			string[] tmp = s.Split(new char[] { '|' });
+
+			EffectGroup effects= new EffectGroup ();
+
+
+			foreach (string t in tmp)
+			{
+				string[] tmp2 = t.Split(new char[] { '$' });
+				string value = tmp2[1].Trim();
+				int v;
+				switch (tmp2[0].Trim())
+				{
+				case "Mode":
+					effects.Mode = (Effect.ModeEnum)Enum.Parse (typeof(Effect.ModeEnum), tmp2 [1]);
+					break;
+				case "Affected":
+					effects.Affected = Target.ParseTargets (value);
+					break;
+				case "GainControl":
+					break;
+				case "Description":
+					break;
+				case "AddKeyword":
+
+					break;
+				case "Condition":
+					break;
+				case "AddAbility":
+					break;
+				case "AddPower":
+					if (!int.TryParse(value, out v))
+						break;
+					effects.Add(new NumericEffect
+						{
+							TypeOfEffect = EffectType.AddPower,
+							NumericValue = v,						
+						});
+					break;
+				case "AddToughness":
+					if (!int.TryParse(value, out v))
+						break;
+					effects.Add(new NumericEffect
+						{
+							TypeOfEffect = EffectType.AddTouchness,
+							NumericValue = v,
+						});
+					break;                        
+				case "SetPower":
+					if (!int.TryParse(value, out v))
+						break;
+					effects.Add(new NumericEffect
+						{
+							TypeOfEffect = EffectType.SetPower,
+							NumericValue = v,
+						});
+					break;
+				case "SetToughness":
+					if (!int.TryParse(value, out v))
+						break;
+					effects.Add(new NumericEffect
+						{
+							TypeOfEffect = EffectType.SetTouchness,
+							NumericValue = v,
+						});
+					break;
+				case "EffectZone":
+					break;
+				case "CharacteristicDefining":
+					break;
+				case "AddType":
+					break;
+				case "References":
+					break;
+				case "ValidCard":
+					break;
+				case "AddHiddenKeyword":
+					switch (value) {
+					case "CARDNAME can't attack or block.":
+						effects.Add (EffectType.CantAttack);
+						effects.Add (EffectType.CantBlock);
+						break;
+					default:
+						Debug.WriteLine ("Unkwnown HiddenKeyword: " + value);
+						break;
+					}
+					break;
+				case "CheckSVar":
+					break;
+				case "SVarCompare":
+					break;
+				case "AffectedZone":
+					break;
+				case "Activator":
+					break;
+				case "Type":
+					break;
+				case "Color":
+					break;
+				case "Amount":
+					break;
+				case "SetColor":
+					break;
+				case "Caster":
+					break;
+				case "OpponentAttackedWithCreatureThisTurn":
+					break;
+				case "AddColor":
+					break;
+				case "AddSVar":
+					break;
+				case "Spell":
+					break;
+				case "SetMaxHandSize":
+					break;
+				case "AddTrigger":
+					break;
+				case "RemoveKeyword":
+					break;
+				case "GlobalRule":
+					break;
+				case "Attacker":
+					break;
+				case "Cost":
+					break;
+				case "Player":
+					break;
+				case "Phases":
+					break;
+				case "Target":
+					break;
+				case "Optional":
+					break;
+				case "AILogic":
+					break;
+				case "CheckSecondSVar":
+					break;
+				case "SecondSVarCompare":
+					break;
+				case "RemoveSubTypes":
+					break;
+				case "RemoveAllAbilities":
+					break;
+				case "AddStaticAbility":
+					break;
+				case "SharedKeywordsZone":
+					break;
+				case "SharedRestrictions":
+					break;
+				case "MaxDamage":
+					break;
+				case "Source":
+					break;
+				case "RemoveCreatureTypes":
+					break;
+				case "TopCardOfLibraryIs":
+					break;
+				case "NonMana":
+					break;
+				case "GainsAbilitiesOf":
+					break;
+				case "GainsAbilitiesOfZones":
+					break;
+				case "RemoveCardTypes":
+					break;
+				case "CombatDamage":
+					break;
+				case "ValidTarget":
+					break;
+				case "RemoveType":
+					break;
+				case "ValidSource":
+					break;
+				case "RaiseMaxHandSize":
+					break;
+				case "Origin":
+					break;
+				case "MinMana":
+					break;
+				case "ValidSpellTarget":
+					break;
+				case "TapAbility":
+					break;
+				case "KeywordMultiplier":
+					break;
+				case "CheckThirdSVar":
+					break;
+				case "CheckFourthSVar":
+					break;
+				case "AddReplacementEffects":
+					break;
+				case "OnlySorcerySpeed":
+					break;
+				default:
+					break;
+				}
+			}
+
+
+			return effects;
+		}
+
+	}
+
     [Serializable]
     public class Effect
     {
@@ -52,7 +276,6 @@ namespace Magic3D
             Replacement,
             Prevention,
         }
-
 		public enum ModeEnum
 		{
 			NotSet,
@@ -64,22 +287,16 @@ namespace Magic3D
 			CantAttack,
 			ETBTapped
 		}
-
-
+			
         public EffectType TypeOfEffect;
-        public CardInstance Source;
-        public Cost CounterEffectCost;
-        public Trigger TrigStart;
-        public Trigger TrigEnd;
-        public EffectList ContainingList;
-
-        public Effect()
-        { }
-
+        
+		#region CTOR
+        public Effect() { }
         public Effect(EffectType _type)
         {
             TypeOfEffect = _type;
         }
+		#endregion
 
 		public virtual void Apply(CardInstance _source, object _target = null)
 		{
@@ -129,6 +346,8 @@ namespace Magic3D
 				break;
 			case EffectType.CantAttack:
 				break;
+			case EffectType.CantBlock:
+				break;			
 			case EffectType.TapAll:
 				break;
 			case EffectType.LoseLife:
@@ -316,216 +535,32 @@ namespace Magic3D
 			}
 		}
 
-        public static IEnumerable<Effect> Parse(string s)
-        {
-            string[] tmp = s.Split(new char[] { '|' });
 
-			List<Effect> effects= new List<Effect> ();
-
-			ModeEnum Mode = Effect.ModeEnum.NotSet;
-
-            foreach (string t in tmp)
-            {
-                string[] tmp2 = t.Split(new char[] { '$' });
-                string value = tmp2[1].Trim();
-                int v;
-                switch (tmp2[0].Trim())
-                {
-				case "Mode":
-					Mode = (ModeEnum)Enum.Parse (typeof(ModeEnum), tmp2 [1]);
-                    break;
-                case "Affected":
-                    break;
-                case "GainControl":
-                    break;
-                case "Description":
-                    break;
-                case "AddKeyword":
-                    break;
-                case "Condition":
-                    break;
-                case "AddAbility":
-                    break;
-                case "AddPower":
-                    if (!int.TryParse(value, out v))
-                        break;
-                    effects.Add(new NumericEffect
-                    {
-                        TypeOfEffect = EffectType.AddPower,
-                        NumericValue = v
-                    });
-                    break;
-                case "AddToughness":
-                    if (!int.TryParse(value, out v))
-                        break;
-                    effects.Add(new NumericEffect
-                    {
-                        TypeOfEffect = EffectType.AddTouchness,
-                        NumericValue = v
-                    });
-                    break;                        
-                case "SetPower":
-                    if (!int.TryParse(value, out v))
-                        break;
-                    effects.Add(new NumericEffect
-                    {
-                        TypeOfEffect = EffectType.SetPower,
-                        NumericValue = v
-                    });
-                    break;
-                case "SetToughness":
-                    if (!int.TryParse(value, out v))
-                        break;
-                    effects.Add(new NumericEffect
-                    {
-                        TypeOfEffect = EffectType.SetTouchness,
-                        NumericValue = v
-                    });
-                    break;
-                case "EffectZone":
-                    break;
-                case "CharacteristicDefining":
-                    break;
-                case "AddType":
-                    break;
-                case "References":
-                    break;
-                case "ValidCard":
-                    break;
-                case "AddHiddenKeyword":
-                    break;
-                case "CheckSVar":
-                    break;
-                case "SVarCompare":
-                    break;
-                case "AffectedZone":
-                    break;
-                case "Activator":
-                    break;
-                case "Type":
-                    break;
-                case "Color":
-                    break;
-                case "Amount":
-                    break;
-                case "SetColor":
-                    break;
-                case "Caster":
-                    break;
-                case "OpponentAttackedWithCreatureThisTurn":
-                    break;
-                case "AddColor":
-                    break;
-                case "AddSVar":
-                    break;
-                case "Spell":
-                    break;
-                case "SetMaxHandSize":
-                    break;
-                case "AddTrigger":
-                    break;
-                case "RemoveKeyword":
-                    break;
-                case "GlobalRule":
-                    break;
-                case "Attacker":
-                    break;
-                case "Cost":
-                    break;
-                case "Player":
-                    break;
-                case "Phases":
-                    break;
-                case "Target":
-                    break;
-                case "Optional":
-                    break;
-                case "AILogic":
-                    break;
-                case "CheckSecondSVar":
-                    break;
-                case "SecondSVarCompare":
-                    break;
-                case "RemoveSubTypes":
-                    break;
-                case "RemoveAllAbilities":
-                    break;
-                case "AddStaticAbility":
-                    break;
-                case "SharedKeywordsZone":
-                    break;
-                case "SharedRestrictions":
-                    break;
-                case "MaxDamage":
-                    break;
-                case "Source":
-                    break;
-                case "RemoveCreatureTypes":
-                    break;
-                case "TopCardOfLibraryIs":
-                    break;
-                case "NonMana":
-                    break;
-                case "GainsAbilitiesOf":
-                    break;
-                case "GainsAbilitiesOfZones":
-                    break;
-                case "RemoveCardTypes":
-                    break;
-                case "CombatDamage":
-                    break;
-                case "ValidTarget":
-                    break;
-                case "RemoveType":
-                    break;
-                case "ValidSource":
-                    break;
-                case "RaiseMaxHandSize":
-                    break;
-                case "Origin":
-                    break;
-                case "MinMana":
-                    break;
-                case "ValidSpellTarget":
-                    break;
-                case "TapAbility":
-                    break;
-                case "KeywordMultiplier":
-                    break;
-                case "CheckThirdSVar":
-                    break;
-                case "CheckFourthSVar":
-                    break;
-                case "AddReplacementEffects":
-                    break;
-                case "OnlySorcerySpeed":
-                    break;
-                default:
-                    break;
-				}
-            }
-
-            return effects;
-        }
+		#region operators
+		public static implicit operator Effect(EffectType et)
+		{
+			return new Effect (et);
+		}
+		#endregion
 
         void Effect_MagicEvent(MagicEventArg arg)
         {
-            if (TrigStart.Type != MagicEventType.Unset)
-            {
-                if (arg.Type == TrigStart.Type)
-                { }
-            }
-            if (TrigEnd.Type != MagicEventType.Unset)
-            {
-                if (arg.Type == TrigEnd.Type)
-                {
-//                    if (TrigEnd.Source != null && TrigEnd.Source == arg.Source)
-//                    {
-//                        MagicEngine.MagicEvent -= Effect_MagicEvent;
-//                        ContainingList.RemoveEffect(this);
-//                    }
-                }
-            }
+//            if (TrigStart.Type != MagicEventType.Unset)
+//            {
+//                if (arg.Type == TrigStart.Type)
+//                { }
+//            }
+//            if (TrigEnd.Type != MagicEventType.Unset)
+//            {
+//                if (arg.Type == TrigEnd.Type)
+//                {
+////                    if (TrigEnd.Source != null && TrigEnd.Source == arg.Source)
+////                    {
+////                        MagicEngine.MagicEvent -= Effect_MagicEvent;
+////                        ContainingList.RemoveEffect(this);
+////                    }
+//                }
+//            }
         }
     }
 	 
@@ -768,29 +803,29 @@ namespace Magic3D
     {
         public Ability Ability;
     }
-	public class LifeEffect : Effect
-	{		
-		public int Amount;
-		public Cost Cost;
-
-		public override void Apply (CardInstance _source, object _target = null)
-		{
-			Source = _source;
-			Source.Controler.LifePoints += Amount;
-		}
-	}
-    public class EffectList : List<Effect>
-    {
-        public void AddEffect(Effect e)
-        {
-            this.Add(e);
-            e.ContainingList = this;
-        }
-        public void RemoveEffect(Effect e)
-        {
-            this.Remove(e);
-            e.ContainingList = null;
-        }
-    }
+//	public class LifeEffect : Effect
+//	{		
+//		public int Amount;
+//		public Cost Cost;
+//
+//		public override void Apply (CardInstance _source, object _target = null)
+//		{
+//			Source = _source;
+//			Source.Controler.LifePoints += Amount;
+//		}
+//	}
+//    public class EffectList : List<Effect>
+//    {
+//        public void AddEffect(Effect e)
+//        {
+//            this.Add(e);
+//            e.ContainingList = this;
+//        }
+//        public void RemoveEffect(Effect e)
+//        {
+//            this.Remove(e);
+//            e.ContainingList = null;
+//        }
+//    }
 
 }

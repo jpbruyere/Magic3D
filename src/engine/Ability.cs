@@ -117,7 +117,7 @@ namespace Magic3D
 		}
 
 		public AbilityEnum AbilityType = AbilityEnum.Unset;
-		public List<Effect> Effects = new List<Effect> ();
+		public EffectGroup Effects = new EffectGroup ();
 		public Cost ActivationCost;
 		public string Description = "";
 
@@ -446,7 +446,7 @@ namespace Magic3D
 					});
 					break;
 				case AbilityFieldsEnum.AILogic:
-					#region AIlogic
+					#region AIlogic 
 					switch (value.Trim ()) {
 					case "GainControl":
 						break;
@@ -1321,7 +1321,7 @@ namespace Magic3D
 
 			if (str == "CARDNAME enters the battlefield tapped.") {
 				Trigger t = new Trigger (MagicEventType.PlayLand);
-				t.Targets.Add ("this");
+				t.Targets = new CardTarget (TargetType.Self);
 				TriggeredAbility ta = new TriggeredAbility (t);
 				ta.AbilityType = AbilityEnum.Unset;
 				ta.Effects.Add (new Effect (EffectType.Tap));
@@ -1406,9 +1406,8 @@ namespace Magic3D
 				a = new ActivatedAbility () { AbilityType = AbilityEnum.Attach };
 				CardTarget ct = new CardTarget ();
 				ct.Controler = ControlerType.You;
-				ct.ValidCardTypes.Value = CardTypes.Creature;
-				a.ValidTargets = new MultiformAttribut<Target> ();
-				a.ValidTargets.Value = ct;
+				ct.ValidCardTypes += CardTypes.Creature;
+				a.ValidTargets += ct;
 				a.ActivationCost = Cost.Parse (tmp [1]);
 				a.RequiredTargetCount = 1;
 				break;

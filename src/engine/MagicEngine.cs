@@ -32,11 +32,11 @@ namespace Magic3D
 			MagicEvent (arg);
 		}
 
-		public bool DecksLoaded = false;
 		public volatile EngineStates State = EngineStates.Stopped;
 		public Player[] Players;
 		public Stack<object> MagicStack = new Stack<object> ();
 
+		bool decksLoaded = false;
 
 		int _currentPlayer;
 		int _priorityPlayer;
@@ -117,9 +117,6 @@ namespace Magic3D
 
 		public void SwitchToNextPhase ()
 		{
-			foreach (Player p in Players)
-				p.PhaseDone = false;
-
 			MagicEvent (new PhaseEventArg {
 				Type = MagicEventType.EndPhase,
 				Phase = _currentPhase,
@@ -202,6 +199,23 @@ namespace Magic3D
 
 		public void Process ()
 		{
+			//temp fix to have begin not handle before end event in Magic
+			//but those kind of sync problem will surely rise 
+			if (raiseBeginPhase) {
+				raiseBeginPhase = false;
+				MagicEvent (new PhaseEventArg {
+					Type = MagicEventType.BeginPhase,
+					Phase = _currentPhase,
+					Player = Players [currentPlayerIndex]
+				});
+			}
+				
+			//animate only if cards are loaded
+			if (decksLoaded)
+				Animation.ProcessAnimations();
+			else
+				decksLoaded = Players.Where (p => !p.DeckLoaded).Count()==0;
+
 			checkCurrentAction();
 
 			foreach (Player p in Players)
@@ -218,8 +232,8 @@ namespace Magic3D
 			{
 				foreach (TriggeredAbility ta in arg.Source.Model.Abilities.OfType<TriggeredAbility>()) {						
 					Trigger t = ta.Trigger;
-					if (t.Targets.Contains("this"))
-					{
+//					if (t.Targets.Contains(TargetType.Self))
+//					{
 						if (t.Type != arg.Type)
 							continue;
 						switch (t.Type) {
@@ -229,15 +243,15 @@ namespace Magic3D
 								&& (czea.Destination == t.Destination || t.Destination == CardGroupEnum.Any))
 							{			
 								Magic.AddLog(arg.Source.ToString() + " => " + t.ToString());
-								PushOnStack (new AbilityActivation (arg.Source, ta));
+								arg.Source.Controler.CurrentAction = (new AbilityActivation (arg.Source, ta));
 							}
 							break;
 						default:
 							Magic.AddLog(arg.Source.ToString() + " => " + t.ToString());
-							PushOnStack (new AbilityActivation (arg.Source, ta));
+							arg.Source.Controler.CurrentAction = (new AbilityActivation (arg.Source, ta));
 						break;
 						}
-					}
+					//}
 
 				}
 			}
@@ -258,10 +272,10 @@ namespace Magic3D
 			case MagicEventType.EndPhase:
 				processPhaseEnd (arg as PhaseEventArg);
 				break;
+			//Land and mana abililies don't go on the stack, so
+			//there are resolved here
 			case MagicEventType.PlayLand:
-				cp.Hand.RemoveCard (arg.Source);
-				cp.InPlay.AddCard(arg.Source);
-				MagicEngine.CurrentEngine.RaiseMagicEvent(new ChangeZoneEventArg(arg.Source,CardGroupEnum.Hand,CardGroupEnum.InPlay));
+				arg.Source.ChangeZone (CardGroupEnum.InPlay);
 				cp.AllowedLandsToBePlayed--;
 				break;
 			case MagicEventType.ActivateAbility:
@@ -286,10 +300,6 @@ namespace Magic3D
 			case MagicEventType.TapCard:
 				break;
 			case MagicEventType.ChangeZone:
-//				while(arg.Source.AttachedCards.Count>0) {
-//					CardInstance ci = arg.Source.AttachedCards.FirstOrDefault ();
-//					arg.Source.DetacheCard (ci);
-//				}
 				break;
 			case MagicEventType.Unset:
 				break;
@@ -300,6 +310,9 @@ namespace Magic3D
 
 		void processPhaseBegin (PhaseEventArg pea)
 		{
+			foreach (Player p in Players)
+				p.PhaseDone = false;
+			
 			priorityPlayer = _currentPlayer;
 
 			switch (pea.Phase) {
@@ -396,10 +409,8 @@ namespace Magic3D
 					break;
 				}
 				foreach (CardInstance c in pea.Player.AttackingCreature) {					
-					if (!c.IsTapped)
+					if (!c.IsTapped && !c.HasAbility(AbilityEnum.Vigilance))
 						c.Tap ();
-					else
-						Debugger.Break ();
 				}
 				break;
 			case GamePhases.DeclareBlocker:				
@@ -440,13 +451,11 @@ namespace Magic3D
 			if (pea.Phase != GamePhases.CleanUp)
 				CurrentPhase++;
 
-			MagicEvent (new PhaseEventArg {
-				Type = MagicEventType.BeginPhase,
-				Phase = _currentPhase,
-				Player = Players [currentPlayerIndex]
-			});
+			raiseBeginPhase = true;
 		}
-			
+
+		bool raiseBeginPhase = false;
+
 		public void ClickOnCard (CardInstance c)
 		{
 			if (ip.CurrentAction != null)
@@ -467,10 +476,12 @@ namespace Magic3D
 				break;
 			case CardGroupEnum.Hand:
 				#region hand
-				if (c.Controler != ip || c.Controler != cp)
+				if (c.Controler != ip){// || c.Controler != cp)
+					c.Controler.Hand.toogleShowAll();
 					return;
+				}
 				if (CurrentPhase == GamePhases.Main1 || CurrentPhase == GamePhases.Main2){
-					if (c.Model.Types == CardTypes.Land) {
+					if (c.HasType(CardTypes.Land)) {
 						if (cp.AllowedLandsToBePlayed>0)
 							MagicEvent (new MagicEventArg (MagicEventType.PlayLand, c));
 					} else {
@@ -511,16 +522,14 @@ namespace Magic3D
 					CurrentPhase != GamePhases.CombatDamage)
 					return;
 
-				if (c.IsTapped)
-					return;
+				if (!(c.IsTapped || c.HasSummoningSickness)){
+					Ability[] activableAbs = c.Model.Abilities.Where (
+						sma => sma is ActivatedAbility && !(sma is TriggeredAbility)).ToArray();
 
-				Ability[] activableAbs = c.Model.Abilities.Where (
-					sma => sma is ActivatedAbility).ToArray();
-
-				//TODO:if multiple abs, must choose one
-				if (activableAbs.Count() > 0)
-					ip.CurrentAction = new AbilityActivation(c,activableAbs[0]);
-	
+					//TODO:if multiple abs, must choose one
+					if (activableAbs.Count() > 0)
+						ip.CurrentAction = new AbilityActivation(c,activableAbs[0]);
+				}
 
 				switch (CurrentPhase) {
 				case GamePhases.Untap:
@@ -531,14 +540,6 @@ namespace Magic3D
 					break;
 				case GamePhases.Main1:
 				case GamePhases.Main2:
-					if (c.HasSummoningSickness)
-						return;
-					
-					if (c.Model.Abilities.Count > 0) {
-						foreach (Ability ab in c.Model.Abilities) {
-
-						}
-					}
 					break;
 				case GamePhases.BeforeCombat:
 					break;
@@ -595,6 +596,7 @@ namespace Magic3D
 				c.CurrentGroup.toogleShowAll ();
 				break;
 			case CardGroupEnum.Exhiled:
+				c.CurrentGroup.toogleShowAll ();
 				break;
 			default:
 				break;
@@ -609,7 +611,7 @@ namespace Magic3D
 		{
 			//lands and their abilities does not go on stack
 			MagicAction a = s as MagicAction;
-			if (s != null){
+			if (a != null){
 				if (!a.GoesOnStack) {
 					a.Resolve ();
 					return;
@@ -621,6 +623,26 @@ namespace Magic3D
 			MagicStack.Push (s);
 
 			//s.Source.Controler.Hand.RemoveCard (s.Source);
+
+			SpellStackLayout.Cards = MagicStack.OfType<Spell> ().Select (sp => sp.CardSource).ToList ();
+			SpellStackLayout.UpdateLayout ();
+
+			GivePriorityToNextPlayer ();
+		}
+		public void PushCurrentActionOfPPOnStack()
+		{
+			//lands and their abilities does not go on stack
+			MagicAction a = pp.CurrentAction as MagicAction;
+			if (a != null){
+				if (!a.GoesOnStack) {
+					a.Resolve ();
+					pp.CurrentAction = null;
+					return;
+				}
+			}
+
+			MagicStack.Push (pp.CurrentAction);
+			pp.CurrentAction = null;
 
 			SpellStackLayout.Cards = MagicStack.OfType<Spell> ().Select (sp => sp.CardSource).ToList ();
 			SpellStackLayout.UpdateLayout ();
@@ -678,6 +700,8 @@ namespace Magic3D
 
 		public void processMouseMove (Point<float> ptM)
 		{
+			if (!decksLoaded)
+				return;
 //			Vector3 M = new Vector3( glHelper.UnProject (ref Magic.projection, Magic.modelview, Magic.viewport, new Vector2 (ptM.X, ptM.Y))) ;
 //			Magic.vMouse = Vector3.Normalize (Magic.vEye - M);
 //
@@ -768,8 +792,10 @@ namespace Magic3D
 				return;
 			}
 				
-			if (!pp.CurrentAction.IsComplete)
+			if (!pp.CurrentAction.IsComplete) {
+				//TODO: should check here if available targets
 				return;
+			}
 			
 			pp.UpdateUi ();
 
@@ -782,15 +808,13 @@ namespace Magic3D
 					return;
 				}
 			}
-
-			PushOnStack (pp.CurrentAction);
-			pp.CurrentAction = null;
-			GivePriorityToNextPlayer ();
+				
+			PushCurrentActionOfPPOnStack ();
 		}
 			
 		public void processRendering()
 		{
-			if (!DecksLoaded)
+			if (!decksLoaded)
 				return;
 
 			foreach (Player p in Players) {

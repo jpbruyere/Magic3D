@@ -13,14 +13,14 @@ namespace Magic3D
 		public InPlayGroup()
 			: base(CardGroupEnum.InPlay)
 		{
-			y = -2.5f;
+			y = -4.5f;
 			HorizontalSpacing = 1.5f;
 			MaxHorizontalSpace = 7f;
 
 			LandsLayout.x = -1f;
 			LandsLayout.y = -4.2f;
 			LandsLayout.HorizontalSpacing = 1.5f;
-			LandsLayout.VerticalSpacing = -0.001f;
+			LandsLayout.VerticalSpacing = -0.01f;
 			LandsLayout.MaxHorizontalSpace = 4f;
 
 			CreatureLayout.x = 0f;
@@ -32,8 +32,8 @@ namespace Magic3D
 			OtherLayout.x = 2f; 
 			OtherLayout.y = -2.7f;
 			OtherLayout.HorizontalSpacing = 1.5f;
-			OtherLayout.VerticalSpacing = 0.001f;
-			OtherLayout.MaxHorizontalSpace = 3f;
+			OtherLayout.VerticalSpacing = 0.01f;
+			OtherLayout.MaxHorizontalSpace = 5f;
 
 			CombatingCreature.x = -0;
 			CombatingCreature.y = -0.6f;

@@ -35,7 +35,7 @@ namespace Magic3D
 		public CardGroupEnum Origine;
 		public CardGroupEnum Destination;
 		#endregion
-		public List<Object> Targets = new List<object> ();
+		public MultiformAttribut<Target> Targets;
 		//public List<Effect> Effects;
         public GamePhases Phase;
         //public CardInstance Source;
@@ -99,27 +99,8 @@ namespace Magic3D
 								break;
 							}							
 							break;
-						case "ValidCard":
-							switch (data) {
-							case "Card.Self":
-								t.Targets.Add ("this");
-								break;
-							case "Card.Self+kicked":
-								t.Targets.Add ("this");
-								break;
-							case "Creature.Self":
-								t.Targets.Add ("this");
-								break;
-							case "Card.White":
-								t.Targets.Add (ManaTypes.White);
-								break;
-							case "Plains.YouCtrl":
-								t.Targets.Add (new object[] { CardTypes.Plains, "self" });
-								break;
-							default:
-								Debug.WriteLine ("Unknown trigger " + f[0] + " value:" + data);
-								break;
-							}
+						case "ValidCard":														
+							t.Targets = Target.ParseTargets (data);
 							break;
 						case "Execute":
 							t.Exec = (TrigExec)Enum.Parse (typeof(TrigExec), data);

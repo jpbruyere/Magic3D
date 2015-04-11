@@ -51,14 +51,17 @@ namespace Magic3D
 
             float halfWidth = hSpace * (Cards.Count) / 2;
 
-			foreach (CardInstance i in Cards)
-				Animation.StartAnimation (new FloatAnimation (i, "x", this.x - halfWidth + hSpace * Cards.IndexOf(i),0.2f));
+			foreach (CardInstance i in Cards) {
+				Animation.StartAnimation (new FloatAnimation (i, "x", this.x - halfWidth + hSpace * Cards.IndexOf (i), 0.2f));
+				Animation.StartAnimation(new FloatAnimation(i, "z", this.z + VerticalSpacing * Cards.IndexOf(i), 0.2f));
+			}
 
             Animation.StartAnimation(new FloatAnimation(c, "y", this.y, 0.2f));
-            Animation.StartAnimation(new FloatAnimation(c, "z", this.z + VerticalSpacing * Cards.Count, 0.2f));
+			Animation.StartAnimation(new FloatAnimation(c, "z", this.z + VerticalSpacing * (Cards.Count+1), 0.2f));
 			Animation.StartAnimation(new AngleAnimation(c, "yAngle", this.yAngle, MathHelper.Pi * 0.1f));
 			Animation.StartAnimation(new AngleAnimation(c, "xAngle", this.xAngle, MathHelper.Pi * 0.03f));
-            Cards.Add(c);	
+            
+			Cards.Add(c);	
 		}
         public virtual void RemoveCard(CardInstance c)
         {

@@ -185,6 +185,8 @@ namespace Magic3D
 
 		}
 			
+
+
 		#region interface
 		public Player[] Players;
 		MagicEngine engine;
@@ -196,6 +198,27 @@ namespace Magic3D
 		go.Label txtCard;
 
 		Label labFps, labFpsMin, labFpsMax, labUpdate;
+
+		void initInterface(){
+			LoadInterface("ui/mainMenu.xml", out uiMainMenu);
+			InitLogPanel ();
+			LoadInterface("ui/test4.xml", out g);
+			LoadInterface("ui/phases.xml", out uiPhases);
+			LoadInterface ("ui/text.goml", out wCardText);
+			txtCard = wCardText.FindByName ("txtCard") as Label;
+			wCardText.Visible = false;
+
+			labFps = g.FindByName ("labFps") as Label;
+			labFpsMin = g.FindByName ("labFpsMin") as Label;
+			labFpsMax = g.FindByName ("labFpsMax") as Label;
+			labUpdate = g.FindByName ("labUpdate") as Label;
+
+			//special event handlers fired only if mouse not in interface objects
+			//for scene mouse handling
+			this.MouseWheelChanged += new EventHandler<MouseWheelEventArgs>(Mouse_WheelChanged);
+			this.MouseMove += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
+			this.MouseButtonDown += new EventHandler<MouseButtonEventArgs>(Mouse_Down);;
+		}
 
 		static go.Container uiLogs;
 		public static go.Button btOk;
@@ -336,8 +359,7 @@ namespace Magic3D
 				b = uiPhases.FindByName 
 					((arg as PhaseEventArg).Phase.ToString ()) as Container;
 				if (b!=null)
-					b.child.Background = Color.White;
-				//uiPhases.InvalidateLayout ();
+					b.child.Background = Color.White;				
 				break;
 			case MagicEventType.EndPhase:
 				b = uiPhases.FindByName 
@@ -359,59 +381,33 @@ namespace Magic3D
 		}
 						
 		int frameCpt = 0;
+		public static float time = 0f;
+
 		protected override void OnLoad (EventArgs e)
 		{
-			MagicCard.initCardModel();
 
 			base.OnLoad (e);
 
-			LoadInterface("ui/mainMenu.xml", out uiMainMenu);
+			initInterface ();
 
-			InitLogPanel ();
-			LoadInterface("ui/test4.xml", out g);
-			LoadInterface("ui/phases.xml", out uiPhases);
-			LoadInterface ("ui/text.goml", out wCardText);
-			txtCard = wCardText.FindByName ("txtCard") as Label;
-			wCardText.Visible = false;
-
-			labFps = g.FindByName ("labFps") as Label;
-			labFpsMin = g.FindByName ("labFpsMin") as Label;
-			labFpsMax = g.FindByName ("labFpsMax") as Label;
-			labUpdate = g.FindByName ("labUpdate") as Label;
-
+			#region init GL
+			MagicCard.initCardModel();
 			//MagicCard.LoadCardDatabase();
 			Edition.LoadEditionsDatabase();
 			//Deck.LoadPreconstructedDecks();
-
-
-			//special event handlers fired only if mouse not in interface objects
-			//for scene mouse handling
-			this.MouseWheelChanged += new EventHandler<MouseWheelEventArgs>(Mouse_WheelChanged);
-			this.MouseMove += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
-			this.MouseButtonDown += new EventHandler<MouseButtonEventArgs>(Mouse_Down);;
-
 			//initLights ();
 
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
-
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Less);
-
 			GL.Enable(EnableCap.CullFace);
-			//GL.FrontFace (FrontFaceDirection.Cw);
-
 			GL.PrimitiveRestartIndex (int.MaxValue);
 			GL.Enable (EnableCap.PrimitiveRestart);
-
 			GL.Enable (EnableCap.PointSprite);
 			GL.Enable(EnableCap.VertexProgramPointSize);
 			GL.PointParameter(PointSpriteCoordOriginParameter.LowerLeft);
-
 			GL.Enable (EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-
-			//GL.FrontFace(FrontFaceDirection.Ccw);
-
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 			GL.ShadeModel(ShadingModel.Smooth);
 			GL.Hint (HintTarget.LineSmoothHint, HintMode.Nicest);
@@ -423,26 +419,19 @@ namespace Magic3D
 			wirlpoolShader = new GameLib.EffectShader ("GGL.Shaders.GameLib.wirlpool2",256,256);
 
 			initArrow ();
-
 			initTableModel ();
-
 			initDice ();
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");
-
+			#endregion
 
 			//engine.StartNewGame();
-
-
 			//this.AddWidget (new MessageBox ("Play first?"));
-
 			//this.CursorVisible = false;
-
 		}
-
-		public static float time = 0f;
+			
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
 			time += (float)e.Time;
@@ -492,23 +481,9 @@ namespace Magic3D
 			if (engine == null)
 				return;
 
-			//animate only if cards are loaded
-			if (engine.DecksLoaded)
-				Animation.ProcessAnimations();
-			else{
-				bool ok = true;
-				foreach (Player p in Players) {
-					if (!p.DeckLoaded) {
-						ok = false;
-						break;
-					}
-				}
-				if (ok)
-					engine.DecksLoaded = true;
-			}
-
 			engine.Process ();
 
+			//TODO:disable update if wirlpoolTexture not binded
 			wirlpoolShader.Update (time);
 
 			Rectangle r = this.ClientRectangle;
@@ -554,6 +529,9 @@ namespace Magic3D
 					
 				wCardText.Visible = true;
 				break;
+			case Key.O:
+				//engine.ip.Opponent.Hand.toogleShowAll ();
+				break;
 			case Key.T:
 				//startTossing ();
 				break;
@@ -561,7 +539,6 @@ namespace Magic3D
 		}
 
 		#region Mouse Handling
-
 		void Object_Mouse_Move(object sender, MouseMoveEventArgs e){
 			if (activeWidget == null)
 				return;
@@ -578,28 +555,24 @@ namespace Magic3D
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
-					Matrix4 m = Matrix4.CreateRotationZ (-e.XDelta * RotationSpeed);
-					m *= Matrix4.CreateFromAxisAngle (-vLookPerpendicularOnXYPlane, -e.YDelta * RotationSpeed);
-					vEyeTarget = Vector3.Zero;
-					vEye = Vector3.Transform (vEye, Matrix4.CreateTranslation (-vEyeTarget) * m * Matrix4.CreateTranslation (vEyeTarget));
+					Matrix4 m = Matrix4.CreateRotationX (-e.YDelta * RotationSpeed);
+					vLook = Vector3.Transform (vLook, m);
 					UpdateViewMatrix ();
 					return;
 				}
-				if (e.Mouse.RightButton == ButtonState.Pressed) {
-
-					Matrix4 m = Matrix4.CreateRotationZ (-e.XDelta * RotationSpeed);
-					Matrix4 m2 = Matrix4.Rotate (vLookPerpendicularOnXYPlane, -e.YDelta * RotationSpeed);
-
-					vLook = Vector3.Transform (vLook, m * m2);
-
-					//vLook = Vector3.Transform(vLook, m2);
-					UpdateViewMatrix ();
-					return;
-				}
+//				if (e.Mouse.RightButton == ButtonState.Pressed) {
+//
+//					Matrix4 m = Matrix4.CreateRotationZ (-e.XDelta * RotationSpeed);
+//					Matrix4 m2 = Matrix4.Rotate (vLookPerpendicularOnXYPlane, -e.YDelta * RotationSpeed);
+//
+//					vLook = Vector3.Transform (vLook, m * m2);
+//
+//					//vLook = Vector3.Transform(vLook, m2);
+//					UpdateViewMatrix ();
+//					return;
+//				}
 					
 				if (engine == null)
-					return;
-				if (!engine.DecksLoaded)
 					return;
 					
 				engine.processMouseMove (new Point<float> ((float)e.X, (float)e.Y));
