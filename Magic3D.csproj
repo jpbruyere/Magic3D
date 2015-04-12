@@ -216,6 +216,15 @@
       <LogicalName>
       </LogicalName>
     </None>
+    <None Include="images\abstrait3.jpg">
+      <LogicalName>
+      </LogicalName>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="images\abstrait4.jpg">
+      <LogicalName>
+      </LogicalName>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\engine\Abilities.cs">
@@ -363,6 +372,14 @@
       </LogicalName>
     </Compile>
     <Compile Include="src\engine\NewCost.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\TriggeredAbility.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\ActivatedAbility.cs">
       <LogicalName>
       </LogicalName>
     </Compile>

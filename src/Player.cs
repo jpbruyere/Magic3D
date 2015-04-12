@@ -33,7 +33,7 @@ namespace Magic3D
         int _lifePoints;
         string _name;
         Deck _deck;
-		MagicAction _currentAction;
+		//MagicAction _currentAction;
 
         CardInstance _currentBlockingCreature;
         List<Damage> _damages = new List<Damage>();
@@ -133,29 +133,29 @@ namespace Magic3D
 			set;
 		}
         
-		MagicAction priviousAction;
-		public MagicAction CurrentAction
-        {
-            get { return _currentAction; }
-            set
-            {
-                if (_currentAction == value)
-                    return;
-				
-				if (value is AbilityActivation) {
-					if ((value as AbilityActivation).Source is ManaAbility)
-						priviousAction = _currentAction;
-				}
-
-				_currentAction = value;
-
-				if (_currentAction == null && priviousAction != null) {
-					_currentAction = priviousAction;
-					priviousAction = null;
-					CurrentAction.PayCost (ref ManaPool);
-				}
-            }
-        }
+//		MagicAction priviousAction;
+//		public MagicAction CurrentAction
+//        {
+//            get { return _currentAction; }
+//            set
+//            {
+//                if (_currentAction == value)
+//                    return;
+//				
+//				if (value is AbilityActivation) {
+//					if ((value as AbilityActivation).Source is ManaAbility)
+//						priviousAction = _currentAction;
+//				}
+//
+//				_currentAction = value;
+//
+//				if (_currentAction == null && priviousAction != null) {
+//					_currentAction = priviousAction;
+//					priviousAction = null;
+//					CurrentAction.PayCost (ref ManaPool);
+//				}
+//            }
+//        }
         public CardInstance CurrentBlockingCreature
         {
             get { return _currentBlockingCreature; }
@@ -440,10 +440,22 @@ namespace Magic3D
 				}
             }
         }
-        public bool HaveAttackingCreature
+        public bool HasAttackingCreature
         {
             get { return AttackingCreature.Length > 0 ? true : false; }
         }
+		public bool HasActionPending
+		{
+			get {				
+				MagicEngine e = MagicEngine.CurrentEngine;
+				if (e.pp != this)
+					return false;
+				if (e.MagicStack.Count == 0)
+					return false;
+				MagicAction ma = e.MagicStack.Peek () as MagicAction;
+				return ma == null ? false : (ma.IsComplete || ma.CardSource.Controler != this) ? false : true;				
+			}
+		}
 //		public bool PlayableSpell
 //		{
 //			get{
@@ -471,16 +483,21 @@ namespace Magic3D
 		}
         public void ActivateAvailableMana(MagicEngine engine)
         {
+			MagicAction ma = engine.MagicStack.Peek () as MagicAction;
+			if (ma == null) {
+				Debug.WriteLine ("no action to activate mana for.");
+				return;
+			}
+
             foreach (CardInstance c in InPlay.Cards.Where(crd => !crd.IsTapped))
             {
-                foreach (ManaAbility ma in c.Model.Abilities.OfType<ManaAbility>())
+				foreach (ManaAbility a in c.Model.Abilities.OfType<ManaAbility>())
                 {
-                    if (ma.ActivationCost.Contains(CostTypes.Tap))
+                    if (a.ActivationCost.Contains(CostTypes.Tap))
                     {
-                        if (CurrentAction.RemainingCost.Contains(ma.ProducedMana))
+                        if (ma.RemainingCost.Contains(a.ProducedMana))
                         {
-                            c.Tap();
-							engine.RaiseMagicEvent(new AbilityEventArg(ma,c));
+							MagicEngine.CurrentEngine.PushOnStack(new AbilityActivation(c,a));
                             return;
                         }
                     }

@@ -58,39 +58,6 @@ namespace Magic3D
 
     }
 
-
-    //public class ManaCount : Mana
-    //{
-
-
-
-
-    //    public static Mana operator +(ManaCount m, Mana n)
-    //    {
-    //        return m.IsSameType(n) ? new ManaCount(m.count + 1, m.Type) : null;
-    //    }
-    //    public static Mana operator +(ManaCount m, ManaCount n)
-    //    {
-    //        if (m.IsSameType(n))
-    //            return new ManaCount(m.count + n.count, m.Type);
-    //        ManaSum sum = new ManaSum();
-    //        sum += m;
-    //        sum += n;
-    //        return sum;
-    //    }
-    //    public override string ToString()
-    //    {
-    //        if (Type == ManaTypes.Colorless)
-    //            return count.ToString();
-
-    //        string tmp = Manas[0].ToString();
-
-    //        for (int i = 1; i < Manas.Count; i++)
-    //            tmp += "/" + Manas[i].ToString();
-
-    //        return tmp;
-    //    }
-    //}
     public class ManaChoice : Mana
     {
         public ManaChoice()
@@ -159,8 +126,6 @@ namespace Magic3D
         public ManaTypes TypeOfMana = ManaTypes.Colorless;
         public int count = 0;
 
-
-
         public Mana()
             : base(CostTypes.Mana)
         {
@@ -185,7 +150,8 @@ namespace Magic3D
             count = x;
             TypeOfMana = ManaTypes.Colorless;
         }
-        public override Cost Clone()
+        
+		public override Cost Clone()
         {            
             return new Mana(count,TypeOfMana);
         }

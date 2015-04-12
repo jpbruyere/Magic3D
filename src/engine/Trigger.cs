@@ -57,8 +57,8 @@ namespace Magic3D
 			//t.Effects = new List<Effect> ();
 
 
-			using (Stream s = new FileStream ("trigVars.txt",FileMode.Append)) {				
-				using (TextWriter tw = new StreamWriter (s)) {
+//			using (Stream s = new FileStream ("trigVars.txt",FileMode.Append)) {				
+//				using (TextWriter tw = new StreamWriter (s)) {
 					foreach (string i in tmp) {
 						string[] f = i.Trim ().Split (new char[] { '$' });
 						string data = f [1].Trim();
@@ -122,10 +122,10 @@ namespace Magic3D
 							//tw.WriteLine (data + ",");
 							break;
 						case "TriggerZones":
-							if (list.Contains (data))
-								break;
-							list.Add (data);
-							tw.WriteLine ("case \"" + data + "\":\n\tbreak;");
+//							if (list.Contains (data))
+//								break;
+//							list.Add (data);
+//							tw.WriteLine ("case \"" + data + "\":\n\tbreak;");
 							break;
 						case "CheckSVar":
 							break;
@@ -143,8 +143,8 @@ namespace Magic3D
 						}
 
 					}
-				}
-			}
+//				}
+//			}
 			return t;
 		}
     }

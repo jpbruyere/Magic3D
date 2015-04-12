@@ -56,7 +56,7 @@ namespace Magic3D
 		public static Vector3 vEye = new Vector3(0.0f, -10.0f, 10.0f);    // Camera Position
 		public static Vector3 vEyeTarget;// = new Vector3(40f, 50f, 0.1f);
 		public static Vector3 vLook = new Vector3(0f, 1f, -1.3f);  // Camera vLook Vector
-		public static Vector4 vLight = new Vector4 (0.0f, -20.0f, 10.0f, 0.0f);
+		public static Vector4 vLight = new Vector4 (0.0f, -15.0f, 15.0f, 0.0f);
 		public static Vector3 vMouse = Vector3.Zero;
 
 		float _zFar = 1280.0f;
@@ -144,12 +144,12 @@ namespace Magic3D
 		public static int tableTexture;
 		public void initTableModel()
 		{
-			tableTexture = new Texture(@"images/marble1.jpg");
+			tableTexture = new Texture(@"images/abstrait3.jpg");
 
 			const float _width = 16f;
 			const float _height = 16f;
-			const float texTileX = 3f;
-			const float texTileY = 3f;
+			const float texTileX = 1f;
+			const float texTileY = 2f;
 			const float z = -0.1f;
 
 			table = new vaoMesh (0, 0, z, _width, _height, texTileX, texTileY);
@@ -240,7 +240,7 @@ namespace Magic3D
 
 		void BtOk_MouseClick (object sender, MouseButtonEventArgs e)
 		{			
-			MagicEngine.CurrentEngine.ip.CurrentAction.Validate ();
+			//MagicEngine.CurrentEngine.ip.CurrentAction.Validate ();
 			btOk.Visible = false;			
 		}
 		public static void AddLog(string msg)
@@ -534,6 +534,11 @@ namespace Magic3D
 				break;
 			case Key.T:
 				//startTossing ();
+				break;
+			case Key.U:
+				if (CardInstance.selectedCard == null)
+					return;
+				CardInstance.selectedCard.updateArrows ();			
 				break;
 			}
 		}

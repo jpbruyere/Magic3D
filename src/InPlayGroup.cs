@@ -24,21 +24,21 @@ namespace Magic3D
 			LandsLayout.MaxHorizontalSpace = 4f;
 
 			CreatureLayout.x = 0f;
-			CreatureLayout.y = -1.5f;
+			CreatureLayout.y = -1.8f;
 			CreatureLayout.HorizontalSpacing = 1.5f;
-			CreatureLayout.VerticalSpacing = 0.001f;
+			CreatureLayout.VerticalSpacing = 0.01f;
 			CreatureLayout.MaxHorizontalSpace = 6f;
 
-			OtherLayout.x = 2f; 
+			OtherLayout.x = 4f; 
 			OtherLayout.y = -2.7f;
 			OtherLayout.HorizontalSpacing = 1.5f;
 			OtherLayout.VerticalSpacing = 0.01f;
-			OtherLayout.MaxHorizontalSpace = 5f;
+			OtherLayout.MaxHorizontalSpace = 4f;
 
 			CombatingCreature.x = -0;
-			CombatingCreature.y = -0.6f;
+			CombatingCreature.y = -0.7f;
 			CombatingCreature.HorizontalSpacing = 1.5f;
-			CombatingCreature.VerticalSpacing = 0.001f;
+			CombatingCreature.VerticalSpacing = 0.01f;
 			CombatingCreature.MaxHorizontalSpace = 7f;
 		}
 
@@ -57,7 +57,7 @@ namespace Magic3D
 			LandsLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Land && !(c.IsAttached || c.Combating)).ToList();
 			CreatureLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Creature && !(c.IsAttached || c.Combating)).ToList();
 			OtherLayout.Cards = Cards.Where(c => c.Model.Types != CardTypes.Land && c.Model.Types != CardTypes.Creature
-				&& !(c.IsAttached || c.Combating)).ToList();
+				&& !(c.IsAttachedToACardInTheSameCamp || c.Combating)).ToList();
 
 			LandsLayout.UpdateLayout();
 			CreatureLayout.UpdateLayout();

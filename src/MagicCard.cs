@@ -332,17 +332,17 @@ namespace Magic3D
             //    c.Texture = new Texture(fi[i]);
             //    cardDatabase.Add(c);
             //}
-            using (Stream s = new FileStream("enum.cs", FileMode.Create))
-            {
-                using (StreamWriter sr = new StreamWriter(s))
-                {
-                    foreach (string st in Ability.strings)
-                    {
-                        sr.WriteLine("case \"" + st + "\":");
-                        sr.WriteLine("break;");
-                    }
-                }
-            }
+//            using (Stream s = new FileStream("enum.cs", FileMode.Create))
+//            {
+//                using (StreamWriter sr = new StreamWriter(s))
+//                {
+//                    foreach (string st in Ability.strings)
+//                    {
+//                        sr.WriteLine("case \"" + st + "\":");
+//                        sr.WriteLine("break;");
+//                    }
+//                }
+//            }
         }
 		public static bool TryGetCard(string name, ref MagicCard c){
 			if (cardDatabase.ContainsKey (name)) {
@@ -437,6 +437,8 @@ namespace Magic3D
 									break;
 								}else if(trigs.Count () > 1)
 									Debug.WriteLine ("Multiple corresponding triggers.");
+								if (trigs.FirstOrDefault().Exec == TrigExec.TrigTap)
+									Debugger.Break();
 								c.Abilities.Add (Ability.Parse (tmp [2], trigs.FirstOrDefault ()));
 
 								break;

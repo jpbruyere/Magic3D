@@ -103,17 +103,17 @@ namespace Magic3D
 				Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
 				Animation.StartAnimation (new AngleAnimation (c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
 
-				foreach (CardInstance ac in c.AttachedCards) {
-					aX += 0.15f;
-					aY += 0.15f;
-					aZ -= attachedCardsSpacing;
-
-					Animation.StartAnimation (new FloatAnimation (ac, "x", aX, 0.2f));
-					Animation.StartAnimation (new FloatAnimation (ac, "y", aY, 0.2f));
-					Animation.StartAnimation (new FloatAnimation (ac, "z", aZ, 0.2f));
-					Animation.StartAnimation (new AngleAnimation (ac, "xAngle", xAngle, MathHelper.Pi * 0.3f));
-					Animation.StartAnimation (new AngleAnimation (ac, "yAngle", yAngle, MathHelper.Pi * 0.3f));
-				}
+//				foreach (CardInstance ac in c.AttachedCards) {
+//					aX += 0.15f;
+//					aY += 0.15f;
+//					aZ -= attachedCardsSpacing;
+//
+//					Animation.StartAnimation (new FloatAnimation (ac, "x", aX, 0.2f));
+//					Animation.StartAnimation (new FloatAnimation (ac, "y", aY, 0.2f));
+//					Animation.StartAnimation (new FloatAnimation (ac, "z", aZ, 0.2f));
+//					Animation.StartAnimation (new AngleAnimation (ac, "xAngle", xAngle, MathHelper.Pi * 0.3f));
+//					Animation.StartAnimation (new AngleAnimation (ac, "yAngle", yAngle, MathHelper.Pi * 0.3f));
+//				}
 
 
 				cX += hSpace;

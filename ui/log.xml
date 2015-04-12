@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Container HorizontalAlignment="Center" VerticalAlignment="Top"
 	Margin="2"
-	Width="500" Height="-1">
-	<Border Margin="5" BorderWidth="1" Background="0,6;0,6;0,6;0,6">
+	Width="600" Height="-1">
+	<Border Margin="2" BorderWidth="1" Background="0,6;0,6;0,6;0,6">
 		<Group Width="0" Name="logs">
 			<VerticalStack Width="0" Focusable="False">
 				<Label Name="line1" Width="0" Text="Line1" Margin="0"/>

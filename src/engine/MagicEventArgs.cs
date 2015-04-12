@@ -70,11 +70,11 @@ namespace Magic3D
 		}
 	}
 
-	public class AbilityEventArg : MagicEventArg
+	public class ActivatedAbilityEventArg : MagicEventArg
 	{
 		public Ability Ability;
 
-		public AbilityEventArg(Ability _a, CardInstance _source)
+		public ActivatedAbilityEventArg(Ability _a, CardInstance _source)
 		{
 			Type = MagicEventType.ActivateAbility;
 			Ability = _a;

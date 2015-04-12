@@ -94,6 +94,13 @@ namespace Magic3D
 		public bool IsAttached {
 			get { return AttachedTo == null ? false : true; }
 		}
+		public bool IsAttachedToACardInTheSameCamp {
+			get { 
+				if (!IsAttached)
+					return false;
+				return (AttachedTo.Controler == this.Controler);
+			}
+		}
 		#endregion
 			
         public void AddDamages(Damage d)
@@ -359,6 +366,15 @@ namespace Magic3D
 				
 				_x = value; 
 
+				float a = _x;
+				foreach (CardInstance ac in AttachedCards) {
+					if (ac.Controler != Controler) {
+						updateArrows ();		
+						continue;
+					}
+					a += 0.15f;
+					Animation.StartAnimation (new FloatAnimation (ac, "x", a, 0.2f));
+				}
 				//updateArrows ();
 			}
         }
@@ -371,9 +387,20 @@ namespace Magic3D
 
 				_y = value; 
 
-				//updateArrows ();
+				float a = _y;
+				foreach (CardInstance ac in AttachedCards) {
+					if (ac.Controler != Controler) {
+						updateArrows ();		
+						continue;
+					}
+					a += 0.15f;
+					Animation.StartAnimation (new FloatAnimation (ac, "y", a, 0.2f));
+				}
+
+
 			}        
 		}
+		static float attachedCardsSpacing = 0.03f;
         public float z
         {
             get { return _z; }
@@ -383,6 +410,15 @@ namespace Magic3D
 
 				_z = value; 
 
+				float a = _z;
+				foreach (CardInstance ac in AttachedCards) {
+					if (ac.Controler != Controler) {
+						updateArrows ();		
+						continue;
+					}
+					a -=  attachedCardsSpacing;
+					Animation.StartAnimation (new FloatAnimation (ac, "z", a, 0.2f));
+				}
 				//updateArrows ();
 			}        
 		}
@@ -564,14 +600,17 @@ namespace Magic3D
 
 		#region Arrows
 		vaoMesh arrows;
-		void updateArrows(){
+		public void updateArrows(){
 			if (arrows!=null)
 				arrows.Dispose ();
 			arrows = null;
 
 			float z = 1.0f;
-			foreach (CardInstance ac in AttachedCards) {
-				arrows += new Arrow3d (ac.Position, this.Position, Vector3.UnitZ * z);
+			foreach (CardInstance ac in AttachedCards.Where(c=>c.Controler != this.Controler)) {
+				arrows += new Arrow3d (
+					Vector3.TransformPosition(ac.Position, ac.Controler.Transformations), 
+					Vector3.TransformPosition(this.Position, this.Controler.Transformations),
+					Vector3.UnitZ * z);
 				z += 0.2f;
 			}
 		}

@@ -17,12 +17,12 @@ namespace Magic3D
 			Source = a;
 			if (!Cost.IsNullOrCountIsZero(Source.ActivationCost))
 				RemainingCost = Source.ActivationCost.Clone ();
-			else//if it's a spell ab, no cost and no message
-				return;
+//			else//if it's a spell ab, no cost and no message
+//				return;
 
 			Magic.AddLog ("Trying to activate " + CardSource.Model.Name + " ability");
 
-			if (CardSource.Controler.ManaPool != null)
+			if (CardSource.Controler.ManaPool != null && RemainingCost != null)
 				PayCost (ref CardSource.Controler.ManaPool);
 
 			PrintNextMessage ();
@@ -40,6 +40,8 @@ namespace Magic3D
 
 		public override void Resolve ()
 		{
+			Magic.btOk.Visible = false;
+
 			switch (Source.AbilityType) {
 			case AbilityEnum.Attach:
 				(selectedTargets.FirstOrDefault() as CardInstance).AttachCard (CardSource);
@@ -55,6 +57,10 @@ namespace Magic3D
 			case AbilityEnum.Interrupt:
 				break;
 			case AbilityEnum.Mana:
+				ManaAbility ma = Source as ManaAbility;
+				Player p = CardSource.Controler;
+				p.ManaPool += ma.ProducedMana.Clone();
+				p.UpdateUi ();
 				break;
 			default:
 				//triggered Ability ou activated
@@ -66,6 +72,7 @@ namespace Magic3D
 				aa.Activate(CardSource, SelectedTargets);
 				break;
 			}
+			MagicEngine.CurrentEngine.RaiseMagicEvent (new ActivatedAbilityEventArg (Source, CardSource));	
 		}
 
 		public override List<object> SelectedTargets {

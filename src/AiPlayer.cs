@@ -46,7 +46,7 @@ namespace Magic3D
 			if (e.pp != this || e.State < EngineStates.CurrentPlayer)
 				return;
 
-			if (CurrentAction != null)
+			if (HasActionPending)
 			{
 				ActivateAvailableMana(e);
 				return;
@@ -150,16 +150,16 @@ namespace Magic3D
 			}		
 		}
 
-		public void aiPayManaIfNeedeed()
-		{
-			if (CurrentAction != null)
-			{
-				if (CurrentAction.RemainingCost != null)
-				{
-
-				}
-			}
-		}
+//		public void aiPayManaIfNeedeed()
+//		{
+//			if (CurrentAction != null)
+//			{
+//				if (CurrentAction.RemainingCost != null)
+//				{
+//
+//				}
+//			}
+//		}
 		public bool CastAvailableAndAllowedCreature()
 		{
 			Cost availableMana = AvailableManaOnTable;
@@ -171,7 +171,7 @@ namespace Magic3D
 					if (availableMana < c.Model.Cost)
 						continue;
 					
-					CurrentAction = new Spell(c);
+					MagicEngine.CurrentEngine.PushOnStack(new Spell(c));
 					return true;
 				}
 			}

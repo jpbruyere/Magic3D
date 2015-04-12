@@ -44,7 +44,9 @@ namespace Magic3D
         {
             CostType = _type;
         }
-        public static implicit operator Cost(CostTypes ct)
+        
+		#region Operators
+		public static implicit operator Cost(CostTypes ct)
         {
             return new Cost(ct);
         }
@@ -167,6 +169,27 @@ namespace Magic3D
 		public static bool operator !=(Cost c, CostTypes ct){
 			return ct == null ? true : c.CostType != ct;
 		} 
+		#endregion
+
+//		public virtual ManaTypes DominantColor {
+//			get {
+//				Dictionary<ManaTypes,int> counter = new Dictionary<ManaTypes, int> ();
+//				ManaTypes[] colors = Enum.GetValues (typeof(ManaTypes));
+//				for (int i = 0; i < colors.Count(); i++) {
+//					counter.Add (colors [i], 0);
+//				}
+//				Costs csts = this as Costs;
+//				if (csts != null) {					
+//					foreach (Cost co in csts.CostList) {
+//						Mana m = co as Mana;
+//						if (co == null)
+//							continue;
+//						counter [m.TypeOfMana] += m.count;
+//					}
+//				}
+//			}
+//		}
+
 		public static Cost Parse(string costString)
         {
             if (costString.ToLower() == "no cost")

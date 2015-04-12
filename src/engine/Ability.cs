@@ -6,44 +6,10 @@ using System.Diagnostics;
 
 namespace Magic3D
 {
-	public class Abilities : List<Ability>
-	{
-		public bool Has (AbilityEnum ab)
-		{
-			foreach (Ability a in this) {
-				if (a.AbilityType == ab)
-					return true;
-			}
-			return false;
-		}
-	}
-
-	public class TriggeredAbility : ActivatedAbility
-	{
-		public Trigger Trigger;
-
-		public TriggeredAbility (Trigger _trig)
-		{
-			Trigger = _trig;
-		}
-	}
-
-	public class ActivatedAbility : Ability
-	{
-		//public Cost ActivationCost;
-		public virtual void Activate (CardInstance _source, List<object> _targets)
-		{
-			foreach (Effect e in Effects) {
-				e.Apply (_source, _targets);
-			}
-		}
-	}
-
 	public class StaticAbility : Ability
 	{
 
 	}
-
 	public class ManaAbility : ActivatedAbility
 	{
 		public ManaAbility ()
@@ -54,33 +20,29 @@ namespace Magic3D
 		public Cost ProducedMana;
 	}
 
-
-
-	//	public class Effects : List<Effect>
-	//	{
-	//		public void Apply(CardInstance _source)
-	//		{
-	//			foreach (Effect e in this) {
-	//
-	//			}
-	//		}
-	//	}
 	public class Ability
 	{
 		#region CTOR
-
-		public Ability ()
-		{
-		}
-
+		public Ability (){}
 		public Ability (AbilityEnum a)
 		{
 			AbilityType = a;
 		}
-
 		#endregion
 
 		int _requiredTargetCount = -1;
+		string targetPrompt = "";
+		MultiformAttribut<Target> _validTargets;
+		List<Object> _selectedTargets = new List<object> ();
+
+		public AbilityEnum AbilityType = AbilityEnum.Unset;
+		public EffectGroup Effects = new EffectGroup ();
+		public Cost ActivationCost;
+		public string Description = "";
+		public int MinimumTargetCount = -1;
+		public int MaximumTargetCount = -1;
+
+
 
 		/// <summary>
 		/// return MinimumTargetCount if set or _requiredTargetCount
@@ -114,39 +76,23 @@ namespace Magic3D
 				return MinimumTargetCount > 0 || MaximumTargetCount > 0 ? true : 
 					_requiredTargetCount > 0; 
 			} 
-		}
-
-		public AbilityEnum AbilityType = AbilityEnum.Unset;
-		public EffectGroup Effects = new EffectGroup ();
-		public Cost ActivationCost;
-		public string Description = "";
-
-		MultiformAttribut<Target> _validTargets;
-
+		}			
 		public MultiformAttribut<Target> ValidTargets {
 			get { return _validTargets; }
 			set { _validTargets = value; }
+		}			
+		public List<Object> SelectedTargets {
+			get { return _selectedTargets; }
+			set {
+				_selectedTargets = value;
+			}
 		}
-
-		public int MinimumTargetCount = -1;
-		public int MaximumTargetCount = -1;
-		string targetPrompt = "";
-
 		public string TargetPrompt {
 			get {
 				return string.IsNullOrWhiteSpace (targetPrompt) ? "\tSelect " + ValidTargets.ToString () : targetPrompt;
 			}
 			set {
 				targetPrompt = value;
-			}
-		}
-
-		List<Object> _selectedTargets = new List<object> ();
-
-		public List<Object> SelectedTargets {
-			get { return _selectedTargets; }
-			set {
-				_selectedTargets = value;
 			}
 		}
 
@@ -212,7 +158,7 @@ namespace Magic3D
 					case "Destroy":
 						break;
 					case "Tap":
-						
+						a.Effects.Add(new Effect(EffectType.Tap));
 						break;
 					case "TapAll":
 						
@@ -230,9 +176,7 @@ namespace Magic3D
 					case "DealDamage":
 						break;
 					case "ChangeZone":
-						a.Effects.Add (new Effect { 
-							TypeOfEffect = EffectType.ChangeZone,
-						});
+						a.Effects.Add (new Effect (EffectType.ChangeZone));
 						break;
 					case "Draw":
 						break;
@@ -1311,6 +1255,11 @@ namespace Magic3D
 				}
 
 
+				if (!a.AcceptTargets && a.ValidTargets != null) {
+					Debug.WriteLine ("required target forced to 1.");
+					a.RequiredTargetCount = 1;
+				}
+				
 			}
 		}
 
@@ -1623,36 +1572,7 @@ namespace Magic3D
 				break;
 			}
 			return a;
-		}
-        
-		//?
-		public static List<string> strings = new List<string> ();
-        
-
-		//public static bool operator ==(Ability a, EffectType e)
-		//{
-		//    if (a.AbilityType == e)
-		//        return true;
-
-		//    foreach (Effect ef in a.Effects)
-		//    {
-		//        if (ef.TypeOfEffect == e)
-		//            return true;
-		//    }
-		//    return false;
-		//}
-		//public static bool operator !=(Ability a, EffectType e)
-		//{
-		//    if (a.AbilityType == e)
-		//        return false;
-
-		//    foreach (Effect ef in a.Effects)
-		//    {
-		//        if (ef.TypeOfEffect == e)
-		//            return false;
-		//    }
-		//    return true;
-		//}
+		}        
 	}
 
 }
