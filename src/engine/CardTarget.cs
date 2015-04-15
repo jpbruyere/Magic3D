@@ -80,7 +80,13 @@ namespace Magic3D
 			//TODO: power constrains
 			//TODO: abilities check
 			//TODO: having attached cards
-
+			if (HavingAttachedCards != null) {				
+				foreach (CardInstance ac in c.AttachedCards) {
+					if (ac.Model.Types >= HavingAttachedCards)
+						return true;					
+				}
+				return false;
+			}
 			return true;
 		}
 

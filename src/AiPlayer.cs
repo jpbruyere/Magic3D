@@ -166,14 +166,11 @@ namespace Magic3D
 
 			foreach (CardInstance c in Hand.Cards.Where(c=>c.HasType(CardTypes.Creature)))
 			{
-				if (c.Model.Types == CardTypes.Creature)
-				{
-					if (availableMana < c.Model.Cost)
-						continue;
-					
-					MagicEngine.CurrentEngine.PushOnStack(new Spell(c));
-					return true;
-				}
+				if (availableMana < c.Model.Cost)
+					continue;
+				
+				MagicEngine.CurrentEngine.PushOnStack(new Spell(c));
+				return true;
 			}
 			return false;
 		}

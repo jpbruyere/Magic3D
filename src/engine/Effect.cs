@@ -84,6 +84,7 @@ namespace Magic3D
 			case EffectType.LooseAllAbilities:
 				break;
 			case EffectType.Gain:
+				
 				break;
 			case EffectType.Discard:
 				break;
@@ -365,6 +366,11 @@ namespace Magic3D
     public class AbilityEffect : Effect
     {
         public Ability Ability;
+		public AbilityEffect(Ability _ability)
+		{
+			this.TypeOfEffect = EffectType.Gain;
+			Ability = _ability;
+		}
     }
 //	public class LifeEffect : Effect
 //	{		

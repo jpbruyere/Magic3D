@@ -90,6 +90,19 @@ namespace Magic3D
 				case "Description":
 					break;
 				case "AddKeyword":
+					AbilityEnum ae = AbilityEnum.Unset;
+					if (Enum.TryParse (value, true, out ae)) {
+						effects.Add (new AbilityEffect (new Ability (ae)));
+						break;
+					}
+					switch (value) {
+					case "Double Strike":
+						effects.Add (new AbilityEffect (new Ability(AbilityEnum.DoubleStrike)));
+						break;
+					default:
+						Debug.WriteLine ("unknown AddKeyword in effect: " + value);
+						break;
+					}
 					break;
 				case "Condition":
 					break;

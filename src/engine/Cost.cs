@@ -151,8 +151,10 @@ namespace Magic3D
 				return true;
 			}
 			Cost right = c2.Clone();
+			ManaTypes dominant = right.GetDominantMana ();
             Cost left = c1.Clone();
-            
+			left.OrderFirst (dominant);
+			right.OrderFirst (dominant);
             Cost result = right.Pay(ref left);
             return result == null ? false : true;
         }

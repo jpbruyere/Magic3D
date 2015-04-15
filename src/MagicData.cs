@@ -28,13 +28,18 @@ namespace Magic3D
 		public static ImageSurface imgManaB;
 		public static ImageSurface imgManaU;
 
+		public static Rsvg.Handle hSVGsymbols;
+
+
 		public static void InitCardModel()
 		{
+			hSVGsymbols = loadRessourceSvg ("Magic3D.image2.abilities.svg");
+
 			CardBack = new Texture(@"images/card_back.jpg");
 
 			MagicData.CardMesh = new vaoMesh(0, 0, 0, MagicData.CardWidth, MagicData.CardHeight);
 
-			MagicData.AbilityMesh = new vaoMesh(0, 0, 0.001f, 0.1f, 0.1f);
+			MagicData.AbilityMesh = new vaoMesh(0, 0, 0.002f, 1.0f, 0.2f);
 			MagicData.PointsMesh = new vaoMesh(0, 0, 0.002f, 0.50f, 0.2f);
 
 			//			imgManaW = new ImageSurface(@"images/manaw.png");
@@ -42,6 +47,7 @@ namespace Magic3D
 			//			imgManaR = new ImageSurface(@"images/manar.png");
 			//			imgManaB = new ImageSurface(@"images/manab.png");
 			//			imgManaU = new ImageSurface(@"images/manau.png");
+			testSvg();
 		}
 
 		public static List<MagicCard> MissingPicToDownload = new List<MagicCard>();
@@ -339,6 +345,40 @@ namespace Magic3D
 			}
 		}
 
+		static Rsvg.Handle loadRessourceSvg(string resId)
+		{			
+			Stream s = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(resId);
+			using (MemoryStream ms = new MemoryStream ()) {
+				s.CopyTo (ms);
+				return new Rsvg.Handle (ms.ToArray ());
+			}
+		}
+
+		static void testSvg()
+		{
+			using (ImageSurface draw =
+				new ImageSurface(Format.Argb32, 1024, 1024))
+			{
+				using (Context gr = new Context(draw))
+				{
+					go.Rectangle r = new go.Rectangle(0, 0, 1024, 1024);
+
+					gr.Color = go.Color.Red;
+
+					gr.Rectangle(r);
+					gr.Fill ();
+					//tests
+					//gr.MoveTo(0,0);
+					//gr.Scale (0.3, 0.3);
+					MagicData.hSVGsymbols.RenderCairoSub (gr,"#Flying");
+
+					//MagicData.hSVGsymbols.RenderCairo (gr);
+					draw.Flush();
+				}
+				draw.WriteToPng(@"/home/jp/test.png");
+			}
+
+		}
 	}
 }
 

@@ -44,6 +44,12 @@
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
+    <Reference Include="rsvg2-sharp, Version=2.18.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <Package>rsvg2-sharp-2.0</Package>
+    </Reference>
+    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <Package>glib-sharp-2.0</Package>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\card_back.jpg">
@@ -701,6 +707,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="shaders\effect0.frag" />
+    <EmbeddedResource Include="image2\abilities.svg" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\data2\devel\GOLib\GOLib.csproj">

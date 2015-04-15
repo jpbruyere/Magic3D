@@ -151,9 +151,40 @@ namespace Magic3D
 			AttachedTo.DetacheCard (this);
         }
 
+		public IEnumerable<Ability> getAllAbilities()
+		{
+			List<Ability> abs = new List<Ability>();
+
+			foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingSpellEffects) {
+				bool valid = false;
+				foreach (EffectGroup eg in ci.Effects) {
+					foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
+						if (!ct.Accept (this, ci)) {
+							valid = false;
+							break;
+						} else
+							valid = true;
+					}
+					if (!valid)
+						continue;
+
+					foreach (AbilityEffect e in  eg.OfType<AbilityEffect>()) {
+						switch (e.TypeOfEffect) {
+						case EffectType.Gain:
+							abs.Add (e.Ability);
+							break;
+						case EffectType.Loose:
+							abs.RemoveAll (a => a.AbilityType == e.Ability.AbilityType);
+							break;
+						}
+					}
+				}
+			}
+			return Model.Abilities.Concat(abs);
+		}
 		public Ability[] getAbilitiesByType(AbilityEnum ae)
         {
-			return Model.Abilities.Where (a => a.AbilityType == ae).ToArray();
+			return getAllAbilities().Where (a => a.AbilityType == ae).ToArray();
         }
 			        
         public bool HasEffect(EffectType et)
@@ -584,18 +615,24 @@ namespace Magic3D
 			{				
 				if (CurrentGroup.GroupName == CardGroupEnum.InPlay)
 				{
-					Matrix4 mO = Matrix4.Identity;
-					GL.BindTexture(TextureTarget.Texture2D, pointsTexture);
+					Magic.texturedShader.Color = go.Color.White;
 
-						mO = Matrix4.CreateRotationX (Magic.FocusAngle) * Matrix4.CreateRotationZ (-Controler.zAngle);
+					Matrix4 mMod = Magic.texturedShader.ModelMatrix;
+					Matrix4 mO = Matrix4.CreateRotationX (Magic.FocusAngle) * Matrix4.CreateRotationZ (-Controler.zAngle);
+
 					if (_isTapped)
 						mO *= Matrix4.CreateRotationZ (MathHelper.PiOver2);
 
-					mO *= Matrix4.CreateTranslation(0.25f, -0.6125f, 0.1f);
+					Magic.texturedShader.ModelMatrix = 
+						mO * Matrix4.CreateTranslation(-0.02f, 0.55f, 0.1f) * mMod;
+					GL.BindTexture(TextureTarget.Texture2D, abilitiesTexture);
+					MagicData.AbilityMesh.Render(PrimitiveType.TriangleStrip);
 
-					Magic.texturedShader.ModelMatrix = mO * Magic.texturedShader.ModelMatrix;
-					Magic.texturedShader.Color = go.Color.White;
+					Magic.texturedShader.ModelMatrix = 
+						mO * Matrix4.CreateTranslation(0.27f, -0.7f, 0.1f) * mMod;
+					GL.BindTexture(TextureTarget.Texture2D, pointsTexture);
 					MagicData.PointsMesh.Render(PrimitiveType.TriangleStrip);
+
 				}
 			}
 
@@ -652,9 +689,10 @@ namespace Magic3D
 
 		#region Overlay
 		int pointsTexture = 0;
-		public void UpdateOverlay2()
+		int abilitiesTexture = 0;
+		public void UpdateOverlayAbilities()
 		{
-			int width = 100;
+			int width = 200;
 			int height = 40;
 			int x = 0;
 			int y = 0;
@@ -670,41 +708,45 @@ namespace Magic3D
 			{
 				using (Context gr = new Context(draw))
 				{
-					go.Rectangle r = new go.Rectangle(0, 0, width, height);
-					gr.Color = go.Color.White;
-					gr.Rectangle(r);
-					gr.FillPreserve();
-					gr.Color = go.Color.Black;
-					gr.LineWidth = 1.5f;
-					gr.Stroke();
+//					go.Rectangle r = new go.Rectangle(0, 0, width, height);
+//					gr.Color = go.Color.White;
+//					gr.Rectangle(r);
+//					gr.Fill();
 
-					gr.SelectFontFace("Times New Roman", FontSlant.Normal, FontWeight.Bold);
-					gr.SetFontSize(40);
-					gr.Color = go.Color.Black;
 
-					string text = "Test";
+					//
+					gr.Scale (0.45, 0.45);
 
-					FontExtents fe = gr.FontExtents;
-					TextExtents te = gr.TextExtents(text);
-					double xt = width / 2 - te.Width / 2;
-					double yt = height / 2 + te.Height / 2;
+					foreach (AbilityEnum ae in getAllAbilities ().Select (a => a.AbilityType).Distinct ()) {
+						MagicData.hSVGsymbols.RenderCairoSub (gr, "#" + ae.ToString());
+						gr.Translate (100, 0);
+					}
 
-					gr.MoveTo(xt, yt);
-					gr.ShowText(text);
 
 					draw.Flush();
 				}
 				//draw.WriteToPng(@"d:/test.png");
 			}
-
 			imgHelpers.imgHelpers.flipY(data.Scan0, stride, height);
 
-			GL.ActiveTexture(TextureUnit.Texture0);
-			GL.BindTexture(TextureTarget.Texture2D, pointsTexture);
-			GL.Enable(EnableCap.Texture2D);
-			GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, width, height,
-				OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-
+			if (abilitiesTexture == 0)
+			{
+				GL.GenTextures(1, out abilitiesTexture);
+				GL.BindTexture(TextureTarget.Texture2D, abilitiesTexture);
+				GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+					OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+//				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+//				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+			}
+			else
+			{				
+				GL.BindTexture(TextureTarget.Texture2D, abilitiesTexture);
+				GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, width, height,
+					OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+			}
+			GL.BindTexture (TextureTarget.Texture2D, 0);
 			//bmp.Save(@"d:/test.png");
 			bmp.UnlockBits(data);
 		}
@@ -756,6 +798,10 @@ namespace Magic3D
 					gr.MoveTo(xt, yt);
 					gr.ShowText(text);
 
+					//tests
+					gr.MoveTo(0,0);
+					gr.Scale (0.3, 0.3);
+					MagicData.hSVGsymbols.RenderCairoSub (gr,"path8");
 					draw.Flush();
 				}
 				//draw.WriteToPng(@"d:/test.png");
@@ -767,34 +813,25 @@ namespace Magic3D
 			if (pointsTexture == 0)
 			{
 				GL.GenTextures(1, out pointsTexture);
-				GL.ActiveTexture(TextureUnit.Texture0);
 				GL.BindTexture(TextureTarget.Texture2D, pointsTexture);
-				GL.Enable(EnableCap.Texture2D);
-				//GLU.Build2DMipmap(OpenTK.Graphics.TextureTarget.Texture2D,
-				//            (int)PixelInternalFormat.Rgba,
-				//            width, height,
-				//            OpenTK.Graphics.PixelFormat.Bgra,
-				//            OpenTK.Graphics.PixelType.UnsignedByte, data.Scan0);
-
-				//GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
-				//    (int)TextureMinFilter.NearestMipmapLinear);
 				GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
 					OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
 				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
 				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+//				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+//				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 			}
 			else
-			{
-				GL.ActiveTexture(TextureUnit.Texture0);
+			{				
 				GL.BindTexture(TextureTarget.Texture2D, pointsTexture);
-				GL.Enable(EnableCap.Texture2D);
 				GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, width, height,
 					OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
 			}
+			GL.BindTexture (TextureTarget.Texture2D, 0);
 			//bmp.Save(@"d:/test.png");
 			bmp.UnlockBits(data);
+
+			UpdateOverlayAbilities ();
 		}
 		public void ResetOverlay()
 		{
