@@ -7,6 +7,8 @@ using System.IO;
 
 namespace Magic3D
 {
+	//TODO: permanent, self and enchanted by should go to CardTarget
+	//		possible target should be player or card
     public enum TargetType
     {
         Opponent,
@@ -15,6 +17,8 @@ namespace Magic3D
         Permanent,
 		Self,
 		EnchantedBy,
+		EquipedBy,
+		Attached,
     }
     public enum ControlerType
     {
@@ -37,123 +41,19 @@ namespace Magic3D
         GreaterOrEqual,
         NotEqual
     }
-    public class NumericConstrain
+    
+	public class NumericConstrain
     {
         public NumericRelations Relation;
         public int Value;
     }
-
-    public class CardTarget : Target
-    {
-        public MultiformAttribut<CardTypes> ValidCardTypes;
-		public MultiformAttribut<CardTypes> HavingAttachedCards;
-		public MultiformAttribut<Ability> HavingAbilities;
-		public MultiformAttribut<Ability> WithoutAbilities;
-		public MultiformAttribut<ManaTypes> ValidCardColors;
-        public ControlerType Controler = ControlerType.All;
-        public CombatImplication CombatState = CombatImplication.Unset;
-        public NumericConstrain PowerConstrain;
-        public NumericConstrain ToughnessConstrain;
-		public bool CanBeTargetted = true;
-		public MultiformAttribut<CardGroupEnum> ValidGroup;
-        
-        public CardTarget(TargetType tt = TargetType.Card)
-        {
-            TypeOfTarget = tt;
-        }
-
-		public override bool Accept (object _target)
-		{
-			CardInstance c = _target as CardInstance;
-			if (c == null)
-				return false;
-			if (!(c.Model.Types >= ValidCardTypes))
-				return false;
-
-			if (ValidCardColors != null) {
-				foreach (ManaTypes mc in ValidCardColors.Values) {
-					if (!c.HasColor (mc))
-						return false;
-				}
-			}
-
-			if (Controler == ControlerType.You) {
-				//?????
-			}else if (Controler == ControlerType.Opponent){
-				//?????
-			}
-
-			if (CombatState == CombatImplication.Attacking) {
-				if (!c.Controler.AttackingCreature.Contains (c))
-					return false;
-			}else if (CombatState == CombatImplication.Blocking){
-				if (!c.Controler.BlockingCreature.Contains (c))
-					return false;
-			}
-
-			if (ValidGroup != null) {
-				if (!ValidGroup.Contains(c.CurrentGroup.GroupName))
-					return false;
-			}
-			//TODO: power constrains
-			//TODO: abilities check
-			//TODO: having attached cards
-
-			return true;
-		}
-
-		#region Operators
-		public static bool operator ==(CardTarget ct, CardTypes t)
-		{
-			return ct.HavingAbilities.Count > 0 ?
-				false :
-				ct.ValidCardTypes == t;
-		}
-		public static bool operator !=(CardTarget ct, CardTypes t)
-		{
-			return ct.HavingAbilities.Count > 0 ?
-				true :
-				ct.ValidCardTypes != t;
-		}
-		#endregion
-
-		public override string ToString()
-        {
-            string tmp = "";
-            if (ValidCardTypes.Count == 0)
-                tmp += TypeOfTarget.ToString();
-            else
-                tmp += ValidCardTypes.ToString();
-
-            if (HavingAbilities != null)
-                tmp += " having " + HavingAbilities.ToString();
-
-            if (WithoutAbilities != null)
-                tmp += " without " + WithoutAbilities.ToString();
-
-            return tmp;
-        }
-
-        //public static bool operator ==(CardTarget ct, EffectType t)
-        //{
-        //    return ct.ValidCardTypes.Count > 0 ?
-        //        false :
-        //        ct.HavingAbilities == t;
-        //}
-        //public static bool operator ==(CardTarget ct, EffectType t)
-        //{
-        //    return ct.ValidCardTypes.Count > 0 ?
-        //        false :
-        //        ct.HavingAbilities == t;
-        //}
-    }
-
+		
     public class Target
     {
         public TargetType TypeOfTarget;
 		//should have defining source to know opponent...
 
-		public virtual bool Accept(object _target){
+		public virtual bool Accept(object _target, CardInstance _source){
 			switch (TypeOfTarget) {
 			case TargetType.Opponent:
 				Player p = _target as Player;
@@ -162,20 +62,23 @@ namespace Magic3D
 				break;
 			case TargetType.Player:
 				return (_target is Player);
-				break;
 			case TargetType.Card:
 				return (_target is CardInstance);
-				break;
 			case TargetType.Permanent:
 				CardInstance c = _target as CardInstance;
 				if (c == null)
 					return false;
 				return (c.CurrentGroup.GroupName == CardGroupEnum.InPlay);
-				break;
 			case TargetType.Self:
+				return _target == _source;
+			case TargetType.EquipedBy:
+				if (_target is CardInstance)
+					return  (_target as CardInstance).AttachedTo == _source;
+				return false;
 			case TargetType.EnchantedBy:
-				return (_target is CardInstance);
-				break;
+				if (_target is CardInstance)
+					return  (_target as CardInstance).AttachedTo == _source;
+				return false;
 			}
 			return false;
 		}
@@ -244,17 +147,23 @@ namespace Magic3D
 						case "equipped":
 							ctar.HavingAttachedCards += CardTypes.Equipment;
 							break;
+						case "Attached":
+							ctar.TypeOfTarget = TargetType.Attached;
+							break;
+						case "EquippedBy":
+							ctar.TypeOfTarget = TargetType.EquipedBy;
+							break;
 						case "White":
 							ctar.ValidCardColors += ManaTypes.White;
 							break;
 						default:							
 							#region ability inclusion/exclusion
 							if (ct.StartsWith("without")){
-								ctar.WithoutAbilities += Ability.SpecialK(ct.Substring(7));
+								ctar.WithoutAbilities += Ability.ParseKeyword(ct.Substring(7));
 								break;
 							}
 							if (ct.StartsWith ("with")){
-								ctar.HavingAbilities += Ability.SpecialK(ct.Substring(4));
+								ctar.HavingAbilities += Ability.ParseKeyword(ct.Substring(4));
 								break;
 							}
 							#endregion

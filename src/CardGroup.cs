@@ -30,6 +30,20 @@ namespace Magic3D
 		}
 		#endregion
 
+		public static CardGroupEnum ParseZoneName(string zone)
+		{
+			switch (zone) {
+			case "Any":
+				return CardGroupEnum.Any;
+			case "Battlefield":
+				return CardGroupEnum.InPlay;
+			case "Library":
+				return CardGroupEnum.Library;
+			default:
+				Debug.WriteLine ("Unknow zone: " + zone);
+				return CardGroupEnum.Any;					
+			}
+		}
 		public CardGroupEnum GroupName;
 
         public bool IsVisible = true;
@@ -41,27 +55,28 @@ namespace Magic3D
                 return;
 
             c.CurrentGroup = this;
-            float hSpace = HorizontalSpacing;
-
-            if (HorizontalSpacing * (Cards.Count + 1) > MaxHorizontalSpace)
-                hSpace = MaxHorizontalSpace / (Cards.Count + 1);
-
-
-			Animation.StartAnimation(new FloatAnimation(c, "x", this.x + hSpace / 2 * Cards.Count, 0.2f));
-
-            float halfWidth = hSpace * (Cards.Count) / 2;
-
-			foreach (CardInstance i in Cards) {
-				Animation.StartAnimation (new FloatAnimation (i, "x", this.x - halfWidth + hSpace * Cards.IndexOf (i), 0.2f));
-				Animation.StartAnimation(new FloatAnimation(i, "z", this.z + VerticalSpacing * Cards.IndexOf(i), 0.2f));
-			}
-
-            Animation.StartAnimation(new FloatAnimation(c, "y", this.y, 0.2f));
-			Animation.StartAnimation(new FloatAnimation(c, "z", this.z + VerticalSpacing * (Cards.Count+1), 0.2f));
-			Animation.StartAnimation(new AngleAnimation(c, "yAngle", this.yAngle, MathHelper.Pi * 0.1f));
-			Animation.StartAnimation(new AngleAnimation(c, "xAngle", this.xAngle, MathHelper.Pi * 0.03f));
+//            float hSpace = HorizontalSpacing;
+//
+//            if (HorizontalSpacing * (Cards.Count + 1) > MaxHorizontalSpace)
+//                hSpace = MaxHorizontalSpace / (Cards.Count + 1);
+//
+//
+//			Animation.StartAnimation(new FloatAnimation(c, "x", this.x + hSpace / 2 * Cards.Count, 0.2f));
+//
+//            float halfWidth = hSpace * (Cards.Count) / 2;
+//
+//			foreach (CardInstance i in Cards) {
+//				Animation.StartAnimation (new FloatAnimation (i, "x", this.x - halfWidth + hSpace * Cards.IndexOf (i), 0.2f));
+//				Animation.StartAnimation(new FloatAnimation(i, "z", this.z + VerticalSpacing * Cards.IndexOf(i), 0.2f));
+//			}
+//
+//            Animation.StartAnimation(new FloatAnimation(c, "y", this.y, 0.2f));
+//			Animation.StartAnimation(new FloatAnimation(c, "z", this.z + VerticalSpacing * (Cards.Count+1), 0.2f));
+//			Animation.StartAnimation(new AngleAnimation(c, "yAngle", this.yAngle, MathHelper.Pi * 0.1f));
+//			Animation.StartAnimation(new AngleAnimation(c, "xAngle", this.xAngle, MathHelper.Pi * 0.03f));
             
-			Cards.Add(c);	
+			Cards.Add(c);
+			UpdateLayout ();
 		}
         public virtual void RemoveCard(CardInstance c)
         {
@@ -69,21 +84,21 @@ namespace Magic3D
 
             //c.CurrentGroup = null;
 
-            float hSpace = HorizontalSpacing;
-
-            if (HorizontalSpacing * (Cards.Count + 1) > MaxHorizontalSpace)
-                hSpace = MaxHorizontalSpace / (Cards.Count + 1);
-
-            float halfWidth = hSpace * (Cards.Count) / 2;
-
-            foreach (CardInstance i in Cards)
-            {
-                Animation.StartAnimation(new FloatAnimation(i, "x", this.x - halfWidth + hSpace * Cards.IndexOf(i)));
-                Animation.StartAnimation(new FloatAnimation(c, "z", this.z + VerticalSpacing * Cards.IndexOf(i)));
-            }
+//            float hSpace = HorizontalSpacing;
+//
+//            if (HorizontalSpacing * (Cards.Count + 1) > MaxHorizontalSpace)
+//                hSpace = MaxHorizontalSpace / (Cards.Count + 1);
+//
+//            float halfWidth = hSpace * (Cards.Count) / 2;
+//
+//            foreach (CardInstance i in Cards)
+//            {
+//                Animation.StartAnimation(new FloatAnimation(i, "x", this.x - halfWidth + hSpace * Cards.IndexOf(i)));
+//                Animation.StartAnimation(new FloatAnimation(c, "z", this.z + VerticalSpacing * Cards.IndexOf(i)));
+//            }
 
             //Animation.StartAnimation(new FloatAnimation(c, "y", this.y, 0.2f));
-
+			UpdateLayout();
         }   
 
 		public CardInstance TakeTopOfStack
@@ -106,12 +121,12 @@ namespace Magic3D
         
 		public bool PointIsIn(Vector3 _p)
 		{
-			float chW = MagicCard.CardWidth / 2f;
-			float chH = MagicCard.CardHeight / 2f;
+			float chW = MagicData.CardWidth / 2f;
+			float chH = MagicData.CardHeight / 2f;
 
 			Rectangle<float> r = new Rectangle<float> (
 				this.x - chW, this.y - chH, 
-				MagicCard.CardWidth, MagicCard.CardHeight);
+				MagicData.CardWidth, MagicData.CardHeight);
 
 			Point<float> p = new Point<float> (_p.X, _p.Y);
 			return r.ContainsOrIsEqual (p);
@@ -132,7 +147,7 @@ namespace Magic3D
 
 				GL.Disable(EnableCap.CullFace);
 
-				MagicCard.CardMesh.Render (PrimitiveType.TriangleStrip);
+				MagicData.CardMesh.Render (PrimitiveType.TriangleStrip);
 
 				GL.Enable(EnableCap.CullFace);
 

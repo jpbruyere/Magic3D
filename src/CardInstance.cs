@@ -16,7 +16,7 @@ using GLU = OpenTK.Graphics.Glu;
 namespace Magic3D
 {
     [Serializable]
-	public class CardInstance : IDamagable, IRenderable
+	public class CardInstance : RenderedCardModel, IDamagable
     {
 		#region CardAnimEvent
 		public class CardAnimEventArg : EventArgs
@@ -32,11 +32,6 @@ namespace Magic3D
 		public CardInstance(MagicCard mc)
 		{
 			Model = mc;
-
-			if (Model.Types != CardTypes.Creature)
-				return;
-
-
 		}
 		#endregion
 
@@ -52,17 +47,24 @@ namespace Magic3D
 		public static go.Color AttackingColor = new go.Color(1.0f, 0.8f, 0.8f, 1f);
         #endregion
 
+		const float attachedCardsSpacing = 0.03f;
+
 
 		bool _isTapped = false;
 		bool _combating;
 		Player _controler;
-
-        public MagicCard Model;
+		        
         public CardGroup CurrentGroup;
 		public bool HasFocus = false;
 		public bool HasSummoningSickness = false;
 
-        public EffectGroup Effects = new EffectGroup();
+		//TODO:spelleffects is a list, should handle all the list
+		public EffectGroup Effects{
+			get { return Model.SpellEffects.FirstOrDefault(); }
+		}
+//		public IList<Effect> ActiveEffects{
+//			get { }
+//		}
 		public List<CardInstance> BlockingCreatures = new List<CardInstance>();
 		public List<Damage> Damages = new List<Damage>();
 		public CardInstance BlockedCreature = null;
@@ -109,10 +111,7 @@ namespace Magic3D
             
             MagicEngine.CurrentEngine.RaiseMagicEvent(new DamageEventArg(d));
             
-            int sum = 0;
-            foreach (Damage dm in Damages)
-                sum += dm.Amount;
-            if (sum > Toughness)
+            if (Toughness < 1)
                 PutIntoGraveyard();
             else
                 UpdateOverlay();
@@ -161,12 +160,9 @@ namespace Magic3D
         public bool HasEffect(EffectType et)
         {
 			foreach (CardInstance ca in AttachedCards) {
-				foreach (Ability a in ca.Model.Abilities) {
-					foreach (Effect e in a.Effects)
-					{
-						if (e.TypeOfEffect == et)
-							return true;
-					}					
+				foreach (Effect e in ca.Effects) {
+					if (e.TypeOfEffect == et)
+						return true;
 				}
 			}
             return false;
@@ -176,16 +172,16 @@ namespace Magic3D
 			if (getAbilitiesByType(ab).Count()==0 || HasEffect(EffectType.LooseAllAbilities))
                 return false;
 
-            foreach (Effect e in Effects)
-            {
-                if (e.TypeOfEffect == EffectType.Loose)
-                {
-                    AbilityEffect ae = e as AbilityEffect;
-                    if (ae != null)
-                        if (ae.Ability.AbilityType == ab)
-                            return false;
-                }
-            }
+//            foreach (Effect e in Effects)
+//            {
+//                if (e.TypeOfEffect == EffectType.Loose)
+//                {
+//                    AbilityEffect ae = e as AbilityEffect;
+//                    if (ae != null)
+//                        if (ae.Ability.AbilityType == ab)
+//                            return false;
+//                }
+//            }
             return true;
         }
 		public bool HasColor(ManaTypes color)
@@ -271,9 +267,9 @@ namespace Magic3D
         }
         public void TryToUntap()
         {
-            Effect e = Effects.Where(ef => ef.TypeOfEffect == EffectType.DoesNotUntap).LastOrDefault();
-
-            if (e == null)
+//            Effect e = Effects.Where(ef => ef.TypeOfEffect == EffectType.DoesNotUntap).LastOrDefault();
+//
+//            if (e == null)
                 tappedWithoutEvent = false;
         }
 
@@ -281,8 +277,9 @@ namespace Magic3D
 		{
 			get
 			{
-				ControlEffect ce = Effects.OfType<ControlEffect>().LastOrDefault();
-				return ce == null ? _controler : ce.Controler;
+//				ControlEffect ce = Effects.OfType<ControlEffect>().LastOrDefault();
+//				return ce == null ? _controler : ce.Controler;
+				return _controler;
 			}
 			set { _controler = value; }
 		}
@@ -293,23 +290,26 @@ namespace Magic3D
             {
                 int tmp = Model.Power;
 
-                foreach (NumericEffect e in Effects.OfType<NumericEffect>())
-                {
-                    switch (e.TypeOfEffect)
-                    {
-                        case EffectType.AddPower:
-                            tmp += e.NumericValue;
-                            break;
-                        case EffectType.SetPower:
-                            tmp = e.NumericValue;
-                            break;
-                    }
-                }
-				foreach (CardInstance c in AttachedCards) {
-					foreach (Ability a in c.getAbilitiesByType(AbilityEnum.Attach)) {
-						foreach (NumericEffect e in a.Effects.OfType<NumericEffect>().
-							Where(ef=>ef.TypeOfEffect == EffectType.AddPower)) {
-							tmp += e.NumericValue;
+				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingSpellEffects) {
+					bool valid = false;
+					foreach (CardTarget ct in ci.Effects.Affected.Values.OfType<CardTarget>()) {
+						if (!ct.Accept (this, ci)) {
+							valid = false;
+							break;
+						} else
+							valid = true;
+					}
+					if (!valid)
+						continue;
+
+					foreach (NumericEffect e in  ci.Effects.OfType<NumericEffect>()) {
+						switch (e.TypeOfEffect) {
+						case EffectType.AddPower:
+							tmp += e.Amount.GetValue(ci);
+							break;
+						case EffectType.SetPower:
+							tmp = e.Amount.GetValue(ci);
+							break;
 						}
 					}
 				}
@@ -321,26 +321,38 @@ namespace Magic3D
             get
             {
                 int tmp = Model.Toughness;
-                foreach (NumericEffect e in Effects.OfType<NumericEffect>())
-                {
-                    switch (e.TypeOfEffect)
-                    {
-                        case EffectType.AddTouchness:
-                            tmp += e.NumericValue;
-                            break;
-                        case EffectType.SetTouchness:
-                            tmp = e.NumericValue;
-                            break;
-                    }
-                }
-				foreach (CardInstance c in AttachedCards) {
-					foreach (Ability a in c.getAbilitiesByType(AbilityEnum.Attach)) {
-						foreach (NumericEffect e in a.Effects.OfType<NumericEffect>().
-							Where(ef=>ef.TypeOfEffect == EffectType.AddTouchness)) {
-							tmp += e.NumericValue;
+
+				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingSpellEffects) {
+					bool valid = false;
+					foreach (CardTarget ct in ci.Effects.Affected.Values.OfType<CardTarget>()) {
+						if (!ct.Accept (this, ci)) {
+							valid = false;
+							break;
+						} else
+							valid = true;
+					}
+					if (!valid)
+						continue;
+					
+					foreach (NumericEffect e in  ci.Effects.OfType<NumericEffect>()) {
+						switch (e.TypeOfEffect) {
+						case EffectType.AddTouchness:
+							tmp += e.Amount.GetValue(ci);
+							break;
+						case EffectType.SetTouchness:
+							tmp = e.Amount.GetValue(ci);
+							break;
 						}
 					}
 				}
+//				foreach (CardInstance c in AttachedCards) {
+//					foreach (Ability a in c.getAbilitiesByType(AbilityEnum.Attach)) {
+//						foreach (NumericEffect e in a.Effects.OfType<NumericEffect>().
+//							Where(ef=>ef.TypeOfEffect == EffectType.AddTouchness)) {
+//							tmp += e.Amount;
+//						}
+//					}
+//				}
                 foreach (Damage d in Damages)
                     tmp -= d.Amount;
 
@@ -350,14 +362,10 @@ namespace Magic3D
 
 		#region layouting
 
-        float _x = 0.0f;
-        float _y = 0.0f;
-        float _z = 0.0f;
-        float _xAngle = 0.0f;
-        float _yAngle = 0.0f;
-        float _zAngle = 0.0f;
 
-        public float x
+		//TODO: create function for attached card position update instead of
+		//		copying again and again the same code
+        public override float x
         {
             get { return _x; }
             set { 
@@ -373,12 +381,14 @@ namespace Magic3D
 						continue;
 					}
 					a += 0.15f;
-					Animation.StartAnimation (new FloatAnimation (ac, "x", a, 0.2f));
+					if (Math.Abs (a - ac.x) > 1.0)
+						Animation.StartAnimation (new FloatAnimation (ac, "x", a, 0.2f));
+					else
+						ac.x = a;
 				}
-				//updateArrows ();
 			}
         }
-        public float y
+        public override float y
         {
             get { return _y; }
 			set { 
@@ -394,14 +404,14 @@ namespace Magic3D
 						continue;
 					}
 					a += 0.15f;
-					Animation.StartAnimation (new FloatAnimation (ac, "y", a, 0.2f));
-				}
-
-
+					if (Math.Abs (a - ac.y) > 1.0)
+						Animation.StartAnimation (new FloatAnimation (ac, "y", a, 0.2f));
+					else
+						ac.y = a;
+				}					
 			}        
 		}
-		static float attachedCardsSpacing = 0.03f;
-        public float z
+        public override float z
         {
             get { return _z; }
 			set { 
@@ -417,22 +427,40 @@ namespace Magic3D
 						continue;
 					}
 					a -=  attachedCardsSpacing;
-					Animation.StartAnimation (new FloatAnimation (ac, "z", a, 0.2f));
+					if (Math.Abs (a - ac.z) > 1.0)
+						Animation.StartAnimation (new FloatAnimation (ac, "z", a, 0.2f));
+					else
+						ac.z = a;
 				}
 				//updateArrows ();
 			}        
 		}
-        public float xAngle
+		public override float xAngle
         {
             get { return _xAngle; }
-            set { _xAngle = value; }
+            set {
+				if (_xAngle == value)
+					return;
+				
+				_xAngle = value; 
+
+				foreach (CardInstance ac in AttachedCards) {
+					if (ac.Controler != Controler)
+						continue;
+				
+					if (Math.Abs (_xAngle - ac.xAngle) > 1.0)
+						Animation.StartAnimation (new FloatAnimation (ac, "z", _xAngle, 0.2f));
+					else
+						ac.xAngle = _xAngle;
+				}
+			}
         }
-        public float yAngle
+		public override float yAngle
         {
             get { return _yAngle; }
             set { _yAngle = value; }
         }
-        public float zAngle
+		public override float zAngle
         {
             get { return _zAngle; }
             set { _zAngle = value; }
@@ -445,22 +473,7 @@ namespace Magic3D
         public float saved_yAngle = 0.0f;
         public float saved_zAngle = 0.0f;
 
-        public virtual Vector3 Position
-        {
-            get
-            { return new Vector3(x, y, z); }
-            set
-            {
-                x = value.X;
-                y = value.Y;
-                z = value.Z;
-            }
-        }
 
-        public void ResetPositionAndRotation()
-        {
-            x = y = z = xAngle = yAngle = zAngle = 0;
-        }
        	public void SwitchFocus()
         {
             HasFocus = !HasFocus;
@@ -521,11 +534,11 @@ namespace Magic3D
 			Rectangle<float> projR = Rectangle<float>.Zero;
 			Point<float> topLeft, bottomRight;
 			if (_isTapped) {
-				topLeft = MagicCard.CardBounds.BottomLeft;
-				bottomRight = MagicCard.CardBounds.TopRight;
+				topLeft = MagicData.CardBounds.BottomLeft;
+				bottomRight = MagicData.CardBounds.TopRight;
 			} else {
-				topLeft = MagicCard.CardBounds.TopLeft;
-				bottomRight = MagicCard.CardBounds.BottomRight;
+				topLeft = MagicData.CardBounds.TopLeft;
+				bottomRight = MagicData.CardBounds.BottomRight;
 			}
 			
 			Point<float> pt1 = glHelper.Project (topLeft, M, Magic.viewport [2], Magic.viewport [3]);
@@ -547,7 +560,8 @@ namespace Magic3D
 		#endregion
 
 		#region IRenderable implementation
-		public void Render ()
+
+		public override void Render ()
 		{
 			Matrix4 mSave = Magic.texturedShader.ModelMatrix;            
 			Magic.texturedShader.ModelMatrix = ModelMatrix * Magic.texturedShader.ModelMatrix;
@@ -576,14 +590,14 @@ namespace Magic3D
 
 					Magic.texturedShader.ModelMatrix = mO * Magic.texturedShader.ModelMatrix;
 					Magic.texturedShader.Color = go.Color.White;
-					MagicCard.pointsMesh.Render(PrimitiveType.TriangleStrip);
+					MagicData.PointsMesh.Render(PrimitiveType.TriangleStrip);
 				}
 			}
 
 			if (HasSummoningSickness) {			
 				Magic.texturedShader.ModelMatrix = Matrix4.CreateTranslation (0, 0, 0.3f) * ModelMatrix * mSave ;
 				GL.BindTexture (TextureTarget.Texture2D, Magic.wirlpoolShader.Texture);
-				MagicCard.CardMesh.Render (PrimitiveType.TriangleStrip);
+				MagicData.CardMesh.Render (PrimitiveType.TriangleStrip);
 				GL.BindTexture (TextureTarget.Texture2D, 0);
 			}
 
@@ -613,6 +627,8 @@ namespace Magic3D
 					Vector3.UnitZ * z);
 				z += 0.2f;
 			}
+			if (AttachedTo != null)
+				AttachedTo.updateArrows ();
 		}
 		void renderArrow(){
 			Magic.arrowShader.Enable ();
@@ -627,26 +643,6 @@ namespace Magic3D
 		}
 		#endregion
 
-		public Matrix4 ModelMatrix {
-			get
-			{
-				Matrix4 transformation;
-
-
-				Matrix4 Rot = 
-					Matrix4.CreateRotationX (xAngle) *
-					Matrix4.CreateRotationY (yAngle) *
-					Matrix4.CreateRotationZ (zAngle);
-
-				//Matrix4 Rot = Matrix4.CreateRotationZ(zAngle);
-				transformation = Rot * Matrix4.CreateTranslation(x, y, z);
-
-				return transformation;
-			}
-			set {
-				throw new NotImplementedException ();
-			}
-		}
 		#endregion
 
 		#region Overlay

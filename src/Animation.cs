@@ -64,7 +64,10 @@ namespace Magic3D
 			if (Animation.GetAnimation (a.AnimatedInstance, a.propertyName, ref aa)) {
 				aa.CancelAnimation ();
 			}
-
+//			if (a.AnimatedInstance is CardInstance) {
+//				if ((a.AnimatedInstance as CardInstance).Model.Name.StartsWith ("Spider"))
+// 					Debugger.Break ();
+//			}
 			//a.AnimationFinished += onAnimationFinished;
 
 			a.AnimationFinished += OnEnd;
@@ -84,15 +87,15 @@ namespace Magic3D
         {
 			frame++;
 
-			#region FLYING anim
-			if (frame % 20 == 0){
-				foreach (Player p in MagicEngine.CurrentEngine.Players) {
-					foreach (CardInstance c in p.InPlay.Cards.Where(ci => ci.HasAbility(AbilityEnum.Flying) && ci.z < 0.9f)) {
-						Animation.StartAnimation(new ShakeAnimation(c ,"z", 1.0f, 1.1f));
-					}
-				}
-			}
-			#endregion
+//			#region FLYING anim
+//			if (frame % 20 == 0){
+//				foreach (Player p in MagicEngine.CurrentEngine.Players) {
+//					foreach (CardInstance c in p.InPlay.Cards.Where(ci => ci.HasAbility(AbilityEnum.Flying) && ci.z < 0.4f)) {
+//						
+//					}
+//				}
+//			}
+//			#endregion
             //Stopwatch animationTime = new Stopwatch();
             //animationTime.Start();
 			 

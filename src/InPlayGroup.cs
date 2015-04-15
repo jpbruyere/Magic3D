@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using OpenTK;
 
 namespace Magic3D
 {

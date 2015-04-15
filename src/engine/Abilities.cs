@@ -47,8 +47,5 @@ namespace Magic3D
         Interrupt,
 
         Mana,
-
-		LooseLife,
-		GainLife,
     }
 }

@@ -375,11 +375,35 @@
       <LogicalName>
       </LogicalName>
     </Compile>
-    <Compile Include="src\engine\TriggeredAbility.cs">
+    <Compile Include="src\MagicStackLayout.cs">
       <LogicalName>
       </LogicalName>
     </Compile>
-    <Compile Include="src\engine\ActivatedAbility.cs">
+    <Compile Include="src\Layout3d.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\MagicData.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="RenderedCardModel.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\EffectGroup.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\SVarToResolve.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\CardTarget.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\EffectInstance.cs">
       <LogicalName>
       </LogicalName>
     </Compile>

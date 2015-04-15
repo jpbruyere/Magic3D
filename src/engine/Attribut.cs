@@ -184,6 +184,8 @@ namespace Magic3D
             return true;
         }
 		public static bool operator >=(MultiformAttribut<T> a1, MultiformAttribut<T> a2){
+			if (a2 == null)
+				return true;
 			foreach (T j in a2.Values) {
 				if (!a1.Contains (j))
 					return false;

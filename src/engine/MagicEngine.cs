@@ -65,6 +65,14 @@ namespace Magic3D
 			get { return Players [_priorityPlayer]; }
 		}
 
+		public IList<CardInstance> CardsInPlayHavingSpellEffects
+		{
+			get {
+				return Players.SelectMany (p => p.InPlay.Cards.Where (c => c.Model.SpellEffects.Count() > 0)).ToList();
+			}
+		}
+		//public List<ActiveEffect> SpellEffectsInPlay = new List<ActiveEffect> ();
+
 		public int currentPlayerIndex {
 			get { return _currentPlayer; }
 			set
@@ -132,6 +140,12 @@ namespace Magic3D
 		}
 		public void GivePriorityToNextPlayer ()
 		{
+			//first cancel incomplete action of priority player
+			if (NextActionOnStack != null) {
+				if (NextActionOnStack.CardSource.Controler == pp && !NextActionOnStack.IsComplete)
+					CancelLastActionOnStack ();
+			}
+
 			priorityPlayer++;
 
 			if (!(pp is AiPlayer) && CurrentPhase != GamePhases.DeclareBlocker)
@@ -176,11 +190,11 @@ namespace Magic3D
 			Players = _players;
 			MagicEvent += new MagicEventHandler (MagicEngine_MagicEvent);
 
-			SpellStackLayout.Position = Magic.vGroupedFocusedPoint;
-			SpellStackLayout.HorizontalSpacing = 0.3f;
-			SpellStackLayout.VerticalSpacing = 0.01f;
+			SpellStackLayout.Position = new Vector3 (0, 0, 2);//Magic.vGroupedFocusedPoint;
+			SpellStackLayout.HorizontalSpacing = 0.1f;
+			SpellStackLayout.VerticalSpacing = 0.3f;
 			SpellStackLayout.MaxHorizontalSpace = 3f;
-			SpellStackLayout.xAngle = Magic.FocusAngle;
+			//SpellStackLayout.xAngle = Magic.FocusAngle;
 		}
 		#endregion
 
@@ -230,29 +244,34 @@ namespace Magic3D
 			#region check triggers 
 			if (arg.Source != null)
 			{
-				foreach (TriggeredAbility ta in arg.Source.Model.Abilities.OfType<TriggeredAbility>()) {						
-					Trigger t = ta.Trigger;
-//					if (t.Targets.Contains(TargetType.Self))
-//					{
-						if (t.Type != arg.Type)
-							continue;
-						switch (t.Type) {
-						case MagicEventType.ChangeZone:
-							ChangeZoneEventArg czea = arg as ChangeZoneEventArg;
-							if ((czea.Origine == t.Origine || t.Origine == CardGroupEnum.Any)
-								&& (czea.Destination == t.Destination || t.Destination == CardGroupEnum.Any))
-							{			
-								Magic.AddLog(arg.Source.ToString() + " => " + t.ToString());
-								PushOnStack (new AbilityActivation (arg.Source, ta));
-							}
-							break;
-						default:
-							Magic.AddLog(arg.Source.ToString() + " => " + t.ToString());
-							PushOnStack (new AbilityActivation (arg.Source, ta));
-						break;
-						}
-					//}
+				foreach (Trigger t in arg.Source.Model.Triggers){					
+					if (t.Type != arg.Type)
+						continue;
+					switch (t.Type) {
+					case MagicEventType.ChangeZone:
 
+						bool valid = false;
+						foreach (CardTarget ct in t.ValidTarget.Values.OfType<CardTarget>()) {
+							if (ct.Accept(arg.Source,arg.Source))
+								valid = true;		
+						}
+
+						if (!valid)
+							break;
+						
+						ChangeZoneEventArg czea = arg as ChangeZoneEventArg;
+						if ((czea.Origine == t.Origine || t.Origine == CardGroupEnum.Any)
+							&& (czea.Destination == t.Destination || t.Destination == CardGroupEnum.Any))
+						{			
+							Magic.AddLog(arg.Source.ToString() + " => " + t.ToString());
+							PushOnStack (new AbilityActivation (arg.Source, t.Exec));
+						}
+						break;
+					default:
+						Magic.AddLog(arg.Source.ToString() + " => " + t.ToString());
+						PushOnStack (new AbilityActivation (arg.Source, t.Exec));
+					break;
+					}
 				}
 			}
 
@@ -312,12 +331,12 @@ namespace Magic3D
 			case GamePhases.Upkeep:
 				break;
 			case GamePhases.Draw:
-				if (pea.Player == cp) {
+				//if (pea.Player == cp) {
 					while(cp.CardToDraw > 0){
 						cp.DrawOneCard ();
 						cp.CardToDraw--;
 					}
-				}
+				//}
 				break;
 			case GamePhases.Main1:
 			case GamePhases.Main2:
@@ -476,69 +495,19 @@ namespace Magic3D
 					} else {
 						PushOnStack(new Spell (c));
 					}
-				}else if (CurrentPhase != GamePhases.CleanUp){
-					
-				}
-				switch (CurrentPhase) {
-				case GamePhases.Untap:
-					break;
-				case GamePhases.Upkeep:
-					break;
-				case GamePhases.Draw:
-					break;
-				case GamePhases.Main1:
-				case GamePhases.Main2:
-					break;
-				case GamePhases.BeforeCombat:
-				case GamePhases.DeclareAttacker:
-				case GamePhases.DeclareBlocker:
-				case GamePhases.FirstStrikeDame:
-				case GamePhases.CombatDamage:
-				case GamePhases.EndOfCombat:
-				case GamePhases.EndOfTurn:
-					break;
-				case GamePhases.CleanUp:
-					break;
-				default:
-					break;
+				}else if (CurrentPhase != GamePhases.CleanUp && CurrentPhase != GamePhases.Untap){
+					//play instant and abilities
 				}
 				break;
 				#endregion
 			case CardGroupEnum.InPlay:
 				#region inPlay
-				if (c.Controler != ip &&
-					CurrentPhase != GamePhases.DeclareBlocker &&
-					CurrentPhase != GamePhases.CombatDamage)
-					return;
-
-				if (!(c.IsTapped || c.HasSummoningSickness)){
-					Ability[] activableAbs = c.Model.Abilities.Where (
-						sma => sma is ActivatedAbility && !(sma is TriggeredAbility)).ToArray();
-
-					//TODO:if multiple abs, must choose one
-					if (activableAbs.Count() > 0)
-						PushOnStack(new AbilityActivation(c,activableAbs[0]));
-				}
-
-				switch (CurrentPhase) {
-				case GamePhases.Untap:
-					break;
-				case GamePhases.Upkeep:
-					break;
-				case GamePhases.Draw:
-					break;
-				case GamePhases.Main1:
-				case GamePhases.Main2:
-					break;
-				case GamePhases.BeforeCombat:
-					break;
-				case GamePhases.DeclareAttacker:
+				if (CurrentPhase == GamePhases.DeclareAttacker) {
 					if (!c.Combating && !c.CanAttack)
-						break;
+						return;
 					c.Combating = !c.Combating;
 					c.CurrentGroup.UpdateLayout ();
-					break;
-				case GamePhases.DeclareBlocker:
+				} else if (CurrentPhase == GamePhases.DeclareBlocker) {
 					if (c.Controler == ip) {
 						if (c.Combating) {
 							c.Combating = false;
@@ -547,7 +516,7 @@ namespace Magic3D
 							c.Controler.InPlay.UpdateLayout ();
 						}
 						c.Controler.CurrentBlockingCreature = c;
-						break;
+						return;
 					} else if (ip.CurrentBlockingCreature != null && c.Combating) {
 						if (ip.CurrentBlockingCreature.Combating) {
 							//remove blocker
@@ -561,26 +530,25 @@ namespace Magic3D
 							ip.CurrentBlockingCreature.Combating = true;
 							ip.CurrentBlockingCreature = null;
 						} else
-							break;
-
+							return;
 						ip.InPlay.UpdateLayout ();
 					}
-					break;
-				case GamePhases.FirstStrikeDame:
-					break;
-				case GamePhases.CombatDamage:
-					break;
-				case GamePhases.EndOfCombat:
-					break;
-				case GamePhases.EndOfTurn:
-					break;
-				case GamePhases.CleanUp:
-					break;
-				default:
-					break;
+				} else if (CurrentPhase == GamePhases.CombatDamage) {
+					
+				} else if (c.Controler == ip) {					
+					#region activable abilities
+					if (!(c.IsTapped || c.HasSummoningSickness)) {
+						Ability[] activableAbs = c.Model.Abilities.Where (
+							                         sma => sma.IsActivatedAbility).ToArray ();
+
+						//TODO:if multiple abs, must choose one
+						if (activableAbs.Count () > 0)
+							PushOnStack (new AbilityActivation (c, activableAbs [0]));
+					}
+					#endregion					
 				}
-				break;
 				#endregion
+				break;
 			case CardGroupEnum.Graveyard:
 				c.CurrentGroup.toogleShowAll ();
 				break;
@@ -601,29 +569,6 @@ namespace Magic3D
 		public void PushOnStack (object s)
 		{			
 			MagicStack.Push (s);
-
-			//lands and their abilities does not go on stack
-
-		}
-		public void PushCurrentActionOfPPOnStack()
-		{
-//			//lands and their abilities does not go on stack
-//			MagicAction a = pp.CurrentAction as MagicAction;
-//			if (a != null){
-//				if (!a.GoesOnStack) {
-//					a.Resolve ();
-//					pp.CurrentAction = null;
-//					return;
-//				}
-//			}
-//
-//			MagicStack.Push (pp.CurrentAction);
-//			pp.CurrentAction = null;
-
-			SpellStackLayout.Cards = MagicStack.OfType<Spell> ().Select (sp => sp.CardSource).ToList ();
-			SpellStackLayout.UpdateLayout ();
-
-			GivePriorityToNextPlayer ();
 		}
 		public void ClearIncompleteActions()
 		{
@@ -634,6 +579,19 @@ namespace Magic3D
 					break;
 				MagicStack.Pop ();
 			}
+			Magic.btOk.Visible = false;
+		}
+		public void CancelLastActionOnStack()
+		{
+			MagicAction ma = NextActionOnStack;
+			if (ma == null)
+				return;
+			if (ma.IsComplete)
+				Debug.Print ("Canceling completed action");
+			if (ma.CardSource.Controler != pp)
+				Debug.Print ("Canceling action of another player");
+
+			MagicStack.Pop ();
 		}
 		public void ResolveStack ()
 		{
@@ -645,8 +603,7 @@ namespace Magic3D
 					
 					MagicAction ma = MagicStack.Pop () as MagicAction;
 
-					SpellStackLayout.Cards = MagicStack.OfType<MagicAction> ().Select (sp => sp.CardSource).ToList ();
-					SpellStackLayout.UpdateLayout ();
+					UpdateStackLayouting ();
 
 					ma.Resolve ();
 
@@ -658,6 +615,59 @@ namespace Magic3D
 					continue;
 				}
 			}
+		}
+		public void checkLastActionOnStack ()
+		{
+			if (MagicStack.Count == 0)
+				return;
+			MagicAction ma = MagicStack.Peek () as MagicAction;
+
+			if (ma == null)
+				return;
+			
+			if (ma.CardSource.Controler != pp) {
+				return;
+				//				Debug.WriteLine ("ERROR: last action controle has not priority.");
+				//				CancelLastActionOnStack ();
+
+			}if (!ma.IsComplete) {
+				if (ma.RemainingCost == CostTypes.Tap) {
+					ma.RemainingCost = null;
+					ma.CardSource.Tap ();
+				} else if ((pp.AvailableManaOnTable + pp.ManaPool) < ma.RemainingCost) {
+					Magic.AddLog ("Not enough mana available");
+					CancelLastActionOnStack ();
+					return;
+				} else if (pp.ManaPool != null && ma.RemainingCost != null) {
+					ma.PayCost (ref pp.ManaPool);
+				}
+			}
+
+			if (ma.IsComplete) {
+				if (ma.GoesOnStack) {
+					//should show spell to player...
+					UpdateStackLayouting();
+
+					GivePriorityToNextPlayer ();				
+				} else {
+					MagicStack.Pop ();
+					ma.Resolve ();
+				}
+				return;
+			}
+
+
+			pp.UpdateUi ();
+
+			//			AbilityActivation aa = ma as AbilityActivation;
+			//			//mana doest go on stack
+			//			if (aa != null){
+			//				if (aa.Source.AbilityType == AbilityEnum.Mana) {
+			//					MagicEvent (new AbilityEventArg (aa.Source, aa.CardSource));				
+			//					MagicStack.Pop;
+			//					return;
+			//				}
+			//			}
 		}
 
 		/// <summary>
@@ -756,58 +766,18 @@ namespace Magic3D
 			}
 		}
 		#endregion
-
-		public void checkLastActionOnStack ()
+		public void UpdateOverlays()
 		{
-			if (MagicStack.Count == 0)
-				return;
-			MagicAction ma = MagicStack.Peek () as MagicAction;
-
-			if (ma == null)
-				return;
-			if (ma.CardSource.Controler != pp) {
-				Debug.WriteLine ("ERROR: last action controle has not priority.");
-				return;
-			}if (!ma.IsComplete) {
-				if (ma.RemainingCost == CostTypes.Tap) {
-					ma.RemainingCost = null;
-					ma.CardSource.Tap ();
-				} else if ((pp.AvailableManaOnTable + pp.ManaPool) < ma.RemainingCost) {
-					Magic.AddLog ("Not enough mana available");
-					MagicStack.Pop ();
-					return;
-				} else if (pp.ManaPool != null && ma.RemainingCost != null) {
-					ma.PayCost (ref pp.ManaPool);
-				}
-			}
-			if (ma.IsComplete) {
-				if (ma.GoesOnStack) {
-					//should show spell to player...
-					SpellStackLayout.Cards = MagicStack.OfType<Spell> ().Select (sp => sp.CardSource).ToList ();
-					SpellStackLayout.UpdateLayout ();
-
-					GivePriorityToNextPlayer ();				
-				} else {
-					MagicStack.Pop ();
-					ma.Resolve ();
-				}
-				return;
-			}
-
-
-			pp.UpdateUi ();
-
-//			AbilityActivation aa = ma as AbilityActivation;
-//			//mana doest go on stack
-//			if (aa != null){
-//				if (aa.Source.AbilityType == AbilityEnum.Mana) {
-//					MagicEvent (new AbilityEventArg (aa.Source, aa.CardSource));				
-//					MagicStack.Pop;
-//					return;
-//				}
-//			}
+			foreach (CardInstance ci in CardsInPlayHavingSpellEffects) {
+				//foreach (EffectGroup e in ci.Effects) {
+				foreach (CardTarget ct in ci.Effects.Affected.Values.OfType<CardTarget>()) {
+					foreach (CardInstance c in ct.GetValidTargetsInPlay (ci))
+						c.UpdateOverlay ();
+				}	
+				//}
+			}			
 		}
-			
+	
 		public void processRendering()
 		{
 			if (!decksLoaded)
@@ -817,7 +787,13 @@ namespace Magic3D
 				p.Render ();
 			}
 
-			SpellStackLayout.Render();
+			//SpellStackLayout.Render();
+		}
+
+		public void UpdateStackLayouting()
+		{
+			SpellStackLayout.Cards = MagicStack.OfType<Spell> ().Select (sp => sp.CardSource).ToList ();
+			SpellStackLayout.UpdateLayout ();			
 		}
 	}
 }

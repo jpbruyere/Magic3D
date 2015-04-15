@@ -12,6 +12,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using GLU = OpenTK.Graphics.Glu;
+using System.Linq;
 
 namespace Magic3D
 {
@@ -144,7 +145,7 @@ namespace Magic3D
 		public static int tableTexture;
 		public void initTableModel()
 		{
-			tableTexture = new Texture(@"images/abstrait3.jpg");
+			tableTexture = new Texture(@"images/marble1.jpg");
 
 			const float _width = 16f;
 			const float _height = 16f;
@@ -240,7 +241,7 @@ namespace Magic3D
 
 		void BtOk_MouseClick (object sender, MouseButtonEventArgs e)
 		{			
-			//MagicEngine.CurrentEngine.ip.CurrentAction.Validate ();
+			MagicEngine.CurrentEngine.CancelLastActionOnStack ();
 			btOk.Visible = false;			
 		}
 		public static void AddLog(string msg)
@@ -391,7 +392,7 @@ namespace Magic3D
 			initInterface ();
 
 			#region init GL
-			MagicCard.initCardModel();
+			MagicData.InitCardModel();
 			//MagicCard.LoadCardDatabase();
 			Edition.LoadEditionsDatabase();
 			//Deck.LoadPreconstructedDecks();
@@ -511,7 +512,9 @@ namespace Magic3D
 				Players [0].DrawOneCard ();
 				break;
 			case Key.KeypadEnter:
-				engine.SwitchToNextPhase ();
+				engine.ip.PhaseDone = true;
+				if (engine.pp == engine.ip && engine.cp != engine.pp)
+					engine.GivePriorityToNextPlayer ();
 				break;
 			case Key.Escape:
 				this.CursorVisible = true;
@@ -539,6 +542,14 @@ namespace Magic3D
 				if (CardInstance.selectedCard == null)
 					return;
 				CardInstance.selectedCard.updateArrows ();			
+				break;
+			case Key.L:
+				engine.ip.Library.toogleShowAll ();
+				break;
+			case Key.R:
+				foreach (CardInstance ci in engine.Players.SelectMany(p => p.InPlay.Cards.Where(c => c.HasType(CardTypes.Creature))))
+					ci.UpdateOverlay ();
+				
 				break;
 			}
 		}

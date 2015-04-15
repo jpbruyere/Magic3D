@@ -6,11 +6,7 @@ using System.Diagnostics;
 
 namespace Magic3D
 {
-	public class StaticAbility : Ability
-	{
-
-	}
-	public class ManaAbility : ActivatedAbility
+	public class ManaAbility : Ability
 	{
 		public ManaAbility ()
 		{
@@ -20,6 +16,24 @@ namespace Magic3D
 		public Cost ProducedMana;
 	}
 
+	public class ChangeZoneAbility : Ability
+	{
+		public CardGroupEnum Origin;
+		public CardGroupEnum Destination;
+		public bool Tapped = false;
+
+		public ChangeZoneAbility()
+		{
+			AbilityType = AbilityEnum.Unset;
+			Effects.Add (new NumericEffect(EffectType.ChangeZone,1));
+		}
+	}
+
+	public enum AbilityCategory{		
+		Acivated,
+		Spell,
+		DrawBack
+	}
 	public class Ability
 	{
 		#region CTOR
@@ -28,22 +42,45 @@ namespace Magic3D
 		{
 			AbilityType = a;
 		}
+		public Ability (EffectType et)
+		{
+			AbilityType = AbilityEnum.Unset;
+			Effects.Add (new Effect (et));
+		}
+		public Ability (Trigger trig)
+		{
+			AbilityType = AbilityEnum.Unset;
+			Trigger = trig;
+		}
 		#endregion
 
 		int _requiredTargetCount = -1;
 		string targetPrompt = "";
 		MultiformAttribut<Target> _validTargets;
 		List<Object> _selectedTargets = new List<object> ();
-
+		public Trigger Trigger;
+		public AbilityCategory Category;
 		public AbilityEnum AbilityType = AbilityEnum.Unset;
 		public EffectGroup Effects = new EffectGroup ();
-		public Cost ActivationCost;
+		public string SubAbilityId;
+		public Cost ActivationCost = null;
 		public string Description = "";
 		public int MinimumTargetCount = -1;
 		public int MaximumTargetCount = -1;
 
+		public bool IsTriggeredAbility {
+			get { return Trigger != null; }
+		}
+		public bool IsStaticAbility {
+			get { return ActivationCost == null && Trigger == null; }
+		}
+		public bool IsActivatedAbility {
+			get { return Trigger == null && ActivationCost != null; }
+		}
 
-
+		public bool HasContinuousMode {
+			get { return Effects == null ? false : Effects.Mode == Effect.ModeEnum.Continuous; }
+		}
 		/// <summary>
 		/// return MinimumTargetCount if set or _requiredTargetCount
 		/// </summary>
@@ -96,21 +133,31 @@ namespace Magic3D
 			}
 		}
 
+		public virtual void Activate (CardInstance _source, List<object> _targets)
+		{
+			if (Effects == null)
+				return;
+			Effects.Apply (_source, this, _targets);		
+		}
+
 		public static Ability Parse (string strAbility)
 		{
-			Ability a = new Ability ();
+			Ability a = new Ability();
 			Parse (strAbility, ref a);
 			return a;
 		}
 		public static Ability Parse (string strAbility, Trigger _trig)
 		{
-			Ability ta = new TriggeredAbility (_trig);
+			Ability ta = new Ability();
 			Parse (strAbility, ref ta);
+			ta.Trigger = _trig;
 			return ta;
 		}
 		public static void Parse (string strAbility, ref Ability a)
 		{			
 			string[] tmp = strAbility.Split (new char[] { '|' });
+
+			AbilityCategory Category = AbilityCategory.Acivated;
 
 			foreach (string ab in tmp) {
 				int v;
@@ -128,15 +175,14 @@ namespace Magic3D
 
 				Effect e = null;
 
+
 				switch (varName) {
 				case AbilityFieldsEnum.SP://Spell ability
-				case AbilityFieldsEnum.AB://Triggered or activated
-					if (!(a is TriggeredAbility)) {
-						if (varName == AbilityFieldsEnum.AB)
-							a = new ActivatedAbility ();
-						else if (varName == AbilityFieldsEnum.SP)
-							a = new StaticAbility ();
-					}
+				case AbilityFieldsEnum.AB://Triggered or activated					
+					if (varName == AbilityFieldsEnum.AB)
+						Category = AbilityCategory.Acivated;
+					else if (varName == AbilityFieldsEnum.SP)
+						Category = AbilityCategory.Spell;					
 					#region ability type
 					switch (value) {
 					case "Discard":
@@ -163,11 +209,11 @@ namespace Magic3D
 					case "TapAll":
 						
 						break;
-					case "LoseLife":						
-						a.AbilityType = AbilityEnum.LooseLife;
+					case "LoseLife":
+						a.Effects.Add (new NumericEffect(EffectType.LoseLife));
 						break;
 					case "GainLife":						
-						a.AbilityType = AbilityEnum.GainLife;
+						a.Effects.Add (new NumericEffect(EffectType.GainLife));
 						break;
 					case "PreventDamage":
 						break;
@@ -176,7 +222,7 @@ namespace Magic3D
 					case "DealDamage":
 						break;
 					case "ChangeZone":
-						a.Effects.Add (new Effect (EffectType.ChangeZone));
+						a = new ChangeZoneAbility();
 						break;
 					case "Draw":
 						break;
@@ -355,8 +401,8 @@ namespace Magic3D
 					break;
 					#endregion
 				case AbilityFieldsEnum.Cost:	
-					if (a is StaticAbility)
-						break;
+					if (Category == AbilityCategory.Spell)
+						break;//dont parse cost, it's in card cost
 					a.ActivationCost = Cost.Parse (value);
 					break;
 				case AbilityFieldsEnum.ValidTgts:
@@ -386,7 +432,7 @@ namespace Magic3D
 						break;
 					a.Effects.Add (new NumericEffect {
 						TypeOfEffect = EffectType.AddTouchness,
-						NumericValue = v
+						Amount = v
 					});
 					break;
 				case AbilityFieldsEnum.AILogic:
@@ -506,7 +552,7 @@ namespace Magic3D
 						break;
 					a.Effects.Add (new NumericEffect {
 						TypeOfEffect = EffectType.SetPower,
-						NumericValue = v
+						Amount = v
 					});
 					break;
 				case AbilityFieldsEnum.Toughness:
@@ -514,7 +560,7 @@ namespace Magic3D
 						break;
 					a.Effects.Add (new NumericEffect {
 						TypeOfEffect = EffectType.SetTouchness,
-						NumericValue = v
+						Amount = v
 					});
 					break;
 				case AbilityFieldsEnum.StaticAbilities:
@@ -522,6 +568,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.RememberObjects:
 					break;
 				case AbilityFieldsEnum.SubAbility:
+					a.SubAbilityId = value;
 					break;
 				case AbilityFieldsEnum.TargetType:
 					break;
@@ -537,17 +584,7 @@ namespace Magic3D
 						Debug.WriteLine ("life amount: " + value);
 						break;
 					}
-					if (a.AbilityType == AbilityEnum.GainLife) {
-						a.Effects.Add (new NumericEffect {
-							TypeOfEffect = EffectType.GainLife,
-							NumericValue = v
-						});
-					} else {
-						a.Effects.Add (new NumericEffect {
-							TypeOfEffect = EffectType.LoseLife,
-							NumericValue = v
-						});
-					}
+					a.Effects.OfType<NumericEffect> ().FirstOrDefault ().Amount = v;
 					break;
 				case AbilityFieldsEnum.Amount:
 					break;
@@ -556,8 +593,10 @@ namespace Magic3D
 				case AbilityFieldsEnum.NumDmg:
 					break;
 				case AbilityFieldsEnum.Origin:
+					(a as ChangeZoneAbility).Origin = CardGroup.ParseZoneName (value);
 					break;
 				case AbilityFieldsEnum.Destination:
+					(a as ChangeZoneAbility).Destination = CardGroup.ParseZoneName (value);
 					break;
 				case AbilityFieldsEnum.NumAtt:
 					break;
@@ -594,8 +633,18 @@ namespace Magic3D
 				case AbilityFieldsEnum.TokenToughness:
 					break;
 				case AbilityFieldsEnum.ChangeType:
+					a.ValidTargets = Target.ParseTargets (value);
+					foreach (CardTarget ct in a.ValidTargets.Values.OfType<CardTarget>()) {
+						ct.ValidGroup += (a as ChangeZoneAbility).Origin;
+					}
 					break;
 				case AbilityFieldsEnum.ChangeNum:
+					if (!int.TryParse (value, out v)) {
+						Debug.WriteLine ("changeNum amount: " + value);
+						break;
+					}
+					a.RequiredTargetCount = 1;
+					a.Effects.OfType<NumericEffect>().FirstOrDefault().Amount = v;
 					break;
 				case AbilityFieldsEnum.GainControl:
 					break;
@@ -812,6 +861,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.Abilities:
 					break;
 				case AbilityFieldsEnum.Tapped:
+					(a as ChangeZoneAbility).Tapped = bool.Parse (value);
 					break;
 				case AbilityFieldsEnum.UnlessPayer:
 					break;
@@ -1253,28 +1303,26 @@ namespace Magic3D
 				default:
 					break;
 				}
-
-
-				if (!a.AcceptTargets && a.ValidTargets != null) {
-					Debug.WriteLine ("required target forced to 1.");
-					a.RequiredTargetCount = 1;
-				}
-				
 			}
+			if (!a.AcceptTargets && a.ValidTargets != null) {
+				Debug.WriteLine ("required target forced to 1.");
+				a.RequiredTargetCount = 1;
+			}
+			a.Category = Category;
 		}
 
 
-		public static Ability SpecialK (string str)
+		public static Ability ParseKeyword (string str, MagicCard mc = null)
 		{
 			Ability a = null;
 
 			if (str == "CARDNAME enters the battlefield tapped.") {
-				Trigger t = new Trigger (MagicEventType.PlayLand);
-				t.Targets = new CardTarget (TargetType.Self);
-				TriggeredAbility ta = new TriggeredAbility (t);
-				ta.AbilityType = AbilityEnum.Unset;
-				ta.Effects.Add (new Effect (EffectType.Tap));
-				return ta;
+				mc.Triggers.Add (
+					new Trigger (
+						MagicEventType.PlayLand, 
+						new CardTarget (TargetType.Self),
+						new Ability (EffectType.Tap)));
+				return null;
 			}
 
 			string[] tmp = str.Split (new char[] { ' ' });
@@ -1352,7 +1400,7 @@ namespace Magic3D
 			case "Entwine":
 				break;
 			case "Equip":
-				a = new ActivatedAbility () { AbilityType = AbilityEnum.Attach };
+				a = new Ability () { AbilityType = AbilityEnum.Attach };
 				CardTarget ct = new CardTarget ();
 				ct.Controler = ControlerType.You;
 				ct.ValidCardTypes += CardTypes.Creature;
@@ -1572,7 +1620,18 @@ namespace Magic3D
 				break;
 			}
 			return a;
-		}        
+		}       
+
+		public override string ToString ()
+		{
+			string tmp = "ability: ";
+			if (IsTriggeredAbility)
+				tmp = "Triggered " + tmp;
+			else if (IsActivatedAbility)
+				tmp = "Activated " + tmp;
+			tmp += this.AbilityType.ToString();
+			return tmp;
+		}
 	}
 
 }
