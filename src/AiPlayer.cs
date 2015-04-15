@@ -164,7 +164,7 @@ namespace Magic3D
 		{
 			Cost availableMana = AvailableManaOnTable;
 
-			foreach (CardInstance c in Hand.Cards)
+			foreach (CardInstance c in Hand.Cards.Where(c=>c.HasType(CardTypes.Creature)))
 			{
 				if (c.Model.Types == CardTypes.Creature)
 				{

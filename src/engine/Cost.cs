@@ -150,8 +150,9 @@ namespace Magic3D
 				}
 				return true;
 			}
+			Cost right = c2.Clone();
             Cost left = c1.Clone();
-            Cost right = c2.Clone();
+            
             Cost result = right.Pay(ref left);
             return result == null ? false : true;
         }
@@ -338,9 +339,9 @@ namespace Magic3D
         public virtual Cost Pay(ref Cost c)
         {
             Cost result = null;
-
             if (c != null)
             {
+				c.OrderFirst(this.GetDominantMana ());
                 Costs cl = c as Costs;
                 if (cl != null)
                 {
@@ -383,6 +384,11 @@ namespace Magic3D
             }
             return "erreur";
         }
+		public virtual void OrderFirst(ManaTypes mt){			
+		}
+		public virtual ManaTypes GetDominantMana(){
+			return ManaTypes.Any;
+		}
     }
     public class Costs : Cost
     {
@@ -510,5 +516,26 @@ namespace Magic3D
 
             return tmp;
         }
+
+		public override void OrderFirst (ManaTypes mt)
+		{
+			List<Cost> manas = new List<Cost> ();
+			List<Cost> others = new List<Cost> ();
+			foreach (Cost c in CostList) {
+				if (c is Mana)
+					manas.Add (c);
+				else
+					others.Add (c);
+			}
+			CostList = manas.OrderBy (m => (m as Mana).TypeOfMana).Concat(others).ToList();
+		}
+
+		public override ManaTypes GetDominantMana()
+		{
+			IList<Mana> manas = CostList.OfType<Mana> ().
+				Where (m => m.TypeOfMana != ManaTypes.Colorless && m.TypeOfMana != ManaTypes.Life).
+				OrderBy (mm => mm.count).ToList();
+			return (manas.Count > 0) ? manas.FirstOrDefault ().TypeOfMana : ManaTypes.Colorless;
+		}
     }
 }

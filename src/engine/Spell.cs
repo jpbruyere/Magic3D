@@ -15,8 +15,11 @@ namespace Magic3D
 		public AbilityActivation(CardInstance _source, Ability a) : base(_source)
 		{
 			Source = a;
-			if (!Cost.IsNullOrCountIsZero(Source.ActivationCost))
+			if (!Cost.IsNullOrCountIsZero (Source.ActivationCost)) {
 				RemainingCost = Source.ActivationCost.Clone ();
+				RemainingCost.OrderFirst (Source.ActivationCost.GetDominantMana ());
+			}
+			
 //			else//if it's a spell ab, no cost and no message
 //				return;
 
@@ -148,8 +151,10 @@ namespace Magic3D
 		public Spell(CardInstance _cardInstance) : base(_cardInstance)
 		{            
 
-			if (_cardInstance.Model.Cost != null)
+			if (_cardInstance.Model.Cost != null) {
 				RemainingCost = _cardInstance.Model.Cost.Clone ();
+				RemainingCost.OrderFirst(_cardInstance.Model.Cost.GetDominantMana());
+			}
 
 			Magic.AddLog ("Trying to cast: " + CardSource.Model.Name);
 
