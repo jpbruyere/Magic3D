@@ -50,6 +50,7 @@
     <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <Package>glib-sharp-2.0</Package>
     </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\card_back.jpg">
@@ -225,6 +226,11 @@
     <None Include="images\abstrait4.jpg">
       <LogicalName>
       </LogicalName>
+    </None>
+    <None Include="Datas\cardsfolder.zip">
+      <LogicalName>
+      </LogicalName>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -458,6 +464,10 @@
       </LogicalName>
     </Folder>
     <Folder Include="src\divers\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="Datas\">
       <LogicalName>
       </LogicalName>
     </Folder>

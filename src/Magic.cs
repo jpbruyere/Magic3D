@@ -385,8 +385,7 @@ namespace Magic3D
 		public static float time = 0f;
 
 		protected override void OnLoad (EventArgs e)
-		{
-
+		{			
 			base.OnLoad (e);
 
 			initInterface ();

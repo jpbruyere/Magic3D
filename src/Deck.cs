@@ -52,7 +52,7 @@ namespace Magic3D
 		{
 			MainLine l = cardLines.Dequeue();
 			MagicCard c = null;
-			if (!MagicData.TryGetCard (l.name, ref c)) {
+			if (!MagicData.TryGetCardFromZip (l.name, ref c)) {
 				Debug.WriteLine ("DCK: {0} => Card not found: {1}", Name, l.name);
 				return;
 			}

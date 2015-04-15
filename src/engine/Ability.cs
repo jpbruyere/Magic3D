@@ -175,7 +175,8 @@ namespace Magic3D
 				if (dollarPos < 0)
 					continue;
 
-				AbilityFieldsEnum varName = (AbilityFieldsEnum)Enum.Parse (typeof(AbilityFieldsEnum), ab.Substring (0, dollarPos), true);
+				AbilityFieldsEnum varName;
+				Enum.TryParse (ab.Substring (0, dollarPos), true, out varName);
 				string value = ab.Substring (dollarPos + 1).Trim ();
 
 				Effect e = null;
@@ -246,6 +247,7 @@ namespace Magic3D
 					case "ChooseColor":
 						break;
 					case "Dig":
+						a = new ChangeZoneAbility();
 						break;
 					case "PumpAll":
 						break;
