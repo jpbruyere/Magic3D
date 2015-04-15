@@ -533,7 +533,7 @@ namespace Magic3D
 				wCardText.Visible = true;
 				break;
 			case Key.O:
-				//engine.ip.Opponent.Hand.toogleShowAll ();
+				engine.ip.Opponent.Hand.RevealToUIPlayer();
 				break;
 			case Key.T:
 				//startTossing ();

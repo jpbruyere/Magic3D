@@ -701,7 +701,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="shaders\effect0.frag" />
-    <EmbeddedResource Include="shaders\effect0 %28copier%29.frag" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\data2\devel\GOLib\GOLib.csproj">

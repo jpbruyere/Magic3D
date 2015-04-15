@@ -769,12 +769,12 @@ namespace Magic3D
 		public void UpdateOverlays()
 		{
 			foreach (CardInstance ci in CardsInPlayHavingSpellEffects) {
-				//foreach (EffectGroup e in ci.Effects) {
-				foreach (CardTarget ct in ci.Effects.Affected.Values.OfType<CardTarget>()) {
-					foreach (CardInstance c in ct.GetValidTargetsInPlay (ci))
-						c.UpdateOverlay ();
-				}	
-				//}
+				foreach (EffectGroup eg in ci.Effects) {
+					foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
+						foreach (CardInstance c in ct.GetValidTargetsInPlay (ci))
+							c.UpdateOverlay ();
+					}	
+				}
 			}			
 		}
 	

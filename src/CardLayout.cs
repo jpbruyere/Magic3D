@@ -1,6 +1,7 @@
 ﻿using System;
 using OpenTK;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Magic3D
 {
@@ -65,7 +66,11 @@ namespace Magic3D
 					Animation.StartAnimation (new FloatAnimation (c, "z", aZ, 0.2f));
 				Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
 				Animation.StartAnimation (new AngleAnimation (c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
-
+				if (c.IsTapped)
+					Animation.StartAnimation(new FloatAnimation(c, "zAngle", -MathHelper.PiOver2, MathHelper.Pi * 0.1f));
+				else
+					Animation.StartAnimation(new FloatAnimation(c, "zAngle", 0f, MathHelper.Pi * 0.1f));
+				
 //				foreach (CardInstance ac in c.AttachedCards) {
 //					aX += 0.15f;
 //					aY += 0.15f;
@@ -119,6 +124,49 @@ namespace Magic3D
 				}
 			} else
 				UpdateLayout ();
+		}
+		public void RevealToUIPlayer()
+		{
+			isExpanded = !isExpanded;
+
+			if (!isExpanded) {
+				UpdateLayout ();
+				return;
+			}
+
+			Vector3 v = Magic.vGroupedFocusedPoint;
+			v = Vector3.Transform(v, Matrix4.Invert(Cards.FirstOrDefault().Controler.Transformations));
+
+			float aCam = Magic.FocusAngle;
+
+			float horizontalLimit = 5f;
+
+			float cX = v.X;
+			float cZ = v.Z;
+
+			float hSpace = horizontalLimit / Cards.Count;
+			float vSpace = 0.01f;
+
+			if (hSpace > 0.9f)
+				hSpace = 0.9f;
+
+			cX -= hSpace * Cards.Count / 2;
+
+			int delay = 0;
+
+			foreach (CardInstance c in Cards) {
+				Animation.StartAnimation (new FloatAnimation (c, "x", cX, 0.2f));
+				Animation.StartAnimation (new FloatAnimation (c, "y", v.Y, 1.0f));
+				Animation.StartAnimation (new FloatAnimation (c, "z", cZ, 0.1f));
+				Animation.StartAnimation (new AngleAnimation (c, "xAngle", aCam, MathHelper.Pi * 0.1f), 100);
+				Animation.StartAnimation (new AngleAnimation (c, "yAngle", 0, MathHelper.Pi * 0.1f), 100);
+				Animation.StartAnimation(new AngleAnimation(c, "zAngle", -c.Controler.zAngle, MathHelper.Pi * 0.3f));
+
+				cX += hSpace;
+				cZ += vSpace;
+
+				delay += 10;
+			}
 		}
 
 		public void UpdateDefendersLayout ()

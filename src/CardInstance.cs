@@ -58,9 +58,8 @@ namespace Magic3D
 		public bool HasFocus = false;
 		public bool HasSummoningSickness = false;
 
-		//TODO:spelleffects is a list, should handle all the list
-		public EffectGroup Effects{
-			get { return Model.SpellEffects.FirstOrDefault(); }
+		public IList<EffectGroup> Effects{
+			get { return Model.SpellEffects; }
 		}
 //		public IList<Effect> ActiveEffects{
 //			get { }
@@ -160,9 +159,11 @@ namespace Magic3D
         public bool HasEffect(EffectType et)
         {
 			foreach (CardInstance ca in AttachedCards) {
-				foreach (Effect e in ca.Effects) {
-					if (e.TypeOfEffect == et)
-						return true;
+				foreach (EffectGroup eg in ca.Effects) {
+					foreach (Effect e in eg) {
+						if (e.TypeOfEffect == et)
+							return true;
+					}
 				}
 			}
             return false;
@@ -292,25 +293,27 @@ namespace Magic3D
 
 				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingSpellEffects) {
 					bool valid = false;
-					foreach (CardTarget ct in ci.Effects.Affected.Values.OfType<CardTarget>()) {
-						if (!ct.Accept (this, ci)) {
-							valid = false;
-							break;
-						} else
-							valid = true;
-					}
-					if (!valid)
-						continue;
-
-					foreach (NumericEffect e in  ci.Effects.OfType<NumericEffect>()) {
-						switch (e.TypeOfEffect) {
-						case EffectType.AddPower:
-							tmp += e.Amount.GetValue(ci);
-							break;
-						case EffectType.SetPower:
-							tmp = e.Amount.GetValue(ci);
-							break;
+					foreach (EffectGroup eg in ci.Effects) {
+						foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
+							if (!ct.Accept (this, ci)) {
+								valid = false;
+								break;
+							} else
+								valid = true;
 						}
+						if (!valid)
+							continue;
+
+						foreach (NumericEffect e in  eg.OfType<NumericEffect>()) {
+							switch (e.TypeOfEffect) {
+							case EffectType.AddPower:
+								tmp += e.Amount.GetValue(ci);
+								break;
+							case EffectType.SetPower:
+								tmp = e.Amount.GetValue(ci);
+								break;
+							}
+						}						
 					}
 				}
                 return tmp;
@@ -324,24 +327,26 @@ namespace Magic3D
 
 				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingSpellEffects) {
 					bool valid = false;
-					foreach (CardTarget ct in ci.Effects.Affected.Values.OfType<CardTarget>()) {
-						if (!ct.Accept (this, ci)) {
-							valid = false;
-							break;
-						} else
-							valid = true;
-					}
-					if (!valid)
-						continue;
+					foreach (EffectGroup eg in ci.Effects) {
+						foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
+							if (!ct.Accept (this, ci)) {
+								valid = false;
+								break;
+							} else
+								valid = true;
+						}
+						if (!valid)
+							continue;
 					
-					foreach (NumericEffect e in  ci.Effects.OfType<NumericEffect>()) {
-						switch (e.TypeOfEffect) {
-						case EffectType.AddTouchness:
-							tmp += e.Amount.GetValue(ci);
-							break;
-						case EffectType.SetTouchness:
-							tmp = e.Amount.GetValue(ci);
-							break;
+						foreach (NumericEffect e in  eg.OfType<NumericEffect>()) {
+							switch (e.TypeOfEffect) {
+							case EffectType.AddTouchness:
+								tmp += e.Amount.GetValue (ci);
+								break;
+							case EffectType.SetTouchness:
+								tmp = e.Amount.GetValue (ci);
+								break;
+							}
 						}
 					}
 				}
