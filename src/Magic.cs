@@ -1,20 +1,18 @@
 #define MONO_CAIRO_DEBUG_DISPOSE
 
-
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
+using GGL;
+using go;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
-
-using System.Diagnostics;
-
-using go;
-using System.Threading;
-using GGL;
-using System.Collections.Generic;
-//using GameLib;
 using GLU = OpenTK.Graphics.Glu;
+using System.Linq;
 
 namespace Magic3D
 {
@@ -59,7 +57,7 @@ namespace Magic3D
 		public static Vector3 vEye = new Vector3(0.0f, -10.0f, 10.0f);    // Camera Position
 		public static Vector3 vEyeTarget;// = new Vector3(40f, 50f, 0.1f);
 		public static Vector3 vLook = new Vector3(0f, 1f, -1.3f);  // Camera vLook Vector
-		public static Vector4 vLight = new Vector4 (0.0f, -20.0f, 10.0f, 0.0f);
+		public static Vector4 vLight = new Vector4 (0.0f, -15.0f, 15.0f, 0.0f);
 		public static Vector3 vMouse = Vector3.Zero;
 
 		float _zFar = 1280.0f;
@@ -96,6 +94,9 @@ namespace Magic3D
 
 		public static GameLib.SingleLightSimpleShader texturedShader;
 		public static GameLib.GlowShader glowShader;
+		public static GameLib.EffectShader wirlpoolShader;
+		public static GameLib.EffectShader arrowShader;
+
 		public static Color activeColor = Color.White;
 
 		public static int abstractTex;
@@ -125,25 +126,18 @@ namespace Magic3D
 
 			drawTable ();
 
-//			CardInstance c = deck.Cards [0];
-//			c.x = 0;
-//			c.y = -4;
-
 
 			if (engine != null)
 				engine.processRendering ();
 
-			//Players[1].Render ();
-			//deck.Cards [0].render ();
-
-			//MagicCard.cardDatabase ["Abandon Hope"].Render ();
 			//renderDice ();
 			int i = 0;
 			while (i < Renderables.Count) {
 				Renderables [i].Render ();
 				i++;
 			}
-				
+
+
 		}
 			
 		#region table
@@ -155,8 +149,8 @@ namespace Magic3D
 
 			const float _width = 16f;
 			const float _height = 16f;
-			const float texTileX = 3f;
-			const float texTileY = 3f;
+			const float texTileX = 1f;
+			const float texTileY = 2f;
 			const float z = -0.1f;
 
 			table = new vaoMesh (0, 0, z, _width, _height, texTileX, texTileY);
@@ -167,7 +161,6 @@ namespace Magic3D
 			table.Render(PrimitiveType.TriangleStrip);
 		}
 		#endregion
-
 		#region dice
 		vaoMesh dice;
 		public static Matrix4 diceMat = Matrix4.Identity;
@@ -187,35 +180,13 @@ namespace Magic3D
 		}
 		#endregion
 
-		void initLights()
+		void initArrow()
 		{
-			float[] lmKa = { 0.0f, 0.0f, 0.0f, 0.0f };
+			arrowShader = new GameLib.EffectShader ("GGL.Shaders.GameLib.red");
 
-			GL.LightModel(LightModelParameter.LightModelAmbient, lmKa);
-			GL.LightModel(LightModelParameter.LightModelLocalViewer, 1f);
-			GL.LightModel(LightModelParameter.LightModelTwoSide, 0f);
-
-			//GL.Light(LightName.Light0, LightParameter.SpotDirection, vSpot);
-			//GL.Light(LightName.Light0, LightParameter.SpotExponent, 30);
-			//GL.Light(LightName.Light0, LightParameter.SpotCutoff, 180);
-
-			float Kc = 1.0f;
-			float Kl = 0.0f;
-			float Kq = 0.0f;
-
-			GL.Light(LightName.Light0, LightParameter.ConstantAttenuation, Kc);
-			GL.Light(LightName.Light0, LightParameter.LinearAttenuation, Kl);
-			GL.Light(LightName.Light0, LightParameter.QuadraticAttenuation, Kq);
-
-			float[] light_Ka = { 0.5f, 0.5f, 0.5f, 1.0f };
-			float[] light_Kd = { 0.9f, 0.9f, 0.9f, 1.0f };
-			float[] light_Ks = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-			GL.Light(LightName.Light0, LightParameter.Position, vLight);
-			GL.Light(LightName.Light0, LightParameter.Ambient, light_Ka);
-			GL.Light(LightName.Light0, LightParameter.Diffuse, light_Kd);
-			GL.Light(LightName.Light0, LightParameter.Specular, light_Ks);
 		}
+			
+
 
 		#region interface
 		public Player[] Players;
@@ -224,31 +195,90 @@ namespace Magic3D
 		go.Container uiPhases;
 		go.Container uiMainMenu;
 		MessageBoxYesNo msgBox;
-		static go.Container uiLogs;
-		static go.VerticalStack vsLogs;
+		go.Container wCardText;
+		go.Label txtCard;
 
 		Label labFps, labFpsMin, labFpsMax, labUpdate;
 
+		void initInterface(){
+			LoadInterface("ui/mainMenu.xml", out uiMainMenu);
+			InitLogPanel ();
+			LoadInterface("ui/test4.xml", out g);
+			LoadInterface("ui/phases.xml", out uiPhases);
+			LoadInterface ("ui/text.goml", out wCardText);
+			txtCard = wCardText.FindByName ("txtCard") as Label;
+			wCardText.Visible = false;
+
+			labFps = g.FindByName ("labFps") as Label;
+			labFpsMin = g.FindByName ("labFpsMin") as Label;
+			labFpsMax = g.FindByName ("labFpsMax") as Label;
+			labUpdate = g.FindByName ("labUpdate") as Label;
+
+			//special event handlers fired only if mouse not in interface objects
+			//for scene mouse handling
+			this.MouseWheelChanged += new EventHandler<MouseWheelEventArgs>(Mouse_WheelChanged);
+			this.MouseMove += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
+			this.MouseButtonDown += new EventHandler<MouseButtonEventArgs>(Mouse_Down);;
+		}
+
+		static go.Container uiLogs;
+		public static go.Button btOk;
+
+		static Label[] llogs = new Label[4];
+		static List<String> logBuffer = new List<string> ();
+		static int logBuffPtr = 0;
+
+		public void InitLogPanel()
+		{
+			LoadInterface("ui/log.xml", out uiLogs);
+			uiLogs.MouseWheelChanged += onLogsWheel ;
+			for (int i = 0; i < 4; i++) {
+				llogs [i] = uiLogs.FindByName ("line" + (i + 1)) as Label;
+			}
+			btOk = uiLogs.FindByName ("btOk") as Button;
+			//btOk.Visible = false;
+		}
+
+		void BtOk_MouseClick (object sender, MouseButtonEventArgs e)
+		{			
+			MagicEngine.CurrentEngine.CancelLastActionOnStack ();
+			btOk.Visible = false;			
+		}
 		public static void AddLog(string msg)
 		{
-			for (int i = 1; i < 4; i++) {
-				(vsLogs.FindByName ("line" + i) as Label).Text =
-					(vsLogs.FindByName ("line" + (i + 1)) as Label).Text;
+			foreach (string s in msg.Split('\n')) {
+				logBuffer.Add (s);
 			}
-			(vsLogs.FindByName ("line4") as Label).Text = msg;
+			logBuffPtr = 0;
+			syncLogUi ();
+		}
+		static void syncLogUi()
+		{
+			for (int i = 0; i < 4; i++) {
+				int ptr = logBuffer.Count - (i + 1 + logBuffPtr);
+				if (ptr < 0)
+					break;
+				llogs[3-i].Text = logBuffer[ptr];
+			}
+		}
+		void onLogsWheel(object sender, MouseWheelEventArgs e){
+			logBuffPtr += e.Delta;
+			int limUp = logBuffer.Count - 4;
+			if (logBuffPtr > limUp)
+				logBuffPtr = limUp;
+			if (logBuffPtr < 0)
+				logBuffPtr = 0;
+			syncLogUi ();
 		}
 		#endregion
-
-
-
 
 		void onStartNewGame(Object sender, MouseButtonEventArgs e)
 		{
 			uiMainMenu.Visible = false;
 			Players = new Player[] 
 			{ 
-				new Player("player 1","Lightforce.dck"), 
-				new AiPlayer("player 2","Kor Armory.dck")
+				new Player("player 1","Kor Armory.dck"), 
+				new AiPlayer("player 2","Lightforce.dck")
 			};
 			this.AddWidget (Players [0].playerPanel);
 			this.AddWidget (Players [1].playerPanel);
@@ -259,12 +289,19 @@ namespace Magic3D
 			engine = new MagicEngine (Players);
 			MagicEngine.MagicEvent += new Magic3D.MagicEngine.MagicEventHandler(MagicEngine_MagicEvent);
 
+			#if DEBUG
+			engine.currentPlayerIndex = engine.interfacePlayer;
+			engine.ip.CurrentState = Player.PlayerStates.InitialDraw;
+			engine.ip.Opponent.CurrentState = Player.PlayerStates.InitialDraw;
+			#else
 			coin = new Coin ();
 			Renderables.Add (coin);
 			AddAnimation (coin);
 			coin.AnimationFinished += onTossResult;
-		}
+			#endif
 
+			btOk.Visible = false;
+		}
 		void onTossResult(object sender, EventArgs e)
 		{
 			Coin.TossEventArg tea = e as Coin.TossEventArg;
@@ -308,94 +345,7 @@ namespace Magic3D
 			//engine.State = EngineStates.PlayDrawChoiceDone;
 			//engine.StartGame();
 		}
-
-		protected override void OnLoad (EventArgs e)
-		{
-			MagicCard c = new MagicCard();
-
-			base.OnLoad (e);
-
-			LoadInterface("ui/log.xml", out uiLogs);
-			LoadInterface("ui/mainMenu.xml", out uiMainMenu);
-			vsLogs = uiLogs.FindByName ("logs") as VerticalStack;
-//			AddLog ("Starting magic 3d");
-
-			LoadInterface("ui/test4.xml", out g);
-			LoadInterface("ui/phases.xml", out uiPhases);
-			labFps = g.FindByName ("labFps") as Label;
-			labFpsMin = g.FindByName ("labFpsMin") as Label;
-			labFpsMax = g.FindByName ("labFpsMax") as Label;
-			labUpdate = g.FindByName ("labUpdate") as Label;
-//			if (!GL.GetString(StringName.Extensions).Contains("EXT_geometry_shader4") )
-//			{
-//				Debug.WriteLine (
-//					"Your video card does not support EXT_geometry_shader4. Please update your drivers.",
-//					"EXT_geometry_shader4 not supported");
-//			}
-
-
-
-			//MagicCard.LoadCardDatabase();
-			Edition.LoadEditionsDatabase();
-			//Deck.LoadPreconstructedDecks();
-
-
-			//special event handlers fired only if mouse not in interface objects
-			//for scene mouse handling
-			this.MouseWheelChanged += new EventHandler<MouseWheelEventArgs>(Mouse_WheelChanged);
-			this.MouseMove += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
-			this.MouseButtonDown += new EventHandler<MouseButtonEventArgs>(Mouse_Down);;
-
-			//initLights ();
-
-			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
-
-			GL.Enable(EnableCap.DepthTest);
-			GL.DepthFunc(DepthFunction.Less);
-
-			GL.Enable(EnableCap.CullFace);
-			//GL.FrontFace (FrontFaceDirection.Cw);
-
-			GL.PrimitiveRestartIndex (int.MaxValue);
-			GL.Enable (EnableCap.PrimitiveRestart);
-
-			GL.Enable (EnableCap.PointSprite);
-			GL.Enable(EnableCap.VertexProgramPointSize);
-			GL.PointParameter(PointSpriteCoordOriginParameter.LowerLeft);
-
-			GL.Enable (EnableCap.Blend);
-			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-
-			//GL.FrontFace(FrontFaceDirection.Ccw);
-
-			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-			GL.ShadeModel(ShadingModel.Smooth);
-			GL.Hint (HintTarget.LineSmoothHint, HintMode.Nicest);
-
-			abstractTex = new Texture(@"images/abstract1.jpg");
-
-			texturedShader = new GameLib.SingleLightSimpleShader ();
-			glowShader = new GameLib.GlowShader ();
-
-			initTableModel ();
-
-			initDice ();
-
-			GL.ActiveTexture (TextureUnit.Texture0);
-			ErrorCode err = GL.GetError ();
-			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");
-
-
-			//engine.StartNewGame();
-
-
-			//this.AddWidget (new MessageBox ("Play first?"));
-
-			//this.CursorVisible = false;
-
-		}
-
-
+			
 		void MagicEngine_MagicEvent(MagicEventArg arg)
 		{
 			Container b;
@@ -410,8 +360,7 @@ namespace Magic3D
 				b = uiPhases.FindByName 
 					((arg as PhaseEventArg).Phase.ToString ()) as Container;
 				if (b!=null)
-					b.child.Background = Color.White;
-				//uiPhases.InvalidateLayout ();
+					b.child.Background = Color.White;				
 				break;
 			case MagicEventType.EndPhase:
 				b = uiPhases.FindByName 
@@ -425,7 +374,7 @@ namespace Magic3D
 				break;
 			case MagicEventType.TapCard:
 				break;
-			case MagicEventType.QuitZone:
+			case MagicEventType.ChangeZone:
 				break;
 			default:
 				break;
@@ -433,8 +382,61 @@ namespace Magic3D
 		}
 						
 		int frameCpt = 0;
+		public static float time = 0f;
+
+		protected override void OnLoad (EventArgs e)
+		{
+
+			base.OnLoad (e);
+
+			initInterface ();
+
+			#region init GL
+			MagicData.InitCardModel();
+			//MagicCard.LoadCardDatabase();
+			Edition.LoadEditionsDatabase();
+			//Deck.LoadPreconstructedDecks();
+			//initLights ();
+
+			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
+			GL.Enable(EnableCap.DepthTest);
+			GL.DepthFunc(DepthFunction.Less);
+			GL.Enable(EnableCap.CullFace);
+			GL.PrimitiveRestartIndex (int.MaxValue);
+			GL.Enable (EnableCap.PrimitiveRestart);
+			GL.Enable (EnableCap.PointSprite);
+			GL.Enable(EnableCap.VertexProgramPointSize);
+			GL.PointParameter(PointSpriteCoordOriginParameter.LowerLeft);
+			GL.Enable (EnableCap.Blend);
+			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+			GL.ShadeModel(ShadingModel.Smooth);
+			GL.Hint (HintTarget.LineSmoothHint, HintMode.Nicest);
+
+			abstractTex = new Texture(@"images/abstract1.jpg");
+
+			texturedShader = new GameLib.SingleLightSimpleShader ();
+			glowShader = new GameLib.GlowShader ();
+			wirlpoolShader = new GameLib.EffectShader ("GGL.Shaders.GameLib.wirlpool2",256,256);
+
+			initArrow ();
+			initTableModel ();
+			initDice ();
+
+			GL.ActiveTexture (TextureUnit.Texture0);
+			ErrorCode err = GL.GetError ();
+			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");
+			#endregion
+
+			//engine.StartNewGame();
+			//this.AddWidget (new MessageBox ("Play first?"));
+			//this.CursorVisible = false;
+		}
+			
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
+			time += (float)e.Time;
+
 			base.OnUpdateFrame (e);
 
 			fps = (int)RenderFrequency;
@@ -480,23 +482,13 @@ namespace Magic3D
 			if (engine == null)
 				return;
 
-			//animate only if cards are loaded
-			if (engine.deckLoaded)
-				Animation.ProcessAnimations();
-			else{
-				bool ok = true;
-				foreach (Player p in Players) {
-					if (!p.DeckLoaded) {
-						ok = false;
-						break;
-					}
-				}
-				if (ok)
-					engine.deckLoaded = true;
-			}
-
 			engine.Process ();
-							
+
+			//TODO:disable update if wirlpoolTexture not binded
+			wirlpoolShader.Update (time);
+
+			Rectangle r = this.ClientRectangle;
+			GL.Viewport( r.X, r.Y, r.Width, r.Height);
 		}
 		protected override void OnRenderFrame (FrameEventArgs e)
 		{
@@ -520,19 +512,49 @@ namespace Magic3D
 				Players [0].DrawOneCard ();
 				break;
 			case Key.KeypadEnter:
-				engine.SwitchToNextPhase ();
+				engine.ip.PhaseDone = true;
+				if (engine.pp == engine.ip && engine.cp != engine.pp)
+					engine.GivePriorityToNextPlayer ();
 				break;
 			case Key.Escape:
 				this.CursorVisible = true;
 				break;
+			case Key.H:				
+				if (wCardText.Visible) {
+					wCardText.Visible = false;
+					break;
+				}
+				if (CardInstance.selectedCard == null)
+					return;
+				using (Stream s = new FileStream(CardInstance.selectedCard.Model.FilePath,FileMode.Open))
+					using (StreamReader sr = new StreamReader (s))
+						txtCard.Text = sr.ReadToEnd ();
+					
+				wCardText.Visible = true;
+				break;
+			case Key.O:
+				engine.ip.Opponent.Hand.RevealToUIPlayer();
+				break;
 			case Key.T:
 				//startTossing ();
+				break;
+			case Key.U:
+				if (CardInstance.selectedCard == null)
+					return;
+				CardInstance.selectedCard.updateArrows ();			
+				break;
+			case Key.L:
+				engine.ip.Library.toogleShowAll ();
+				break;
+			case Key.R:
+				foreach (CardInstance ci in engine.Players.SelectMany(p => p.InPlay.Cards.Where(c => c.HasType(CardTypes.Creature))))
+					ci.UpdateOverlay ();
+				
 				break;
 			}
 		}
 
 		#region Mouse Handling
-
 		void Object_Mouse_Move(object sender, MouseMoveEventArgs e){
 			if (activeWidget == null)
 				return;
@@ -549,28 +571,24 @@ namespace Magic3D
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
-					Matrix4 m = Matrix4.CreateRotationZ (-e.XDelta * RotationSpeed);
-					m *= Matrix4.CreateFromAxisAngle (-vLookPerpendicularOnXYPlane, -e.YDelta * RotationSpeed);
-					vEyeTarget = Vector3.Zero;
-					vEye = Vector3.Transform (vEye, Matrix4.CreateTranslation (-vEyeTarget) * m * Matrix4.CreateTranslation (vEyeTarget));
+					Matrix4 m = Matrix4.CreateRotationX (-e.YDelta * RotationSpeed);
+					vLook = Vector3.Transform (vLook, m);
 					UpdateViewMatrix ();
 					return;
 				}
-				if (e.Mouse.RightButton == ButtonState.Pressed) {
-
-					Matrix4 m = Matrix4.CreateRotationZ (-e.XDelta * RotationSpeed);
-					Matrix4 m2 = Matrix4.Rotate (vLookPerpendicularOnXYPlane, -e.YDelta * RotationSpeed);
-
-					vLook = Vector3.Transform (vLook, m * m2);
-
-					//vLook = Vector3.Transform(vLook, m2);
-					UpdateViewMatrix ();
-					return;
-				}
+//				if (e.Mouse.RightButton == ButtonState.Pressed) {
+//
+//					Matrix4 m = Matrix4.CreateRotationZ (-e.XDelta * RotationSpeed);
+//					Matrix4 m2 = Matrix4.Rotate (vLookPerpendicularOnXYPlane, -e.YDelta * RotationSpeed);
+//
+//					vLook = Vector3.Transform (vLook, m * m2);
+//
+//					//vLook = Vector3.Transform(vLook, m2);
+//					UpdateViewMatrix ();
+//					return;
+//				}
 					
 				if (engine == null)
-					return;
-				if (!engine.deckLoaded)
 					return;
 					
 				engine.processMouseMove (new Point<float> ((float)e.X, (float)e.Y));
@@ -620,6 +638,36 @@ namespace Magic3D
 			vEyeTarget += v;
 		}
 		#endregion
+
+		void initLights()
+		{
+			float[] lmKa = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+			GL.LightModel(LightModelParameter.LightModelAmbient, lmKa);
+			GL.LightModel(LightModelParameter.LightModelLocalViewer, 1f);
+			GL.LightModel(LightModelParameter.LightModelTwoSide, 0f);
+
+			//GL.Light(LightName.Light0, LightParameter.SpotDirection, vSpot);
+			//GL.Light(LightName.Light0, LightParameter.SpotExponent, 30);
+			//GL.Light(LightName.Light0, LightParameter.SpotCutoff, 180);
+
+			float Kc = 1.0f;
+			float Kl = 0.0f;
+			float Kq = 0.0f;
+
+			GL.Light(LightName.Light0, LightParameter.ConstantAttenuation, Kc);
+			GL.Light(LightName.Light0, LightParameter.LinearAttenuation, Kl);
+			GL.Light(LightName.Light0, LightParameter.QuadraticAttenuation, Kq);
+
+			float[] light_Ka = { 0.5f, 0.5f, 0.5f, 1.0f };
+			float[] light_Kd = { 0.9f, 0.9f, 0.9f, 1.0f };
+			float[] light_Ks = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+			GL.Light(LightName.Light0, LightParameter.Position, vLight);
+			GL.Light(LightName.Light0, LightParameter.Ambient, light_Ka);
+			GL.Light(LightName.Light0, LightParameter.Diffuse, light_Kd);
+			GL.Light(LightName.Light0, LightParameter.Specular, light_Ks);
+		}
 
 		public void UpdateViewMatrix()
 		{

@@ -35,7 +35,11 @@ namespace Magic3D
                 Target.AddDamages(this);
             }
         }
-    }
+    	public override string ToString ()
+		{
+			return string.Format ("{0} deals {1} damage to {2}", Source.Model.Name,Amount,Target.ToString());
+		}
+	}
 
     //public class DamageList : List<Damage>
     //{

@@ -1,0 +1,5 @@
+tests/
+obj/
+bin/
+.hg*
+src/tmp/

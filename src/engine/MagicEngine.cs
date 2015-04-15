@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using OpenTK;
-using System.Diagnostics;
-using go;
-using OpenTK.Input;
 using System.Threading;
+using go;
+using OpenTK;
+using OpenTK.Input;
 
 namespace Magic3D
 {
@@ -18,14 +19,11 @@ namespace Magic3D
 		Opponents,
 		Resolve,
 	}
-//	class Sychronizer
-//	{
-//		public EngineStates State = EngineStates.Paused;
-//
-//	}
+
 	public class MagicEngine
 	{
 		public delegate void MagicEventHandler (MagicEventArg arg);
+
 		public static event MagicEventHandler MagicEvent;
 		public static MagicEngine CurrentEngine;
 
@@ -35,19 +33,19 @@ namespace Magic3D
 		}
 
 		public volatile EngineStates State = EngineStates.Stopped;
-		public bool deckLoaded = false;
+		public Player[] Players;
+		public Stack<object> MagicStack = new Stack<object> ();
 
-		//Sychronizer synchronizer = new Sychronizer ();
-
-		//Random rnd = new Random ();
+		bool decksLoaded = false;
 
 		int _currentPlayer;
 		int _priorityPlayer;
-		int _interfacePlayer = 0;
-		//index of player using this interface
+		int _interfacePlayer = 0;//index of player using this interface
 		GamePhases _currentPhase;
+
 		//public int currentAttackingCreature = 0;    //combat damage resolution
 		//public Damage currentDamage;
+
 		/// <summary>
 		/// player having his turn running
 		/// </summary>
@@ -66,6 +64,14 @@ namespace Magic3D
 		public Player pp {
 			get { return Players [_priorityPlayer]; }
 		}
+
+		public IList<CardInstance> CardsInPlayHavingSpellEffects
+		{
+			get {
+				return Players.SelectMany (p => p.InPlay.Cards.Where (c => c.Model.SpellEffects.Count() > 0)).ToList();
+			}
+		}
+		//public List<ActiveEffect> SpellEffectsInPlay = new List<ActiveEffect> ();
 
 		public int currentPlayerIndex {
 			get { return _currentPlayer; }
@@ -119,16 +125,12 @@ namespace Magic3D
 
 		public void SwitchToNextPhase ()
 		{
-			foreach (Player p in Players)
-				p.PhaseDone = false;
-
 			MagicEvent (new PhaseEventArg {
 				Type = MagicEventType.EndPhase,
 				Phase = _currentPhase,
 				Player = Players [currentPlayerIndex]
 			});
 		}
-
 		public void SwitchToNextPlayer ()
 		{
 			MagicEvent (new MagicEventArg {
@@ -136,21 +138,32 @@ namespace Magic3D
 				//Player = Players [currentPlayer]
 			});
 		}
-
 		public void GivePriorityToNextPlayer ()
 		{
+			//first cancel incomplete action of priority player
+			if (NextActionOnStack != null) {
+				if (NextActionOnStack.CardSource.Controler == pp){
+					if (!NextActionOnStack.IsComplete) {
+						if (!CancelLastActionOnStack ()) {
+							pp.PhaseDone = false;
+							return;
+						}
+					}
+				}
+			}
+
 			priorityPlayer++;
 
-			if (pp.Type == Player.PlayerType.human && CurrentPhase != GamePhases.DeclareBlocker)
+			if (!(pp is AiPlayer) && CurrentPhase != GamePhases.DeclareBlocker)
 				startChrono ();
 			else
 				stopChrono ();
 
-			if (NextSpellOnStack == null) {
+			if (NextActionOnStack == null) {
 				if (priorityPlayer == _currentPlayer && cp.PhaseDone)
 					SwitchToNextPhase ();
-			} else if (NextSpellOnStack.Source.Controler == pp)
-				CheckStackForResolutions ();
+			} else if (NextActionOnStack.CardSource.Controler == pp)
+				ResolveStack ();
 		}
 
 		public void startChrono ()
@@ -162,7 +175,6 @@ namespace Magic3D
 			//pp.pbTimer.Visible = true;
 
 		}
-
 		public void stopChrono ()
 		{
 			//    //if (pp.Type == Player.PlayerType.ai)
@@ -174,8 +186,7 @@ namespace Magic3D
 		public Stopwatch Chrono = new Stopwatch ();
 		public static int timerLength = 1500;
 		public CardLayout SpellStackLayout = new CardLayout ();
-		public Player[] Players;
-		public Stack<object> MagicStack = new Stack<object> ();
+
 
 		#region CTOR
 		public MagicEngine (Player[] _players)
@@ -185,11 +196,11 @@ namespace Magic3D
 			Players = _players;
 			MagicEvent += new MagicEventHandler (MagicEngine_MagicEvent);
 
-			SpellStackLayout.Position = Magic.vGroupedFocusedPoint;
-			SpellStackLayout.HorizontalSpacing = 0.3f;
-			SpellStackLayout.VerticalSpacing = 0.01f;
+			SpellStackLayout.Position = new Vector3 (0, 0, 2);//Magic.vGroupedFocusedPoint;
+			SpellStackLayout.HorizontalSpacing = 0.1f;
+			SpellStackLayout.VerticalSpacing = 0.3f;
 			SpellStackLayout.MaxHorizontalSpace = 3f;
-			SpellStackLayout.xAngle = Magic.FocusAngle;
+			//SpellStackLayout.xAngle = Magic.FocusAngle;
 		}
 		#endregion
 
@@ -208,7 +219,24 @@ namespace Magic3D
 
 		public void Process ()
 		{
-			checkCurrentSpell();
+			//temp fix to have begin not handle before end event in Magic
+			//but those kind of sync problem will surely rise 
+			if (raiseBeginPhase) {
+				raiseBeginPhase = false;
+				MagicEvent (new PhaseEventArg {
+					Type = MagicEventType.BeginPhase,
+					Phase = _currentPhase,
+					Player = Players [currentPlayerIndex]
+				});
+			}
+				
+			//animate only if cards are loaded
+			if (decksLoaded)
+				Animation.ProcessAnimations();
+			else
+				decksLoaded = Players.Where (p => !p.DeckLoaded).Count()==0;
+
+			checkLastActionOnStack();
 
 			foreach (Player p in Players)
 				p.Process ();
@@ -216,10 +244,45 @@ namespace Magic3D
 			if (pp.PhaseDone)
 				GivePriorityToNextPlayer();
 		}
-
-
+			
 		void MagicEngine_MagicEvent (MagicEventArg arg)
 		{
+			#region check triggers 
+			if (arg.Source != null)
+			{
+				foreach (Trigger t in arg.Source.Model.Triggers){					
+					if (t.Type != arg.Type)
+						continue;
+					switch (t.Type) {
+					case MagicEventType.ChangeZone:
+
+						bool valid = false;
+						foreach (CardTarget ct in t.ValidTarget.Values.OfType<CardTarget>()) {
+							if (ct.Accept(arg.Source,arg.Source))
+								valid = true;		
+						}
+
+						if (!valid)
+							break;
+						
+						ChangeZoneEventArg czea = arg as ChangeZoneEventArg;
+						if ((czea.Origine == t.Origine || t.Origine == CardGroupEnum.Any)
+							&& (czea.Destination == t.Destination || t.Destination == CardGroupEnum.Any))
+						{			
+							Magic.AddLog(arg.Source.ToString() + " => " + t.ToString());
+							PushOnStack (new AbilityActivation (arg.Source, t.Exec));
+						}
+						break;
+					default:
+						Magic.AddLog(arg.Source.ToString() + " => " + t.ToString());
+						PushOnStack (new AbilityActivation (arg.Source, t.Exec));
+					break;
+					}
+				}
+			}
+
+			#endregion
+
 			switch (arg.Type) {
 			case MagicEventType.PlayerIsReady:
 				//check if all players are ready
@@ -228,67 +291,28 @@ namespace Magic3D
 						return;
 				startGame ();
 				break;
-			case MagicEventType.Unset:
-				break;
 			case MagicEventType.BeginPhase:
 				processPhaseBegin (arg as PhaseEventArg);
 				break;
 			case MagicEventType.EndPhase:
 				processPhaseEnd (arg as PhaseEventArg);
 				break;
+			//Land and mana abililies don't go on the stack, so
+			//there are resolved here
 			case MagicEventType.PlayLand:
-				cp.Hand.RemoveCard (arg.Source);
-				cp.PutCardInPlay (arg.Source);
+				arg.Source.ChangeZone (CardGroupEnum.InPlay);
 				cp.AllowedLandsToBePlayed--;
 				break;
 			case MagicEventType.ActivateAbility:
-				AbilityEventArg aea = arg as AbilityEventArg;
-				switch (aea.Ability.AbilityType) {
-				case AbilityEnum.Mana:
-					ManaAbility ma = aea.Ability as ManaAbility;
-					aea.Source.Controler.ManaPool += ma.ProducedMana;
-					aea.Source.Controler.UpdateUi ();
-					break;
-				default:
-					break;
-				}					
 				break;
 			case MagicEventType.CastSpell:
-				//if (arg.Card.Controler.Type == Player.PlayerType.ai)
-				//    Debugger.Break();
-				SpellEventArg sea = arg as SpellEventArg;
-				if (sea.Spell.SelectedTargets.Count > 0) {
-					Ability a = sea.Spell.Source.getAbilitiesByType (AbilityEnum.Attach).FirstOrDefault();
-					if (a != null) {
-						CardInstance c = sea.Spell.SelectedTargets [0] as CardInstance;
-
-						c.AttachedCards.Add (sea.Spell.Source);
-						sea.Spell.Source.IsAttached = true;
-
-						foreach (Effect e in a.Effects) {
-							Effect ee = e.Clone ();
-							ee.TrigEnd = new Trigger {
-								Card = sea.Spell.Source,
-								Type = MagicEventType.QuitZone
-							};
-							c.Effects.AddEffect (ee);
-						}
-
-						c.UpdateOverlay ();
-					}
-				}
-				sea.Spell.Source.Controler.PutCardInPlay (sea.Spell.Source);
 				break;
 			case MagicEventType.TapCard:
-
 				break;
-			case MagicEventType.QuitZone:
-				foreach (CardInstance ci in arg.Source.AttachedCards) {
-					ci.IsAttached = false;
-				}
-				arg.Source.AttachedCards.Clear ();
+			case MagicEventType.ChangeZone:
 				break;
-			
+			case MagicEventType.Unset:
+				break;
 			default:
 				break;
 			}
@@ -296,9 +320,10 @@ namespace Magic3D
 
 		void processPhaseBegin (PhaseEventArg pea)
 		{
+			foreach (Player p in Players)
+				p.PhaseDone = false;
+			
 			priorityPlayer = _currentPlayer;
-
-			//cp.labCurrentPhase.Text = pea.Phase.ToString();
 
 			switch (pea.Phase) {
 			case GamePhases.Untap:
@@ -306,57 +331,65 @@ namespace Magic3D
 				cp.CardToDraw = 1;
 				foreach (CardInstance c in cp.InPlay.Cards) {
 					c.HasSummoningSickness = false;
-					c.Untap ();
+					c.TryToUntap ();
 				}
 				break;
 			case GamePhases.Upkeep:
 				break;
 			case GamePhases.Draw:
-				if (pea.Player == cp) {
-					while(cp.CardToDraw>0){
+				//if (pea.Player == cp) {
+					while(cp.CardToDraw > 0){
 						cp.DrawOneCard ();
 						cp.CardToDraw--;
 					}
-				}
+				//}
 				break;
 			case GamePhases.Main1:
 			case GamePhases.Main2:
-
 				break;
-			case GamePhases.BeforeCombat:
-				if (!cp.HaveCreaturesOnTableToAttack)
-					SwitchToNextPhase ();
+			case GamePhases.BeforeCombat:				
 				break;
 			case GamePhases.DeclareAttacker:
-				if (!cp.HaveCreaturesOnTableToAttack)
-					SwitchToNextPhase ();
-				else if (cp.Type == Player.PlayerType.human)
-					stopChrono ();
-
+//				if (cp.Type == Player.PlayerType.human)
+//					stopChrono ();
 				break;
 			case GamePhases.DeclareBlocker:
-				if (!cp.HaveAttackingCreature) {
-					SwitchToNextPhase ();
-					break;
-				}
-				cp.PhaseDone = true;
 				break;
 			case GamePhases.FirstStrikeDame:
-				if (!cp.HaveAttackingCreature) {
-					SwitchToNextPhase ();
-					break;
-				}
-				break;
-			case GamePhases.CombatDamage:
-				if (!cp.HaveAttackingCreature) {
-					SwitchToNextPhase ();
-					break;
-				}
 				Chrono.Reset ();
-				foreach (CardInstance ac in cp.AttackingCreature) {
+				foreach (CardInstance ac in cp.AttackingCreature.Where
+					(cpac => cpac.HasAbility(AbilityEnum.FirstStrike) || 
+						cpac.HasAbility(AbilityEnum.DoubleStrike))) {
 					Damage d = new Damage (null, ac, ac.Power);
 
-					foreach (CardInstance def in ac.BlockingCreatures)
+					foreach (CardInstance def in ac.BlockingCreatures.Where
+						(cpac => cpac.HasAbility(AbilityEnum.FirstStrike) || 
+							cpac.HasAbility(AbilityEnum.DoubleStrike)))
+						MagicStack.Push (new Damage (ac, def, def.Power));
+
+					if (ac.BlockingCreatures.Count == 0) {
+						d.Target = cp.Opponent;
+						MagicStack.Push (d);
+					} else if (ac.BlockingCreatures.Count == 1) {
+						d.Target = ac.BlockingCreatures [0];
+						MagicStack.Push (d);
+					} else {
+						//push damages one by one for further resolution
+						for (int i = 0; i < ac.Power; i++)
+							MagicStack.Push (new Damage (null, d.Source, 1));
+					}
+				}
+
+				CheckStackForUnasignedDamage ();
+				break;
+			case GamePhases.CombatDamage:
+				Chrono.Reset ();
+				foreach (CardInstance ac in cp.AttackingCreature.Where
+					(cpac => !cpac.HasAbility(AbilityEnum.FirstStrike))) {
+					Damage d = new Damage (null, ac, ac.Power);
+
+					foreach (CardInstance def in ac.BlockingCreatures.Where
+						(cpac => !cpac.HasAbility(AbilityEnum.FirstStrike)))
 						MagicStack.Push (new Damage (ac, def, def.Power));
 
 					if (ac.BlockingCreatures.Count == 0) {
@@ -374,10 +407,6 @@ namespace Magic3D
 				CheckStackForUnasignedDamage ();
 				break;
 			case GamePhases.EndOfCombat:
-				if (!cp.HaveAttackingCreature) {
-					SwitchToNextPhase ();
-					break;
-				}
 				break;
 			case GamePhases.EndOfTurn:
 				break;
@@ -395,7 +424,9 @@ namespace Magic3D
 		}
 		void processPhaseEnd (PhaseEventArg pea)
 		{
-			CheckStackForResolutions ();
+			ClearIncompleteActions ();
+
+			ResolveStack ();
 
 			switch (pea.Phase) {
 			case GamePhases.Untap:
@@ -406,21 +437,22 @@ namespace Magic3D
 				break;
 			case GamePhases.Main2:
 			case GamePhases.Main1:
-				if (CurrentPhase == GamePhases.Main1 && !cp.HaveCreaturesOnTableToAttack)
+				if (CurrentPhase == GamePhases.Main1 && cp.CreaturesAbleToAttack.Count() == 0)
 					CurrentPhase = GamePhases.EndOfCombat;
 				break;
 			case GamePhases.BeforeCombat:
 				break;
 			case GamePhases.DeclareAttacker:
-				foreach (CardInstance c in pea.Player.InPlay.Cards) {
-					if (c.Combating)
-					if (!c.IsTapped)
+				if (!pea.Player.HasAttackingCreature) {
+					CurrentPhase = GamePhases.EndOfCombat;
+					break;
+				}
+				foreach (CardInstance c in pea.Player.AttackingCreature) {					
+					if (!c.IsTapped && !c.HasAbility(AbilityEnum.Vigilance))
 						c.Tap ();
-					else
-						Debugger.Break ();
 				}
 				break;
-			case GamePhases.DeclareBlocker:
+			case GamePhases.DeclareBlocker:				
 				break;
 			case GamePhases.FirstStrikeDame:
 				break;
@@ -451,136 +483,64 @@ namespace Magic3D
 			}
 
 			foreach (Player p in Players) {
-				p.CurrentSpell = null;
+				//p.CurrentAction = null;
 				p.ManaPool = null;
 			}
 
 			if (pea.Phase != GamePhases.CleanUp)
 				CurrentPhase++;
 
-			MagicEvent (new PhaseEventArg {
-				Type = MagicEventType.BeginPhase,
-				Phase = _currentPhase,
-				Player = Players [currentPlayerIndex]
-			});
-
-
+			raiseBeginPhase = true;
 		}
-			
+
+		bool raiseBeginPhase = false;
+
 		public void ClickOnCard (CardInstance c)
 		{
-
-
-			//            if (Magic3D.pCurrentSpell.Visible) //promt for something
-			//            {
-			if (ip.CurrentSpell != null)
-			{
-				if (ip.CurrentSpell.SelectedTargets.Count < ip.CurrentSpell.RequiredTargetCount)
-				if (ip.CurrentSpell.TryToAddTarget(c))
-					return;
+			if (MagicStack.Count > 0) {
+				MagicAction ma = MagicStack.Peek () as MagicAction;
+				if (ma != null) {
+					if (!ma.IsComplete) {
+						if (ma.TryToAddTarget (c))
+							return;
+					}
+				}
 			}
-			else if (TryToAssignTargetForDamage(c))
+			if (TryToAssignTargetForDamage(c))
 			{
 				CheckStackForUnasignedDamage();
 				return;
 			}
-			//            }
 
 			switch (c.CurrentGroup.GroupName) {
 			case CardGroupEnum.Library:
 				break;
 			case CardGroupEnum.Hand:
 				#region hand
-				if (c.Controler != ip || c.Controler != cp)
+				if (c.Controler != ip){// || c.Controler != cp)
+					c.Controler.Hand.toogleShowAll();
 					return;
-
-				switch (CurrentPhase) {
-				case GamePhases.Untap:
-					break;
-				case GamePhases.Upkeep:
-					break;
-				case GamePhases.Draw:
-					break;
-				case GamePhases.Main1:
-				case GamePhases.Main2:
-					if (c.Model.Types == CardTypes.Land) {
+				}
+				if (CurrentPhase == GamePhases.Main1 || CurrentPhase == GamePhases.Main2){
+					if (c.HasType(CardTypes.Land)) {
 						if (cp.AllowedLandsToBePlayed>0)
 							MagicEvent (new MagicEventArg (MagicEventType.PlayLand, c));
-					} else
-						ip.CurrentSpell = new Spell (c);
-					break;
-				case GamePhases.BeforeCombat:
-					break;
-				case GamePhases.DeclareAttacker:
-
-					break;
-				case GamePhases.DeclareBlocker:
-					break;
-				case GamePhases.FirstStrikeDame:
-					break;
-				case GamePhases.CombatDamage:
-					break;
-				case GamePhases.EndOfCombat:
-					break;
-				case GamePhases.EndOfTurn:
-					break;
-				case GamePhases.CleanUp:
-					break;
-				default:
-					break;
+					} else {
+						PushOnStack(new Spell (c));
+					}
+				}else if (CurrentPhase != GamePhases.CleanUp && CurrentPhase != GamePhases.Untap){
+					//play instant and abilities
 				}
 				break;
 				#endregion
 			case CardGroupEnum.InPlay:
 				#region inPlay
-				if (c.Controler != ip &&
-					CurrentPhase != GamePhases.DeclareBlocker &&
-					CurrentPhase != GamePhases.CombatDamage)
-					return;
-
-				if (c.IsTapped)
-					return;
-
-				#region ManaAbilities
-				//could be played anywhen
-				Ability[] manaAbilities = c.getAbilitiesByType(AbilityEnum.Mana);
-				if (manaAbilities.Count()>0)
-				{
-					if (manaAbilities.Count()==1){
-						if (manaAbilities[0].ActivationCost.CostType == CostTypes.Tap) {
-							c.Tap ();
-							MagicEvent (new AbilityEventArg(manaAbilities[0],c));
-						}
-					}else{
-						//show choice
-					}
-				}
-				#endregion
-
-				switch (CurrentPhase) {
-				case GamePhases.Untap:
-					break;
-				case GamePhases.Upkeep:
-					break;
-				case GamePhases.Draw:
-					break;
-				case GamePhases.Main1:
-				case GamePhases.Main2:
-					if (c.Model.Abilities.Count > 0) {
-						foreach (Ability ab in c.Model.Abilities) {
-
-						}
-					}
-					break;
-				case GamePhases.BeforeCombat:
-					break;
-				case GamePhases.DeclareAttacker:
+				if (CurrentPhase == GamePhases.DeclareAttacker) {
 					if (!c.Combating && !c.CanAttack)
-						break;
+						return;
 					c.Combating = !c.Combating;
 					c.CurrentGroup.UpdateLayout ();
-					break;
-				case GamePhases.DeclareBlocker:
+				} else if (CurrentPhase == GamePhases.DeclareBlocker) {
 					if (c.Controler == ip) {
 						if (c.Combating) {
 							c.Combating = false;
@@ -589,7 +549,7 @@ namespace Magic3D
 							c.Controler.InPlay.UpdateLayout ();
 						}
 						c.Controler.CurrentBlockingCreature = c;
-						break;
+						return;
 					} else if (ip.CurrentBlockingCreature != null && c.Combating) {
 						if (ip.CurrentBlockingCreature.Combating) {
 							//remove blocker
@@ -603,30 +563,30 @@ namespace Magic3D
 							ip.CurrentBlockingCreature.Combating = true;
 							ip.CurrentBlockingCreature = null;
 						} else
-							break;
-
+							return;
 						ip.InPlay.UpdateLayout ();
 					}
-					break;
-				case GamePhases.FirstStrikeDame:
-					break;
-				case GamePhases.CombatDamage:
-					break;
-				case GamePhases.EndOfCombat:
-					break;
-				case GamePhases.EndOfTurn:
-					break;
-				case GamePhases.CleanUp:
-					break;
-				default:
-					break;
+				} else if (CurrentPhase == GamePhases.CombatDamage) {
+					
+				} else if (c.Controler == ip) {					
+					#region activable abilities
+					if (!(c.IsTapped || c.HasSummoningSickness)) {
+						Ability[] activableAbs = c.Model.Abilities.Where (
+							                         sma => sma.IsActivatedAbility).ToArray ();
+
+						//TODO:if multiple abs, must choose one
+						if (activableAbs.Count () > 0)
+							PushOnStack (new AbilityActivation (c, activableAbs [0]));
+					}
+					#endregion					
 				}
-				break;
 				#endregion
+				break;
 			case CardGroupEnum.Graveyard:
 				c.CurrentGroup.toogleShowAll ();
 				break;
 			case CardGroupEnum.Exhiled:
+				c.CurrentGroup.toogleShowAll ();
 				break;
 			default:
 				break;
@@ -634,38 +594,57 @@ namespace Magic3D
 		}
 
 		#region Stack managment
-		public Spell NextSpellOnStack {
-			get { return MagicStack.Count == 0 ? null : MagicStack.Peek () as Spell; }
+		public MagicAction NextActionOnStack {
+			get { return MagicStack.Count == 0 ? null :
+				MagicStack.Peek () is MagicAction ?
+				MagicStack.Peek () as MagicAction : null; }
 		}
-		public void PushSpellOnStack (Spell s)
-		{
-			//should show spell to player...
-
+		public void PushOnStack (object s)
+		{			
 			MagicStack.Push (s);
-
-			s.Source.Controler.Hand.RemoveCard (s.Source);
-
-			SpellStackLayout.Cards = MagicStack.OfType<Spell> ().Select (sp => sp.Source).ToList ();
-			SpellStackLayout.UpdateLayout ();
 		}
-		public Spell PopSpellFromStack ()
-		{
-			Spell tmp = MagicStack.Pop () as Spell;
-			SpellStackLayout.Cards = MagicStack.OfType<Spell> ().Select (sp => sp.Source).ToList ();
-			SpellStackLayout.UpdateLayout ();
-
-			//AttachAbility ab = tmp.getAttachAbilityIfPresent;
-			//if (ab != null)
-			//{
-			//    tmp.Source.AttachedTo = tmp.SelectedTargets.FirstOrDefault() as CardInstance;
-			//}
-			return tmp;
-		}
-		public void CheckStackForResolutions ()
+		public void ClearIncompleteActions()
 		{
 			while (MagicStack.Count > 0) {
-				if (MagicStack.Peek () is Spell) {
-					MagicEvent (new SpellEventArg { Spell = PopSpellFromStack () });
+				if (MagicStack.Peek () is Damage)
+					return;
+				if ((MagicStack.Peek () as MagicAction).IsComplete)
+					break;
+				MagicStack.Pop ();
+			}
+			Magic.btOk.Visible = false;
+		}
+		public bool CancelLastActionOnStack()
+		{
+			MagicAction ma = NextActionOnStack;
+			if (ma == null)
+				return true;
+			if (ma.IsComplete)
+				Debug.Print ("Canceling completed action");
+			if (ma.IsMandatory) {
+				Debug.Print ("Unable to cancel mandatory action");
+				return false;
+			}
+			if (ma.CardSource.Controler != pp)
+				Debug.Print ("Canceling action of another player");
+
+			MagicStack.Pop ();
+			return true;
+		}
+		public void ResolveStack ()
+		{
+			while (MagicStack.Count > 0) {
+				if (MagicStack.Peek () is MagicAction) {
+
+					if (!(MagicStack.Peek () as MagicAction).IsComplete)
+						break;
+					
+					MagicAction ma = MagicStack.Pop () as MagicAction;
+
+					UpdateStackLayouting ();
+
+					ma.Resolve ();
+
 					continue;
 				}
 
@@ -675,6 +654,59 @@ namespace Magic3D
 				}
 			}
 		}
+		public void checkLastActionOnStack ()
+		{
+			if (MagicStack.Count == 0)
+				return;
+			MagicAction ma = MagicStack.Peek () as MagicAction;
+
+			if (ma == null)
+				return;
+			
+			if (ma.CardSource.Controler != pp) {
+				return;
+				//				Debug.WriteLine ("ERROR: last action controle has not priority.");
+				//				CancelLastActionOnStack ();
+
+			}if (!ma.IsComplete) {
+				if (ma.RemainingCost == CostTypes.Tap) {
+					ma.RemainingCost = null;
+					ma.CardSource.Tap ();
+				} else if ((pp.AvailableManaOnTable + pp.ManaPool) < ma.RemainingCost) {
+					Magic.AddLog ("Not enough mana available");
+					CancelLastActionOnStack ();
+					return;
+				} else if (pp.ManaPool != null && ma.RemainingCost != null) {
+					ma.PayCost (ref pp.ManaPool);
+				}
+			}
+
+			if (ma.IsComplete) {
+				if (ma.GoesOnStack) {
+					//should show spell to player...
+					UpdateStackLayouting();
+
+					GivePriorityToNextPlayer ();				
+				} else {
+					MagicStack.Pop ();
+					ma.Resolve ();
+				}
+				return;
+			}
+
+
+			pp.UpdateUi ();
+
+			//			AbilityActivation aa = ma as AbilityActivation;
+			//			//mana doest go on stack
+			//			if (aa != null){
+			//				if (aa.Source.AbilityType == AbilityEnum.Mana) {
+			//					MagicEvent (new AbilityEventArg (aa.Source, aa.CardSource));				
+			//					MagicStack.Pop;
+			//					return;
+			//				}
+			//			}
+		}
 
 		/// <summary>
 		/// 
@@ -682,32 +714,34 @@ namespace Magic3D
 		/// <returns>true if all damages are assigned</returns>
 		public bool CheckStackForUnasignedDamage ()
 		{
-			//            foreach (Damage d in MagicStack.ToArray().OfType<Damage>())
-			//            {
-			//                if (d.Target == null)
-			//                {
-			//                    Magic3D.pCurrentSpell.Promt.Text = d.Amount + " damage from " + d.Source.Model.Name + " to assign";
-			//                    Magic3D.pCurrentSpell.Visible = true;
-			//                    return false;
-			//                }
-			//            }
+            foreach (Damage d in MagicStack.ToArray().OfType<Damage>())
+            {
+                if (d.Target == null)
+                {
+					Magic.AddLog(d.Amount + " damage from " + d.Source.Model.Name + " to assign");                    
+                    return false;
+                }
+            }
 			return true;
 		}
-
+		public bool TryToAssignTargetForDamage (CardInstance c)
+		{
+			foreach (Damage d in MagicStack.ToArray().OfType<Damage>()) {
+				if (d.Target == null) {
+					d.Target = c;
+					//Magic3D.pCurrentSpell.Visible = false;
+					return true;
+				}
+			}
+			return false;
+		}
 		#endregion
 
 		#region Mouse handling
-
-		Vector3 computeVMouseAtHeight (Vector3 M, float z)
-		{
-			float t = (z - M.Z) / Magic.vMouse.Z;
-			float x = M.X + t * Magic.vMouse.X;
-			float y = M.Y + t * Magic.vMouse.Y;
-			return new Vector3 (x, y, z);
-		}
-
 		public void processMouseMove (Point<float> ptM)
 		{
+			if (!decksLoaded)
+				return;
 //			Vector3 M = new Vector3( glHelper.UnProject (ref Magic.projection, Magic.modelview, Magic.viewport, new Vector2 (ptM.X, ptM.Y))) ;
 //			Magic.vMouse = Vector3.Normalize (Magic.vEye - M);
 //
@@ -722,25 +756,38 @@ namespace Magic3D
 //					case CardGroupEnum.Hand:
 			ptM.Y = Magic.viewport [3] - ptM.Y;
 
-			if (CardInstance.selectedCard != null) {
-				if (CardInstance.selectedCard.mouseIsIn (ptM))
-					return;
-				else
-					CardInstance.selectedCard = null;
-			}
-
-			foreach (Player p in Players) {
-				foreach (CardGroup cg in p.allGroups) {
-					foreach (CardInstance c in cg.Cards) {
-						if (c.mouseIsIn (ptM)) {
-							CardInstance.selectedCard = c;
-							break;
+			CardInstance tmp = null;
+			if (CardInstance.selectedCard != null) {				
+				foreach (CardInstance c in CardInstance.selectedCard.CurrentGroup.Cards) {
+					if (c.mouseIsIn (ptM)) {
+						if (tmp != null) {
+							if (c.z < tmp.z)
+								continue;
 						}
+						tmp = c;
 					}
-					if (CardInstance.selectedCard != null)
-						break;
-				}			
+				}
 			}
+			if (tmp == null) {
+				foreach (Player p in Players) {
+					foreach (CardGroup cg in p.allGroups) {
+						foreach (CardInstance c in cg.Cards) {
+							if (c.mouseIsIn (ptM)) {
+								if (tmp != null) {
+									if (c.z < tmp.z)
+										continue;
+								}
+								tmp = c;
+							}
+						}
+						if (tmp != null)
+							break;
+					}
+					if (tmp != null)
+						break;
+				}
+			}
+			CardInstance.selectedCard = tmp;
 		}
 		public void processMouseDown (MouseButtonEventArgs e)
 		{
@@ -757,53 +804,34 @@ namespace Magic3D
 			}
 		}
 		#endregion
-
-
-		public bool TryToAssignTargetForDamage (CardInstance c)
+		public void UpdateOverlays()
 		{
-			foreach (Damage d in MagicStack.ToArray().OfType<Damage>()) {
-				if (d.Target == null) {
-					d.Target = c;
-					//Magic3D.pCurrentSpell.Visible = false;
-					return true;
+			foreach (CardInstance ci in CardsInPlayHavingSpellEffects) {
+				foreach (EffectGroup eg in ci.Effects) {
+					foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
+						foreach (CardInstance c in ct.GetValidTargetsInPlay (ci))
+							c.UpdateOverlay ();
+					}	
 				}
-			}
-			return false;
+			}			
 		}
-
-		public void checkCurrentSpell ()
-		{
-			if (pp.CurrentSpell != null) {
-				if (pp.CurrentSpell.SelectedTargets.Count < pp.CurrentSpell.RequiredTargetCount) {
-//                    if (pp.Type == Player.PlayerType.human)
-//                        Magic3D.pCurrentSpell.Update(pp.CurrentSpell);
-				}
-
-				if (pp.ManaPool != null) {
-					pp.CurrentSpell.RemainingCost = pp.CurrentSpell.RemainingCost.Pay (ref pp.ManaPool);
-					pp.UpdateUi ();
-					if (pp.CurrentSpell.RemainingCost == null) {
-						PushSpellOnStack (pp.CurrentSpell);
-						pp.CurrentSpell = null;
-						GivePriorityToNextPlayer ();
-					}
-//                    else if (pp.Type == Player.PlayerType.human)
-//                        Magic3D.pCurrentSpell.Update(pp.CurrentSpell);
-				}
-			}
-		}
-
-
+	
 		public void processRendering()
 		{
-			if (!deckLoaded)
+			if (!decksLoaded)
 				return;
 
 			foreach (Player p in Players) {
 				p.Render ();
 			}
 
-			SpellStackLayout.Render();
+			//SpellStackLayout.Render();
+		}
+
+		public void UpdateStackLayouting()
+		{
+			SpellStackLayout.Cards = MagicStack.OfType<Spell> ().Select (sp => sp.CardSource).ToList ();
+			SpellStackLayout.UpdateLayout ();			
 		}
 	}
 }

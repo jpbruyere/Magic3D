@@ -47,6 +47,5 @@ namespace Magic3D
         Interrupt,
 
         Mana,
-
     }
 }

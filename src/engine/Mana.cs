@@ -58,39 +58,6 @@ namespace Magic3D
 
     }
 
-
-    //public class ManaCount : Mana
-    //{
-
-
-
-
-    //    public static Mana operator +(ManaCount m, Mana n)
-    //    {
-    //        return m.IsSameType(n) ? new ManaCount(m.count + 1, m.Type) : null;
-    //    }
-    //    public static Mana operator +(ManaCount m, ManaCount n)
-    //    {
-    //        if (m.IsSameType(n))
-    //            return new ManaCount(m.count + n.count, m.Type);
-    //        ManaSum sum = new ManaSum();
-    //        sum += m;
-    //        sum += n;
-    //        return sum;
-    //    }
-    //    public override string ToString()
-    //    {
-    //        if (Type == ManaTypes.Colorless)
-    //            return count.ToString();
-
-    //        string tmp = Manas[0].ToString();
-
-    //        for (int i = 1; i < Manas.Count; i++)
-    //            tmp += "/" + Manas[i].ToString();
-
-    //        return tmp;
-    //    }
-    //}
     public class ManaChoice : Mana
     {
         public ManaChoice()
@@ -159,8 +126,6 @@ namespace Magic3D
         public ManaTypes TypeOfMana = ManaTypes.Colorless;
         public int count = 0;
 
-
-
         public Mana()
             : base(CostTypes.Mana)
         {
@@ -185,7 +150,8 @@ namespace Magic3D
             count = x;
             TypeOfMana = ManaTypes.Colorless;
         }
-        public override Cost Clone()
+        
+		public override Cost Clone()
         {            
             return new Mana(count,TypeOfMana);
         }
@@ -247,46 +213,6 @@ namespace Magic3D
         }
 
 
-		public static Cost operator +(Mana m1, Mana m2)
-		{
-			if (m1 == null)
-				return m2;
-			if (m1.IsSameType (m2))
-				return new Mana (m1.count + m2.count, m1.TypeOfMana);
-			Costs tmp = new Costs();
-			tmp.CostList.Add(m1);
-			tmp.CostList.Add(m2);
-			return tmp;
-		}
-		public static Cost operator -(Mana m1, Mana m2)
-		{
-			if (m1 == null)
-				return -m2;
-			if (m1.IsSameType (m2))
-				return new Mana (m1.count - m2.count, m1.TypeOfMana);
-
-			return m1;
-		}
-		public static Cost operator -(Mana m)
-		{
-			return new Mana(-m.count,m.TypeOfMana);
-		}
-		public static bool operator <(Mana m1, Mana m2)
-		{
-			if (m1 == null)
-				return true;
-			if (m1.IsSameType (m2))
-				return m1.count < m2.count;
-			return false;
-		}
-		public static bool operator >(Mana m1, Mana m2)
-		{
-			if (m1 == null)
-				return false;
-			if (m1.IsSameType (m2))
-				return m1.count > m2.count;
-			return false;
-		}
         public static bool operator ==(Mana m, ManaTypes mt)
         {
             return m.TypeOfMana == mt && m.count == 1 ? true : false;
@@ -297,7 +223,8 @@ namespace Magic3D
         }
         public virtual bool IsSameType(Mana m)
         {
-            return m.TypeOfMana == TypeOfMana && TypeOfMana != ManaTypes.Composite && count > 0 && m.count > 0 ? true : false;
+			return m==null ? false : m.TypeOfMana == TypeOfMana && 
+				TypeOfMana != ManaTypes.Composite && count > 0 && m.count > 0 ? true : false;
         }
         public override string ToString()
         {

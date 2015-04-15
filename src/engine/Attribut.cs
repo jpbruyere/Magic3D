@@ -5,24 +5,50 @@ using System.Text;
 
 namespace Magic3D
 {
+	/// <summary>
+	/// items list relation, AND, OR, NOR
+	/// </summary>
     public enum AttributeType
-    {
-        Choice,
+    {		
+		/// <summary>OR</summary>
+		Choice,
+		/// <summary>AND</summary>
         Composite,
+		/// <summary>NOR</summary>
         Exclude
     }
-    public class MultiformAttribut<T>
+	public class MultiformAttribut<T>
     {
-
-        //public List<Effect> Effects = new List<Effect>();
-
         public List<T> Values = new List<T>();
         public AttributeType attributeType;
 
-        public MultiformAttribut(AttributeType at = AttributeType.Composite)
+		public MultiformAttribut(AttributeType at, params T[] list)
         {
             attributeType = at;
+
+			foreach (T i in list)
+				AddValue (i);		
         }
+		public MultiformAttribut(params T[] list)
+		{
+			attributeType = AttributeType.Composite;
+
+			foreach (T i in list)
+				AddValue (i);
+		}
+
+		MultiformAttribut<T> Clone
+		{
+			get { 
+				return new MultiformAttribut<T> (this.attributeType, this.Values.ToArray());
+			}
+		}
+		void AddValue(T a)
+		{
+			if (a != null)
+				Values.Add (a);
+		}
+
         public int Count
         {
             get { return Values.Count; }
@@ -45,52 +71,101 @@ namespace Magic3D
         }
         public bool Contains(T a)
         {
-
             return Values.Contains(a) ? true : false;
         }
-        //public static implicit operator T(MultiformAttribut<T> a)
-        //{
 
-        //}
+		#region operators
+		public static implicit operator MultiformAttribut<T>(T a)
+		{
+			return new MultiformAttribut<T> (a);
+		}
+		public static MultiformAttribut<T> operator +(MultiformAttribut<T> ma, T a)
+        {
+			if (ma == null)
+				return a == null ? null : new MultiformAttribut<T> (a);
+			if (ma.attributeType == AttributeType.Composite) {
+				MultiformAttribut<T> tmp = ma.Clone;
+				tmp.AddValue (a);
+				return tmp;
+			} else if (a == null)
+				return ma.Clone;
+			else
+				return null;
+
+//			return new MultiformAttribut<MultiformAttribut<T>>
+//				(ma.Clone, new MultiformAttribut<T> (a));
+        }
+//		public static MultiformAttribut<T> operator +(T a, MultiformAttribut<T> ma)
+//		{
+//			if (ma == null)
+//				return a == null ? null : a;
+//			return ma.Clone.AddValue (a);
+//		}
+		public static MultiformAttribut<T> operator |(MultiformAttribut<T> ma, T a)
+		{
+//			if (ma == null)
+//				return a == null ? null : new MultiformAttribut<T> (a);
+			if (ma.attributeType == AttributeType.Choice) {
+				MultiformAttribut<T> tmp = ma.Clone;
+				tmp.AddValue (a);
+				return tmp;
+			} else if (a == null)
+				return ma.Clone;
+			else
+				return null;
+			
+//				new MultiformAttribut<MultiformAttribut<T>>(AttributeType.Choice,
+//				ma.Clone, new MultiformAttribut<T> (a));
+		}
         public static bool operator ==(MultiformAttribut<T> a1, MultiformAttribut<T> a2)
         {
-            foreach (T i in a1.Values)
-            {
-                foreach (T j in a2.Values)
-                {
-                    if (EqualityComparer<T>.Default.Equals(i, j))
-                    {
-                        //if (a1.attributeType == AttributeType.Choice)
-                            return a1.attributeType == AttributeType.Exclude ? false : true;
-                    }
-                    else if (a2.attributeType == AttributeType.Composite && a2.Count > 1)
-                        return false;
-                }
+			try {
+				foreach (T i in a1.Values)
+				{
+					foreach (T j in a2.Values)
+					{
+						if (EqualityComparer<T>.Default.Equals(i, j))
+						{
+							//if (a1.attributeType == AttributeType.Choice)
+							return a1.attributeType == AttributeType.Exclude ? false : true;
+						}
+						else if (a2.attributeType == AttributeType.Composite && a2.Count > 1)
+							return false;
+					}
 
-            }
-            return a1.attributeType == AttributeType.Exclude ? true : false;
+				}
+				return a1.attributeType == AttributeType.Exclude ? true : false;
+			} catch (Exception ex) {
+				return object.Equals(a1,a2);
+			}
         }
         public static bool operator !=(MultiformAttribut<T> a1, MultiformAttribut<T> a2)
         {
-            foreach (T i in a1.Values)
-            {
-                foreach (T j in a2.Values)
-                {
-                    if (EqualityComparer<T>.Default.Equals(i, j))
-                    {
-                        if (a2.attributeType == AttributeType.Choice)
-                            return a1.attributeType == AttributeType.Exclude ? true : false;
-                    }
-                    else if (a2.attributeType == AttributeType.Composite && a2.Count > 1)
-                        return true;
-                }
+			try {
+	            foreach (T i in a1.Values)
+	            {
+	                foreach (T j in a2.Values)
+	                {
+	                    if (EqualityComparer<T>.Default.Equals(i, j))
+	                    {
+	                        if (a2.attributeType == AttributeType.Choice)
+	                            return a1.attributeType == AttributeType.Exclude ? true : false;
+	                    }
+	                    else if (a2.attributeType == AttributeType.Composite && a2.Count > 1)
+	                        return true;
+	                }
 
-            }
-            return a1.attributeType == AttributeType.Exclude ? false : true;
-        }
+	            }
+	            return a1.attributeType == AttributeType.Exclude ? false : true;
+			} catch (Exception ex) {
+				return !object.Equals(a1,a2);
+			}
+		}
         public static bool operator ==(MultiformAttribut<T> a, T v)
         {
-            foreach (T i in a.Values)
+			if (a == null)
+				return v == null ? true : false;
+			foreach (T i in a.Values)
             {
                 if (EqualityComparer<T>.Default.Equals(i, v))
                     return true;
@@ -99,6 +174,8 @@ namespace Magic3D
         }
         public static bool operator !=(MultiformAttribut<T> a, T v)
         {
+			if (a == null)
+				return v == null ? false : true;
             foreach (T i in a.Values)
             {
                 if (EqualityComparer<T>.Default.Equals(i, v))
@@ -106,8 +183,25 @@ namespace Magic3D
             }
             return true;
         }
-
-        public override string ToString()
+		public static bool operator >=(MultiformAttribut<T> a1, MultiformAttribut<T> a2){
+			if (a2 == null)
+				return true;
+			foreach (T j in a2.Values) {
+				if (!a1.Contains (j))
+					return false;
+			}
+			return true;
+		}
+		public static bool operator <=(MultiformAttribut<T> a1, MultiformAttribut<T> a2){
+			foreach (T j in a1.Values) {
+				if (!a2.Contains (j))
+					return false;
+			}
+			return true;
+		}
+		#endregion
+        
+		public override string ToString()
         {
             if (Count == 0)
                 return "empty";

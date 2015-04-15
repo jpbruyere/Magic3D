@@ -8,10 +8,7 @@ namespace Magic3D
 	public class AiPlayer : Player
 	{
 		#region CTOR
-		public AiPlayer (string _name, string _deckPath) : base(_name,_deckPath)
-		{
-			Type = PlayerType.ai;
-		}
+		public AiPlayer (string _name, string _deckPath) : base(_name,_deckPath){}
 		#endregion
 
 		public override void initInterface ()
@@ -49,7 +46,7 @@ namespace Magic3D
 			if (e.pp != this || e.State < EngineStates.CurrentPlayer)
 				return;
 
-			if (CurrentSpell != null)
+			if (HasActionPending)
 			{
 				ActivateAvailableMana(e);
 				return;
@@ -105,77 +102,79 @@ namespace Magic3D
 			}
 			else
 			{
-				switch (e.CurrentPhase)
-				{
-				case GamePhases.Untap:
-					PhaseDone = true;
-					break;
-				case GamePhases.Upkeep:
-					PhaseDone = true;
-					break;
-				case GamePhases.Draw:
-					PhaseDone = true;
-					break;
-				case GamePhases.Main1:
-					PhaseDone = true;
-					break;
-				case GamePhases.BeforeCombat:
-					PhaseDone = true;
-					break;
-				case GamePhases.DeclareAttacker:
-					PhaseDone = true;
-					break;
-				case GamePhases.DeclareBlocker:
-					PhaseDone = true;
-					break;
-				case GamePhases.FirstStrikeDame:
-					PhaseDone = true;
-					break;
-				case GamePhases.CombatDamage:
-					PhaseDone = true;
-					break;
-				case GamePhases.EndOfCombat:
-					PhaseDone = true;
-					break;
-				case GamePhases.Main2:
-					PhaseDone = true;
-					break;
-				case GamePhases.EndOfTurn:
-					PhaseDone = true;
-					break;
-				case GamePhases.CleanUp:
-					PhaseDone = true;
-					break;
+				if (e.pp == this) {
+					e.GivePriorityToNextPlayer ();
 				}
-			}		}
-
-		public void aiPayManaIfNeedeed()
-		{
-			if (CurrentSpell != null)
-			{
-				if (CurrentSpell.RemainingCost != null)
-				{
-
-				}
-			}
+//				switch (e.CurrentPhase)
+//				{
+//				case GamePhases.Untap:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.Upkeep:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.Draw:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.Main1:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.BeforeCombat:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.DeclareAttacker:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.DeclareBlocker:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.FirstStrikeDame:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.CombatDamage:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.EndOfCombat:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.Main2:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.EndOfTurn:
+//					PhaseDone = true;
+//					break;
+//				case GamePhases.CleanUp:
+//					PhaseDone = true;
+//					break;
+//				}
+			}		
 		}
+
+//		public void aiPayManaIfNeedeed()
+//		{
+//			if (CurrentAction != null)
+//			{
+//				if (CurrentAction.RemainingCost != null)
+//				{
+//
+//				}
+//			}
+//		}
 		public bool CastAvailableAndAllowedCreature()
 		{
 			Cost availableMana = AvailableManaOnTable;
 
-			foreach (CardInstance c in Hand.Cards)
+			foreach (CardInstance c in Hand.Cards.Where(c=>c.HasType(CardTypes.Creature)))
 			{
-				if (c.Model.Types == CardTypes.Creature)
-				{
-					if (c.Model.Cost < availableMana)
-					{
-						CurrentSpell = new Spell(c);
-						return true;
-					}
-				}
+				if (availableMana < c.Model.Cost)
+					continue;
+				
+				MagicEngine.CurrentEngine.PushOnStack(new Spell(c));
+				return true;
 			}
 			return false;
 		}
+
 		public bool AITryToPlayLand()
 		{            
 			CardInstance[] lands = Hand.Cards.Where(c => c.Model.Types == CardTypes.Land).ToArray();
@@ -195,7 +194,6 @@ namespace Magic3D
 			}
 			InPlay.UpdateLayout();
 		}
-
 	}
 }
 

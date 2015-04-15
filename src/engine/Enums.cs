@@ -32,7 +32,7 @@ namespace Magic3D
 		Effect,
 		Destroy,
 		Exill,
-		QuitZone,
+		ChangeZone,
 		TapCard,
 		Damage,
 	}
@@ -379,6 +379,7 @@ namespace Magic3D
 		Tap,
 		DoesNotUntap,
 		CantAttack,
+		CantBlock,
 		TapAll,
 		LoseLife,
 		PreventDamage,
@@ -470,6 +471,7 @@ namespace Magic3D
 		ChoosePlayer,
 		EndTurn,
 		MultiplePiles
+
 	}
 	public enum AbilityFieldsEnum
 	{

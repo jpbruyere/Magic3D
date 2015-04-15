@@ -3,15 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 
 namespace Magic3D
 {
+	//TODO: permanent, self and enchanted by should go to CardTarget
+	//		possible target should be player or card
     public enum TargetType
     {
         Opponent,
         Player,
         Card,
         Permanent,
+		Self,
+		EnchantedBy,
+		EquipedBy,
+		Attached,
     }
     public enum ControlerType
     {
@@ -34,215 +41,201 @@ namespace Magic3D
         GreaterOrEqual,
         NotEqual
     }
-    public class NumericConstrain
+    
+	public class NumericConstrain
     {
         public NumericRelations Relation;
         public int Value;
     }
-
-    public class CardTarget : Target
-    {
-        public MultiformAttribut<CardTypes> ValidCardTypes =
-            new MultiformAttribut<CardTypes>(AttributeType.Composite);
-        public MultiformAttribut<Ability> HavingAbilities =
-            new MultiformAttribut<Ability>(AttributeType.Composite);
-        public MultiformAttribut<Ability> WithoutAbilities =
-            new MultiformAttribut<Ability>(AttributeType.Composite);
-        public ControlerType Controler = ControlerType.All;
-        public bool CanBeTargetted = true;
-        public CombatImplication CombatState = CombatImplication.Unset;
-        public NumericConstrain PowerConstrain;
-        public NumericConstrain ToughnessConstrain;
-        
-        public CardTarget(TargetType tt = TargetType.Card)
-        {
-            TypeOfTarget = tt;
-        }
-        public override string ToString()
-        {
-            string tmp = "";
-            if (ValidCardTypes.Count == 0)
-                tmp += TypeOfTarget.ToString();
-            else
-                tmp += ValidCardTypes.ToString();
-
-            if (HavingAbilities.Count > 0)
-                tmp += " having " + HavingAbilities.ToString();
-
-            if (WithoutAbilities.Count > 0)
-                tmp += " without " + WithoutAbilities.ToString();
-
-            return tmp;
-        }
-        public static bool operator ==(CardTarget ct, CardTypes t)
-        {
-            return ct.HavingAbilities.Count > 0 ?
-                false :
-                ct.ValidCardTypes == t;
-        }
-        public static bool operator !=(CardTarget ct, CardTypes t)
-        {
-            return ct.HavingAbilities.Count > 0 ?
-                true :
-                ct.ValidCardTypes != t;
-        }
-        //public static bool operator ==(CardTarget ct, EffectType t)
-        //{
-        //    return ct.ValidCardTypes.Count > 0 ?
-        //        false :
-        //        ct.HavingAbilities == t;
-        //}
-        //public static bool operator ==(CardTarget ct, EffectType t)
-        //{
-        //    return ct.ValidCardTypes.Count > 0 ?
-        //        false :
-        //        ct.HavingAbilities == t;
-        //}
-    }
-
+		
     public class Target
     {
         public TargetType TypeOfTarget;
+		//should have defining source to know opponent...
 
+		public virtual bool Accept(object _target, CardInstance _source){
+			switch (TypeOfTarget) {
+			case TargetType.Opponent:
+				Player p = _target as Player;
+				if (p == null)
+					return false;				
+				break;
+			case TargetType.Player:
+				return (_target is Player);
+			case TargetType.Card:
+				return (_target is CardInstance);
+			case TargetType.Permanent:
+				CardInstance c = _target as CardInstance;
+				if (c == null)
+					return false;
+				return (c.CurrentGroup.GroupName == CardGroupEnum.InPlay);
+			case TargetType.Self:
+				return _target == _source;
+			case TargetType.EquipedBy:
+				if (_target is CardInstance)
+					return  (_target as CardInstance).AttachedTo == _source;
+				return false;
+			case TargetType.EnchantedBy:
+				if (_target is CardInstance)
+					return  (_target as CardInstance).AttachedTo == _source;
+				return false;
+			}
+			return false;
+		}
+//		static List<string> list = new List<String> ();
 
         public static MultiformAttribut<Target> ParseTargets(string str)
         {
             MultiformAttribut<Target> result = new MultiformAttribut<Target>(AttributeType.Choice);
+//			using (Stream stream = new FileStream(@"/mnt/data/effects.txt", FileMode.Append)){
+//				using (StreamWriter tw = new StreamWriter (stream)) {
+//					
+//					if (!list.Contains (str)) {
+//						list.Add (str);
+//						tw.WriteLine (str);
+//					}
+//				}
+//			}
+			string[] tmp = str.Trim().Split(new char[] { ',' });
+			foreach (string t in tmp)
+			{
+				if (string.IsNullOrWhiteSpace(t))
+					continue;
 
-            string[] tmp = str.Trim().Split(new char[] { ',' });
-            foreach (string t in tmp)
-            {
-                if (string.IsNullOrWhiteSpace(t))
-                    continue;
+				string[] cardTypes = t.Trim().Split(new char[] { '.', '+' });
 
-                //string[] details = t.Trim().Split(new char[] { '.' });
-                string[] cardTypes = t.Trim().Split(new char[] { '.', '+' });
+				switch (cardTypes[0].Trim())
+				{
+				case "Opponent":
+					result |= TargetType.Opponent;
+					break;
+				case "Player":
+					result |= TargetType.Player;
+					break;
+				default:
+					CardTarget ctar = new CardTarget();
 
-                switch (cardTypes[0].Trim())
-                {
-                    case "Opponent":
-                        result.Value = TargetType.Opponent;
-                        break;
-                    case "Player":
-                        result.Value = TargetType.Player;
-                        break;
-                    default:
-                        CardTarget ctar = new CardTarget();
-                        foreach (string ct in cardTypes)
-                        {
-                            if (ct == "Card")
-                            {
-                                continue;
-                            }
-                            if (ct == "Permanent")
-                            {
-                                ctar.TypeOfTarget = TargetType.Permanent;
-                                continue;
-                            }
-                            if (ct == "YouCtrl")
-                            {
-                                ctar.Controler = ControlerType.You;
-                                continue;
-                            }
-                            if (ct == "OppCtrl")
-                            {
-                                ctar.Controler = ControlerType.Opponent;
-                                continue;
-                            }
-                            if (ct == "Other")
-                            {
-                                ctar.CanBeTargetted = false;
-                                continue;
-                            }
-                            if (ct == "attacking")
-                            {
-                                ctar.CombatState = CombatImplication.Attacking;
-                                continue;
-                            }
-                            if (ct == "blocking")
-                            {
-                                ctar.CombatState = CombatImplication.Blocking;
-                                continue;
-                            }
-                            if (ct.StartsWith("without"))
-                            {
-                                ctar.WithoutAbilities.Value = Ability.SpecialK(ct.Substring(7));
-                                continue;
-                            }
-                            if (ct.StartsWith("with"))
-                            {
-                                ctar.HavingAbilities.Value = Ability.SpecialK(ct.Substring(4));
-                                continue;
-                            }
+					foreach (string ct in cardTypes)
+					{
+						switch (ct) {
+						case "Card":
+							break;
+						case "Permanent":
+							ctar.TypeOfTarget = TargetType.Permanent;
+							break;
+						case "YouCtrl":
+							ctar.Controler = ControlerType.You;
+							break;						
+						case "OppCtrl":
+							ctar.Controler = ControlerType.Opponent;
+							break;
+						case "Other":
+							ctar.CanBeTargetted = false;
+							break;						
+						case "attacking":
+							ctar.CombatState = CombatImplication.Attacking;
+							break;
+						case "blocking":
+							ctar.CombatState = CombatImplication.Blocking;
+							break;
+						case "Self":
+							ctar.TypeOfTarget = TargetType.Self;
+							break;
+						case "EnchantedBy":
+							ctar.TypeOfTarget = TargetType.EnchantedBy;
+							break;
+						case "equipped":
+							ctar.HavingAttachedCards += CardTypes.Equipment;
+							break;
+						case "Attached":
+							ctar.TypeOfTarget = TargetType.Attached;
+							break;
+						case "EquippedBy":
+							ctar.TypeOfTarget = TargetType.EquipedBy;
+							break;
+						case "White":
+							ctar.ValidCardColors += ManaTypes.White;
+							break;
+						default:							
+							#region ability inclusion/exclusion
+							if (ct.StartsWith("without")){
+								ctar.WithoutAbilities += Ability.ParseKeyword(ct.Substring(7));
+								break;
+							}
+							if (ct.StartsWith ("with")){
+								ctar.HavingAbilities += Ability.ParseKeyword(ct.Substring(4));
+								break;
+							}
+							#endregion
+							#region numeric contrain
+							NumericConstrain nc = null;
+							string strTmp = "";
+							if (ct.ToLower().StartsWith("power"))
+							{
+								ctar.PowerConstrain = new NumericConstrain();
+								nc = ctar.PowerConstrain;
+								strTmp = ct.Substring(5);
+							}
+							else if (ct.ToLower().StartsWith("toughness"))
+							{
+								ctar.ToughnessConstrain = new NumericConstrain();
+								nc = ctar.ToughnessConstrain;
+								strTmp = ct.Substring(9);
+							}
 
-                            NumericConstrain nc = null;
-                            string strTmp = "";
-                            if (ct.ToLower().StartsWith("power"))
-                            {
-                                ctar.PowerConstrain = new NumericConstrain();
-                                nc = ctar.PowerConstrain;
-                                strTmp = ct.Substring(5);
-                            }
-                            else if (ct.ToLower().StartsWith("toughness"))
-                            {
-                                ctar.ToughnessConstrain = new NumericConstrain();
-                                nc = ctar.ToughnessConstrain;
-                                strTmp = ct.Substring(9);
-                            }
+							if (nc != null)
+							{
+								string strRelation = strTmp.Substring(0, 2);
+								switch (strRelation)
+								{
+								case "EQ":
+									nc.Relation = NumericRelations.Equal;
+									break;
+								case "LT":
+									nc.Relation = NumericRelations.Less;
+									break;
+								case "LE":
+									nc.Relation = NumericRelations.LessOrEqual;
+									break;
+								case "GT":
+									nc.Relation = NumericRelations.Greater;
+									break;
+								case "GE":
+									nc.Relation = NumericRelations.GreaterOrEqual;
+									break;
+								case "NE":
+									nc.Relation = NumericRelations.NotEqual;
+									break;
+								default:
+									break;
+								}
+								strTmp = strTmp.Substring(2);
 
-                            if (nc != null)
-                            {
-                                string strRelation = strTmp.Substring(0, 2);
-                                switch (strRelation)
-                                {
-                                    case "EQ":
-                                        nc.Relation = NumericRelations.Equal;
-                                        break;
-                                    case "LT":
-                                        nc.Relation = NumericRelations.Less;
-                                        break;
-                                    case "LE":
-                                        nc.Relation = NumericRelations.LessOrEqual;
-                                        break;
-                                    case "GT":
-                                        nc.Relation = NumericRelations.Greater;
-                                        break;
-                                    case "GE":
-                                        nc.Relation = NumericRelations.GreaterOrEqual;
-                                        break;
-                                    case "NE":
-                                        nc.Relation = NumericRelations.NotEqual;
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                strTmp = strTmp.Substring(2);
+								if (strTmp != "X" && !string.IsNullOrWhiteSpace(strTmp))
+									nc.Value = int.Parse(strTmp);
 
-                                if (strTmp != "X" && !string.IsNullOrWhiteSpace(strTmp))
-                                    nc.Value = int.Parse(strTmp);
-
-                                continue;
-                            }
-
-                            CardTypes cts;
-                            if (Enum.TryParse<CardTypes>(ct, true, out cts))
-                                ctar.ValidCardTypes.Value = (CardTypes)Enum.Parse(typeof(CardTypes), ct, true);
-                            //else
-                            //    cts = CardTypes.Archon;
-                        }
-
-                        result.Value = ctar;
-
-                        break;
-                }
-
-
+								break;
+							}
+							#endregion
+							#region card types constrains
+							CardTypes cts;
+							if (Enum.TryParse<CardTypes>(ct, true, out cts))
+								ctar.ValidCardTypes += (CardTypes)Enum.Parse(typeof(CardTypes), ct, true);
+							else
+								Debug.WriteLine ("Unknow card type: " + ct);
+							#endregion
+							break;
+						}							
+					}
+					result |= ctar;
+					break;
+				}
             }
-
-
+				
             return result;
         }
 
+		#region Operators
         public static implicit operator Target(TargetType tt)
         {
             return tt == TargetType.Card || tt == TargetType.Permanent ?
@@ -257,7 +250,9 @@ namespace Magic3D
         {
             return ct is CardTarget ? (ct as CardTarget) != t : true;
         }
-        public override string ToString()
+		#endregion
+
+		public override string ToString()
         {
             return TypeOfTarget.ToString();
         }

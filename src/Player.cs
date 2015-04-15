@@ -15,19 +15,17 @@ namespace Magic3D
 
     public class Player : IDamagable
     {
-        public enum PlayerType
-        {
-            human,
-            ai
-        }
-
+		/// <summary>
+		/// Overall game status
+		/// </summary>
 		public enum PlayerStates
 		{
 			init,
-			PlayDrawChoice,
+			PlayDrawChoice,		
 			InitialDraw,
 			KeepMuliganChoice,
-			Ready
+			Ready,
+			SelectTarget,
 		}
 
         public static int InitialLifePoints = 20;
@@ -35,14 +33,14 @@ namespace Magic3D
         int _lifePoints;
         string _name;
         Deck _deck;
-        Spell _currentSpell;
+		//MagicAction _currentAction;
+
         CardInstance _currentBlockingCreature;
         List<Damage> _damages = new List<Damage>();
 
 		public volatile PlayerStates CurrentState;
 		public volatile bool DeckLoaded = false;
 		public string deckPath = "Lightforce.dck";
-		public PlayerType Type = PlayerType.human;
 		public Cost ManaPool;
 		public bool Keep = false;
 		public int CardToDraw = 7;
@@ -55,6 +53,11 @@ namespace Magic3D
 		public CardGroup Exhiled;
 		public CardGroup[] allGroups = new CardGroup[5];
 
+		public CardGroup GetGroup(CardGroupEnum zone)
+		{
+			return allGroups.Where (g => g.GroupName == zone).FirstOrDefault ();
+		}
+
 		#region CTOR
 		public Player(string _name, string _deckPath)
 		{
@@ -65,7 +68,6 @@ namespace Magic3D
 			LoadDeck (_deckPath);
 
 			Name = _name;
-			Type = PlayerType.human;
 
 			Library = new Library();
 
@@ -74,7 +76,7 @@ namespace Magic3D
 			Hand.z = 3.3f;
 			Hand.xAngle = MathHelper.Pi - Vector3.CalculateAngle (Magic.vLook, Vector3.UnitZ);
 			Hand.HorizontalSpacing = 0.7f;
-			Hand.VerticalSpacing = 0.02f;
+			Hand.VerticalSpacing = -0.01f;
 
 			Graveyard = new CardGroup(CardGroupEnum.Graveyard);
 			Graveyard.x = -4;
@@ -85,11 +87,11 @@ namespace Magic3D
 			Exhiled = new CardGroup(CardGroupEnum.Exhiled);
 			Exhiled.IsVisible = false;
 
-			allGroups[0] = Library;
-			allGroups[1] = Hand;
+			allGroups[0] = Hand;
+			allGroups[1] = InPlay;
 			allGroups[2] = Graveyard;
-			allGroups[3] = InPlay;
-			allGroups[4] = Exhiled;
+			allGroups[3] = Exhiled;
+			allGroups[4] = Library;
 
 		}
 		#endregion
@@ -131,36 +133,29 @@ namespace Magic3D
 			set;
 		}
         
-		public Spell CurrentSpell
-        {
-            get { return _currentSpell; }
-            set
-            {
-                if (_currentSpell == value)
-                    return;
-
-
-//				if (_currentSpell != null) {
-//					if (_currentSpell.RemainingCost != _currentSpell.Source.Model.Cost) {
-//						//put already spent mana back into Manapool
-//						ManaPool = _currentSpell.Source.Model.Cost - _currentSpell.RemainingCost;
-//					}
+//		MagicAction priviousAction;
+//		public MagicAction CurrentAction
+//        {
+//            get { return _currentAction; }
+//            set
+//            {
+//                if (_currentAction == value)
+//                    return;
+//				
+//				if (value is AbilityActivation) {
+//					if ((value as AbilityActivation).Source is ManaAbility)
+//						priviousAction = _currentAction;
 //				}
-
-				if (value != null)
-					Magic.AddLog ("Trying to cast: " + value.Source.Model.Name);
-
-                _currentSpell = value;
-                
-//                if (_currentSpell == null)
-//                    Magic3D.pCurrentSpell.Visible = false;
-//                else if (MagicEngine.CurrentEngine.pp.Type == PlayerType.human)
-//                {
-//                    Magic3D.pCurrentSpell.Visible = true;
-//                    Magic3D.pCurrentSpell.Update(_currentSpell);
-//                }
-            }
-        }
+//
+//				_currentAction = value;
+//
+//				if (_currentAction == null && priviousAction != null) {
+//					_currentAction = priviousAction;
+//					priviousAction = null;
+//					CurrentAction.PayCost (ref ManaPool);
+//				}
+//            }
+//        }
         public CardInstance CurrentBlockingCreature
         {
             get { return _currentBlockingCreature; }
@@ -342,23 +337,13 @@ namespace Magic3D
 			}
 			Animation.DelayMs = 0;
 		}
-
-
  		public void DrawOneCard()
         {
             CardInstance c = Library.TakeTopOfStack;
             Hand.AddCard(c);
-//            Animation.StartAnimation(new AngleAnimation(c, "yAngle", 0, MathHelper.Pi * 0.1f));
-//            Animation.StartAnimation(new AngleAnimation(c, "xAngle",
-//				MathHelper.Pi - Vector3.CalculateAngle(Magic.vLook, Vector3.UnitZ), MathHelper.Pi * 0.03f));
-        }
-        public void PutCardInPlay(CardInstance c)
-        {
-            Hand.RemoveCard(c);
-            InPlay.AddCard(c);
-			Animation.StartAnimation(new AngleAnimation(c, "xAngle", 0, MathHelper.Pi * 0.3f));
-        }
-			
+			MagicEngine.CurrentEngine.RaiseMagicEvent (
+				new ChangeZoneEventArg (c,CardGroupEnum.Library,CardGroupEnum.Hand));
+        }			
 		public void AddDamages(Damage d)
 		{
 			LifePoints -= d.Amount;
@@ -375,6 +360,7 @@ namespace Magic3D
 			MagicEngine e = MagicEngine.CurrentEngine;
 
 			switch (CurrentState) {
+			#region StartUp
 			case PlayerStates.init:
 				return;
 			case PlayerStates.PlayDrawChoice:
@@ -387,11 +373,11 @@ namespace Magic3D
 				createKeepMulliganChoice ();
 				return;
 			case PlayerStates.KeepMuliganChoice:
-
 				return;
+				#endregion
 			}
 
-			if (e.pp != this||e.State<EngineStates.CurrentPlayer)
+			if (e.pp != this || e.State < EngineStates.CurrentPlayer)
 				return;
 
 			switch (e.CurrentPhase)
@@ -442,30 +428,76 @@ namespace Magic3D
 			//            e.Chrono.Stop();
         }
  
-        public bool HaveCreaturesOnTableToAttack
+        public IEnumerable<CardInstance> CreaturesAbleToAttack
         {
             get
             {
-				return InPlay.Cards.Where(c => !c.IsTapped && c.Model.Types == CardTypes.Creature && !c.HasSummoningSickness).Count() > 0 ? true : false;
+				foreach (CardInstance c in InPlay.Cards) {
+					if (c.Model.Types == CardTypes.Creature && 
+						!c.IsTapped && !c.HasSummoningSickness) {						
+							yield return c;
+					}
+				}
             }
         }
-        public bool HaveAttackingCreature
+        public bool HasAttackingCreature
         {
             get { return AttackingCreature.Length > 0 ? true : false; }
         }
+		public bool HasActionPending
+		{
+			get {				
+				MagicEngine e = MagicEngine.CurrentEngine;
+				if (e.pp != this)
+					return false;
+				if (e.MagicStack.Count == 0)
+					return false;
+				MagicAction ma = e.MagicStack.Peek () as MagicAction;
+				return ma == null ? false : (ma.IsComplete || ma.CardSource.Controler != this) ? false : true;				
+			}
+		}
+//		public bool PlayableSpell
+//		{
+//			get{
+//				MagicEngine e = MagicEngine.CurrentEngine;
+//
+//				if (e.cp == this) {
+//					if (e.CurrentPhase == GamePhases.Main1 || e.CurrentPhase == GamePhases.Main2) {
+//						
+//					}
+//				}
+//
+//			}
+//		}
+		public IEnumerable<CardInstance> PlayableInstants{
+			get {
+				Cost availableMana = AvailableManaOnTable;
 
+				foreach (CardInstance c in Hand.Cards) {
+					if (c.Model.Types == CardTypes.Instant) {
+						if (c.Model.Cost < availableMana)
+							yield return c;
+					}
+				}
+			}
+		}
         public void ActivateAvailableMana(MagicEngine engine)
         {
+			MagicAction ma = engine.MagicStack.Peek () as MagicAction;
+			if (ma == null) {
+				Debug.WriteLine ("no action to activate mana for.");
+				return;
+			}
+
             foreach (CardInstance c in InPlay.Cards.Where(crd => !crd.IsTapped))
             {
-                foreach (ManaAbility ma in c.Model.Abilities.OfType<ManaAbility>())
+				foreach (ManaAbility a in c.Model.Abilities.OfType<ManaAbility>())
                 {
-                    if (ma.ActivationCost.Contains(CostTypes.Tap))
+                    if (a.ActivationCost.Contains(CostTypes.Tap))
                     {
-                        if (CurrentSpell.RemainingCost.Contains(ma.ProducedMana))
+                        if (ma.RemainingCost.Contains(a.ProducedMana))
                         {
-                            c.Tap();
-							engine.RaiseMagicEvent(new AbilityEventArg(ma,c));
+							MagicEngine.CurrentEngine.PushOnStack(new AbilityActivation(c,a));
                             return;
                         }
                     }
@@ -496,6 +528,7 @@ namespace Magic3D
                 return availableMana;
             }
         }
+			
 
 		#region Rendering
 		public float zAngle = 0.0f;

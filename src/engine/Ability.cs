@@ -6,125 +6,194 @@ using System.Diagnostics;
 
 namespace Magic3D
 {
-    public class Abilities : List<Ability>
-    {
-        public bool Has(AbilityEnum ab)
-        {
-            foreach (Ability a in this)
-            {
-                if (a.AbilityType == ab)
-                    return true;
-            }
-            return false;
-        }
-    }
-
-    public class TriggeredAbility : Ability
-    {
-    }
-
-    public class ActivatedAbility : Ability
-    {
-        //public Cost ActivationCost;
-
-    }
-    public class StaticAbility : Ability
-    {
-
-    }
-
-    public class ManaAbility : ActivatedAbility
-    {
-        public ManaAbility()
-        {
-            AbilityType = AbilityEnum.Mana;
-        }
-        public Cost ProducedMana;
-    }
-		
-    public class Ability
-    {
-		#region CTOR
-		public Ability()
+	public class ManaAbility : Ability
+	{
+		public ManaAbility ()
 		{
+			AbilityType = AbilityEnum.Mana;
 		}
 
-		public Ability(AbilityEnum a)
+		public Cost ProducedMana;
+	}
+
+	public class ChangeZoneAbility : Ability
+	{
+		public CardGroupEnum Origin;
+		public CardGroupEnum Destination;
+		public bool Tapped = false;
+
+		public ChangeZoneAbility()
+		{
+			AbilityType = AbilityEnum.Unset;
+			Effects.Add (new Effect(EffectType.ChangeZone));
+		}
+	}
+
+	public enum AbilityCategory{		
+		Acivated,
+		Spell,
+		DrawBack
+	}
+	public class Ability
+	{
+		#region CTOR
+		public Ability (){}
+		public Ability (AbilityEnum a)
 		{
 			AbilityType = a;
 		}
+		public Ability (EffectType et)
+		{
+			AbilityType = AbilityEnum.Unset;
+			Effects.Add (new Effect (et));
+		}
+		public Ability (Trigger trig)
+		{
+			AbilityType = AbilityEnum.Unset;
+			Trigger = trig;
+		}
 		#endregion
-        
-        int _requiredTargetCount = 0;
-        public int RequiredTargetCount
-        {
-            get
-            {
-                return _requiredTargetCount;
-            }
-            set
-            {
-                _requiredTargetCount = value;
-            }
-        }
 
+		int _requiredTargetCount = -1;
+		string targetPrompt = "";
+		MultiformAttribut<Target> _validTargets;
+		List<Object> _selectedTargets = new List<object> ();
+		public Trigger Trigger;
+		public AbilityCategory Category;
 		public AbilityEnum AbilityType = AbilityEnum.Unset;
-        public List<Effect> Effects = new List<Effect>();
-        public Cost ActivationCost;
-        public string Description = "";
+		public EffectGroup Effects = new EffectGroup ();
+		public string SubAbilityId;
+		public Cost ActivationCost = null;
+		public string Description = "";
+		public int MinimumTargetCount = -1;
+		public int MaximumTargetCount = -1;
+		/// <summary>
+		/// if true, ability activation can't be cancelled and have to be completed
+		/// </summary>
+		public bool Mandatory = false;
 
-        MultiformAttribut<Target> _validTargets;
-        public MultiformAttribut<Target> ValidTargets
-        {
-            get { return _validTargets; }
-            set { _validTargets = value; }
-        }
-			
-        List<Object> _selectedTargets = new List<object>();        
-        public List<Object> SelectedTargets
-        {
-            get { return _selectedTargets; }
-            set
-            {
-                _selectedTargets = value;
-            }
-        }
+		public bool IsTriggeredAbility {
+			get { return Trigger != null; }
+		}
+		public bool IsStaticAbility {
+			get { return ActivationCost == null && Trigger == null; }
+		}
+		public bool IsActivatedAbility {
+			get { return Trigger == null && ActivationCost != null; }
+		}
 
-		public static Ability Parse(string strAbility)
+		public bool HasContinuousMode {
+			get { return Effects == null ? false : Effects.Mode == Effect.ModeEnum.Continuous; }
+		}
+		/// <summary>
+		/// return MinimumTargetCount if set or _requiredTargetCount
+		/// </summary>
+		public int RequiredTargetCount {
+			get {
+				return MinimumTargetCount > 0 ? MinimumTargetCount : _requiredTargetCount;
+			}
+			set {
+				_requiredTargetCount = value;
+			}
+		}
+		/// <summary>
+		/// Used to know if ability could accept target 
+		/// for msg prompt.
+		/// </summary>
+		/// <value>The possible target count.</value>
+		public int PossibleTargetCount {
+			get { 
+				return  
+					MaximumTargetCount > 0 ? MaximumTargetCount : _requiredTargetCount; 
+			}
+		}
+		/// <summary>
+		/// if minTarget or maxTarget are set return true 
+		/// else return true if required target > 0
+		/// </summary>
+		///
+		public bool AcceptTargets {
+			get { 
+				return MinimumTargetCount > 0 || MaximumTargetCount > 0 ? true : 
+					_requiredTargetCount > 0; 
+			} 
+		}			
+		public MultiformAttribut<Target> ValidTargets {
+			get { return _validTargets; }
+			set { _validTargets = value; }
+		}			
+		public List<Object> SelectedTargets {
+			get { return _selectedTargets; }
+			set {
+				_selectedTargets = value;
+			}
+		}
+		public string TargetPrompt {
+			get {
+				return string.IsNullOrWhiteSpace (targetPrompt) ? "\tSelect " + ValidTargets.ToString () : targetPrompt;
+			}
+			set {
+				targetPrompt = value;
+			}
+		}
+
+		public virtual void Activate (CardInstance _source, List<object> _targets)
+		{
+			if (Effects == null)
+				return;
+			Effects.Apply (_source, this, _targets);		
+		}
+
+		public static Ability Parse (string strAbility)
 		{
 			Ability a = new Ability();
+			Parse (strAbility, ref a);
+			return a;
+		}
+		public static Ability Parse (string strAbility, Trigger _trig)
+		{
+			Ability ta = new Ability();
+			Parse (strAbility, ref ta);
+			ta.Trigger = _trig;
+			return ta;
+		}
+		public static void Parse (string strAbility, ref Ability a)
+		{			
+			string[] tmp = strAbility.Split (new char[] { '|' });
 
+			AbilityCategory Category = AbilityCategory.Acivated;
+			bool mandatory = false;
 
-			string[] tmp = strAbility.Split(new char[] { '|' });
-
-			foreach (string ab in tmp)
-			{
+			foreach (string ab in tmp) {
 				int v;
 
-				if (string.IsNullOrWhiteSpace(ab))
+				if (string.IsNullOrWhiteSpace (ab))
 					continue;
 
-				int dollarPos = ab.IndexOf('$');
+				int dollarPos = ab.IndexOf ('$');
 
 				if (dollarPos < 0)
 					continue;
 
-				AbilityFieldsEnum varName = (AbilityFieldsEnum)Enum.Parse(typeof(AbilityFieldsEnum), ab.Substring(0, dollarPos), true);
-				string value = ab.Substring(dollarPos + 1).Trim();
+				AbilityFieldsEnum varName = (AbilityFieldsEnum)Enum.Parse (typeof(AbilityFieldsEnum), ab.Substring (0, dollarPos), true);
+				string value = ab.Substring (dollarPos + 1).Trim ();
 
 				Effect e = null;
 
-				switch (varName)
-				{
-				case AbilityFieldsEnum.SP:
-				case AbilityFieldsEnum.AB:
+
+				switch (varName) {
+				case AbilityFieldsEnum.SP://Spell ability
+				case AbilityFieldsEnum.AB://Triggered or activated					
+					if (varName == AbilityFieldsEnum.AB)
+						Category = AbilityCategory.Acivated;
+					else if (varName == AbilityFieldsEnum.SP)
+						Category = AbilityCategory.Spell;					
 					#region ability type
-					switch (value)
-					{
+					switch (value) {
 					case "Discard":
 						break;
 					case "Mana":
-						a = new ManaAbility();
+						a = new ManaAbility ();
 						break;
 					case "Pump":
 						break;
@@ -140,10 +209,16 @@ namespace Magic3D
 					case "Destroy":
 						break;
 					case "Tap":
+						a.Effects.Add(new Effect(EffectType.Tap));
 						break;
 					case "TapAll":
+						
 						break;
 					case "LoseLife":
+						a.Effects.Add (new NumericEffect(EffectType.LoseLife));
+						break;
+					case "GainLife":						
+						a.Effects.Add (new NumericEffect(EffectType.GainLife));
 						break;
 					case "PreventDamage":
 						break;
@@ -152,6 +227,7 @@ namespace Magic3D
 					case "DealDamage":
 						break;
 					case "ChangeZone":
+						a = new ChangeZoneAbility();
 						break;
 					case "Draw":
 						break;
@@ -182,8 +258,6 @@ namespace Magic3D
 					case "UntapAll":
 						break;
 					case "PutCounter":
-						break;
-					case "GainLife":
 						break;
 					case "PutCounterAll":
 						break;
@@ -331,19 +405,21 @@ namespace Magic3D
 					}
 					break;
 					#endregion
-				case AbilityFieldsEnum.Cost:
-					a.ActivationCost = Cost.Parse(value);
+				case AbilityFieldsEnum.Cost:	
+					if (Category == AbilityCategory.Spell)
+						break;//dont parse cost, it's in card cost
+					a.ActivationCost = Cost.Parse (value);
 					break;
 				case AbilityFieldsEnum.ValidTgts:
-					a.ValidTargets = Target.ParseTargets(value);
+					a.ValidTargets = Target.ParseTargets (value);
 					break;
 				case AbilityFieldsEnum.Mode:
-					switch (value.Trim().ToLower())
-					{
+					switch (value.Trim ().ToLower ()) {
 					case "continuous":
 
 						break;
 					default:
+						Debug.WriteLine ("unknow ability mode: " + value.Trim ().ToLower ());
 						break;
 					}
 					break;
@@ -354,21 +430,19 @@ namespace Magic3D
 				case AbilityFieldsEnum.SpellDescription:
 					break;
 				case AbilityFieldsEnum.Produced:
-					(a as ManaAbility).ProducedMana = Mana.Parse(value);
+					(a as ManaAbility).ProducedMana = Mana.Parse (value);
 					break;
 				case AbilityFieldsEnum.NumDef:                        
-					if (!int.TryParse(value, out v))
+					if (!int.TryParse (value, out v))
 						break;
-					a.Effects.Add(new NumericEffect
-						{
-							TypeOfEffect = EffectType.AddTouchness,
-							NumericValue = v
-						});
+					a.Effects.Add (new NumericEffect {
+						TypeOfEffect = EffectType.AddTouchness,
+						Amount = v
+					});
 					break;
 				case AbilityFieldsEnum.AILogic:
-					#region AIlogic
-					switch (value.Trim())
-					{
+					#region AIlogic 
+					switch (value.Trim ()) {
 					case "GainControl":
 						break;
 					case "BeginningOfOppTurn":
@@ -409,7 +483,7 @@ namespace Magic3D
 					case "AtLeast1":
 						break;
 					case "KeepTapped":
-						a.Effects.Add(new Effect { TypeOfEffect = EffectType.DoesNotUntap });
+						a.Effects.Add (new Effect { TypeOfEffect = EffectType.DoesNotUntap });
 						break;
 					case "DontCast":
 						break;
@@ -479,38 +553,43 @@ namespace Magic3D
 				case AbilityFieldsEnum.Name:
 					break;
 				case AbilityFieldsEnum.Power:                        
-					if (!int.TryParse(value, out v))
+					if (!int.TryParse (value, out v))
 						break;
-					a.Effects.Add(new NumericEffect
-						{
-							TypeOfEffect = EffectType.SetPower,
-							NumericValue = v
-						});
+					a.Effects.Add (new NumericEffect {
+						TypeOfEffect = EffectType.SetPower,
+						Amount = v
+					});
 					break;
 				case AbilityFieldsEnum.Toughness:
-					if (!int.TryParse(value, out v))
+					if (!int.TryParse (value, out v))
 						break;
-					a.Effects.Add(new NumericEffect
-						{
-							TypeOfEffect = EffectType.SetTouchness,
-							NumericValue = v
-						});
+					a.Effects.Add (new NumericEffect {
+						TypeOfEffect = EffectType.SetTouchness,
+						Amount = v
+					});
 					break;
 				case AbilityFieldsEnum.StaticAbilities:
 					break;
 				case AbilityFieldsEnum.RememberObjects:
 					break;
 				case AbilityFieldsEnum.SubAbility:
+					a.SubAbilityId = value;
 					break;
 				case AbilityFieldsEnum.TargetType:
 					break;
 				case AbilityFieldsEnum.TgtPrompt:
+					a.targetPrompt = value;
 					break;
 				case AbilityFieldsEnum.ValidCards:
 					break;
 				case AbilityFieldsEnum.KW:
 					break;
 				case AbilityFieldsEnum.LifeAmount:
+					if (!int.TryParse (value, out v)) {
+						Debug.WriteLine ("life amount: " + value);
+						break;
+					}
+					a.Effects.OfType<NumericEffect> ().FirstOrDefault ().Amount = v;
 					break;
 				case AbilityFieldsEnum.Amount:
 					break;
@@ -519,8 +598,10 @@ namespace Magic3D
 				case AbilityFieldsEnum.NumDmg:
 					break;
 				case AbilityFieldsEnum.Origin:
+					(a as ChangeZoneAbility).Origin = CardGroup.ParseZoneName (value);
 					break;
 				case AbilityFieldsEnum.Destination:
+					(a as ChangeZoneAbility).Destination = CardGroup.ParseZoneName (value);
 					break;
 				case AbilityFieldsEnum.NumAtt:
 					break;
@@ -557,8 +638,16 @@ namespace Magic3D
 				case AbilityFieldsEnum.TokenToughness:
 					break;
 				case AbilityFieldsEnum.ChangeType:
+					a.ValidTargets = Target.ParseTargets (value);
+					foreach (CardTarget ct in a.ValidTargets.Values.OfType<CardTarget>()) {
+						ct.ValidGroup += (a as ChangeZoneAbility).Origin;
+					}
 					break;
 				case AbilityFieldsEnum.ChangeNum:
+					if (int.TryParse (value, out v))
+						a.RequiredTargetCount = v;
+					else
+						SVarToResolve.RegisterSVar(value, a, a.GetType().GetProperty("RequiredTargetCount"));
 					break;
 				case AbilityFieldsEnum.GainControl:
 					break;
@@ -593,8 +682,18 @@ namespace Magic3D
 				case AbilityFieldsEnum.RememberChanged:
 					break;
 				case AbilityFieldsEnum.TargetMin:
+					if (!int.TryParse (value, out v)) {
+						Debug.WriteLine ("target min amount: " + value);
+						break;
+					}
+					a.MinimumTargetCount = v;
 					break;
 				case AbilityFieldsEnum.TargetMax:
+					if (!int.TryParse (value, out v)) {
+						Debug.WriteLine ("target min amount: " + value);
+						break;
+					}
+					a.MaximumTargetCount = v;					
 					break;
 				case AbilityFieldsEnum.AllCounterTypes:
 					break;
@@ -617,6 +716,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.SorcerySpeed:
 					break;
 				case AbilityFieldsEnum.Mandatory:
+					mandatory = true;
 					break;
 				case AbilityFieldsEnum.Planeswalker:
 					break;
@@ -765,6 +865,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.Abilities:
 					break;
 				case AbilityFieldsEnum.Tapped:
+					(a as ChangeZoneAbility).Tapped = bool.Parse (value);
 					break;
 				case AbilityFieldsEnum.UnlessPayer:
 					break;
@@ -911,7 +1012,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.KeepCardTypes:
 					break;
 				case AbilityFieldsEnum.RemoveAllAbilities:
-					a.Effects.Add(new Effect(EffectType.LooseAllAbilities));                        
+					a.Effects.Add (new Effect (EffectType.LooseAllAbilities));                        
 					break;
 				case AbilityFieldsEnum.TargetsSingleTarget:
 					break;
@@ -1206,336 +1307,336 @@ namespace Magic3D
 				default:
 					break;
 				}
-
-
 			}
-
-			return a;
+			if (!a.AcceptTargets && a.ValidTargets != null) {
+				Debug.WriteLine ("required target forced to 1.");
+				a.RequiredTargetCount = 1;
+			}
+			a.Category = Category;
+			a.Mandatory = mandatory;
 		}
 
 
-        public static Ability SpecialK(string str)
-        {
-            Ability a = null;
+		public static Ability ParseKeyword (string str, MagicCard mc = null)
+		{
+			Ability a = null;
 
-            string[] tmp = str.Split(new char[] { ' ' });
+			if (str == "CARDNAME enters the battlefield tapped.") {
+				mc.Triggers.Add (
+					new Trigger (
+						MagicEventType.PlayLand, 
+						new CardTarget (TargetType.Self),
+						new Ability (EffectType.Tap)));
+				return null;
+			}
+
+			string[] tmp = str.Split (new char[] { ' ' });
 
             
-            switch (tmp[0])
-            {
-                case "CARDNAME":
-                    break;
-                case "Swampwalk":
-                    a = new Ability(AbilityEnum.Swampwalk);
-                    break;
-                case "Islandwalk":
-                    a = new Ability(AbilityEnum.Islandwalk);
-                    break;
-                case "Plainswalk":
-                    a = new Ability(AbilityEnum.Plainswalk);
-                    break;
-                case "Forestwalk":
-                    a = new Ability(AbilityEnum.Forestwalk);
-                    break;
-                case "Mountainwalk":
-                    a = new Ability(AbilityEnum.Mountainwalk);
-                    break;
-                case "First":
-                    if (tmp[1] != "Strike")
-                        Debugger.Break();
-                    return new Ability(AbilityEnum.FirstStrike);
-                case "Flying":
-                    a = new Ability(AbilityEnum.Flying);
-                    break;
-                case "Protection":
-                    a = new Ability(AbilityEnum.Protection);
-                    break;
-                case "Vigilance":
-                    a = new Ability(AbilityEnum.Vigilance);
-                    break;
-                case "Trample":
-                    a = new Ability(AbilityEnum.Trample);
-                    break;
-                case "Intimidate":
-                    a = new Ability(AbilityEnum.Intimidate);
-                    break;
-                case "Deathtouch":
-                    a = new Ability(AbilityEnum.Deathtouch);
-                    break;
-                case "Unblockable":
-                    a = new Ability(AbilityEnum.Unblockable);
-                    break;
-                case "Defender":
-                    a = new Ability(AbilityEnum.Defender);
-                    break;
-                case "Haste":
-                    a = new Ability(AbilityEnum.Haste);
-                    break;
-                case "Banding":
-                    a = new Ability(AbilityEnum.Banding);
-                    break;
-                case "Bushido":
-                    a = new Ability(AbilityEnum.Bushido);
-                    break;
-                case "Horsemanship":
-                    a = new Ability(AbilityEnum.Horsemanship);
-                    break;
-                case "Enchant":
+			switch (tmp [0]) {
+			case "CARDNAME":
+				
+				break;
+			case "Swampwalk":
+				a = new Ability (AbilityEnum.Swampwalk);
+				break;
+			case "Islandwalk":
+				a = new Ability (AbilityEnum.Islandwalk);
+				break;
+			case "Plainswalk":
+				a = new Ability (AbilityEnum.Plainswalk);
+				break;
+			case "Forestwalk":
+				a = new Ability (AbilityEnum.Forestwalk);
+				break;
+			case "Mountainwalk":
+				a = new Ability (AbilityEnum.Mountainwalk);
+				break;
+			case "First":
+				if (tmp [1] != "Strike")
+					Debugger.Break ();
+				return new Ability (AbilityEnum.FirstStrike);
+			case "Flying":
+				a = new Ability (AbilityEnum.Flying);
+				break;
+			case "Protection":
+				a = new Ability (AbilityEnum.Protection);
+				break;
+			case "Vigilance":
+				a = new Ability (AbilityEnum.Vigilance);
+				break;
+			case "Trample":
+				a = new Ability (AbilityEnum.Trample);
+				break;
+			case "Intimidate":
+				a = new Ability (AbilityEnum.Intimidate);
+				break;
+			case "Deathtouch":
+				a = new Ability (AbilityEnum.Deathtouch);
+				break;
+			case "Unblockable":
+				a = new Ability (AbilityEnum.Unblockable);
+				break;
+			case "Defender":
+				a = new Ability (AbilityEnum.Defender);
+				break;
+			case "Haste":
+				a = new Ability (AbilityEnum.Haste);
+				break;
+			case "Banding":
+				a = new Ability (AbilityEnum.Banding);
+				break;
+			case "Bushido":
+				a = new Ability (AbilityEnum.Bushido);
+				break;
+			case "Horsemanship":
+				a = new Ability (AbilityEnum.Horsemanship);
+				break;
+			case "Enchant":
                     //AttachAbility aa = new AttachAbility();
                     //aa.ValidTargets.Value = (CardTypes)Enum.Parse(typeof(CardTypes),tmp[1],true);
-                    return null;
-                case "Cumulative":
-                    break;
-                case "Haunt":
-                    break;
-                case "TypeCycling":
-                    break;
-                case "Entwine":
-                    break;
-                case "Equip":
-                    break;
-                case "Reach":
-                    break;
-                case "Flashback":
-                    break;
-                case "Echo":
-                    break;
-                case "ETBReplacement":
-                    break;
-                case "Evolve":
-                    break;
-                case "Suspend":
-                    break;
-                case "Rampage":
-                    break;
-                case "Persist":
-                    break;
-                case "Kicker":
-                    break;
-                case "etbCounter":
-                    break;
-                case "Flash":
-                    break;
-                case "Evoke":
-                    break;
-                case "Conspire":
-                    break;
-                case "Lifelink":
-                    break;
-                case "Exalted":
-                    break;
-                case "Morph":
-                    break;
-                case "Cycling":
-                    break;
-                case "Shroud":
-                    break;
-                case "Fuse":
-                    break;
-                case "Buyback":
-                    break;
-                case "You":
-                    break;
-                case "CantBeBlockedBy":
-                    break;
-                case "Remove":
-                    break;
-                case "Unearth":
-                    break;
-                case "Fading":
-                    break;
-                case "Convoke":
-                    break;
-                case "Split":
-                    break;
-                case "Multikicker":
-                    break;
-                case "Graft":
-                    break;
-                case "Monstrosity":
-                    break;
-                case "At":
-                    break;
-                case "Modular":
-                    break;
-                case "Fear":
-                    break;
-                case "Sunburst":
-                    break;
-                case "Cascade":
-                    break;
-                case "Permanents":
-                    break;
-                case "PreventAllDamageBy":
-                    break;
-                case "Madness":
-                    break;
-                case "Annihilator":
-                    break;
-                case "Hexproof":
-                    break;
-                case "Storm":
-                    break;
-                case "Shadow":
-                    break;
-                case "Creatures":
-                    break;
-                case "Indestructible":
-                    break;
-                case "Vanishing":
-                    break;
-                case "Amplify":
-                    break;
-                case "Legendary":
-                    break;
-                case "Bestow":
-                    break;
-                case "Miracle":
-                    break;
-                case "Extort":
-                    break;
-                case "Bloodthirst":
-                    break;
-                case "Living":
-                    break;
-                case "Totem":
-                    break;
-                case "Level":
-                    break;
-                case "maxLevel":
-                    break;
-                case "Flanking":
-                    break;
-                case "Infect":
-                    break;
-                case "Splice":
-                    break;
-                case "If":
-                    break;
-                case "Soulshift":
-                    break;
-                case "Champion":
-                    break;
-                case "Wither":
-                    break;
-                case "Double":
-                    break;
-                case "Transmute":
-                    break;
-                case "CantBlock":
-                    break;
-                case "Phasing":
-                    break;
-                case "Provoke":
-                    break;
-                case "Undying":
-                    break;
-                case "Devour":
-                    break;
-                case "No":
-                    break;
-                case "MayEffectFromOpeningHand":
-                    break;
-                case "CantBeBlockedByAmount":
-                    break;
-                case "Prevent":
-                    break;
-                case "As":
-                    break;
-                case "Rebound":
-                    break;
-                case "Recover":
-                    break;
-                case "Play":
-                    break;
-                case "Dredge":
-                    break;
-                case "Fortify":
-                    break;
-                case "Soulbond":
-                    break;
-                case "Delve":
-                    break;
-                case "Desertwalk":
-                    break;
-                case "Each":
-                    break;
-                case "SpellCantTarget":
-                    break;
-                case "Nonbasic":
-                    break;
-                case "All":
-                    break;
-                case "Epic":
-                    break;
-                case "Damage":
-                    break;
-                case "Tribute":
-                    break;
-                case "Players":
-                    break;
-                case "AlternateAdditionalCost":
-                    break;
-                case "Replicate":
-                    break;
-                case "Hideaway":
-                    break;
-                case "CantEquip":
-                    break;
-                case "Snow":
-                    break;
-                case "Goblin":
-                    break;
-                case "Fox":
-                    break;
-                case "Moonfolk":
-                    break;
-                case "Rat":
-                    break;
-                case "Snake":
-                    break;
-                case "Reveal":
-                    break;
-                case "etbCounters":
-                    break;
-                case "Whenever":
-                    break;
-                case "Ripple":
-                    break;
-                default:
-                    break;
-            }
-            return a;
-        }
-        
-		//?
-		public static List<string> strings = new List<string>();
-        
+				return null;
+			case "Cumulative":
+				break;
+			case "Haunt":
+				break;
+			case "TypeCycling":
+				break;
+			case "Entwine":
+				break;
+			case "Equip":
+				a = new Ability () { AbilityType = AbilityEnum.Attach };
+				CardTarget ct = new CardTarget ();
+				ct.Controler = ControlerType.You;
+				ct.ValidCardTypes += CardTypes.Creature;
+				a.ValidTargets += ct;
+				a.ActivationCost = Cost.Parse (tmp [1]);
+				a.RequiredTargetCount = 1;
+				break;
+			case "Reach":
+				break;
+			case "Flashback":
+				break;
+			case "Echo":
+				break;
+			case "ETBReplacement":
+				break;
+			case "Evolve":
+				break;
+			case "Suspend":
+				break;
+			case "Rampage":
+				break;
+			case "Persist":
+				break;
+			case "Kicker":
+				break;
+			case "etbCounter":
+				break;
+			case "Flash":
+				break;
+			case "Evoke":
+				break;
+			case "Conspire":
+				break;
+			case "Lifelink":
+				break;
+			case "Exalted":
+				break;
+			case "Morph":
+				break;
+			case "Cycling":
+				break;
+			case "Shroud":
+				break;
+			case "Fuse":
+				break;
+			case "Buyback":
+				break;
+			case "You":
+				break;
+			case "CantBeBlockedBy":
+				break;
+			case "Remove":
+				break;
+			case "Unearth":
+				break;
+			case "Fading":
+				break;
+			case "Convoke":
+				break;
+			case "Split":
+				break;
+			case "Multikicker":
+				break;
+			case "Graft":
+				break;
+			case "Monstrosity":
+				break;
+			case "At":
+				break;
+			case "Modular":
+				break;
+			case "Fear":
+				break;
+			case "Sunburst":
+				break;
+			case "Cascade":
+				break;
+			case "Permanents":
+				break;
+			case "PreventAllDamageBy":
+				break;
+			case "Madness":
+				break;
+			case "Annihilator":
+				break;
+			case "Hexproof":
+				break;
+			case "Storm":
+				break;
+			case "Shadow":
+				break;
+			case "Creatures":
+				break;
+			case "Indestructible":
+				break;
+			case "Vanishing":
+				break;
+			case "Amplify":
+				break;
+			case "Legendary":
+				break;
+			case "Bestow":
+				break;
+			case "Miracle":
+				break;
+			case "Extort":
+				break;
+			case "Bloodthirst":
+				break;
+			case "Living":
+				break;
+			case "Totem":
+				break;
+			case "Level":
+				break;
+			case "maxLevel":
+				break;
+			case "Flanking":
+				break;
+			case "Infect":
+				break;
+			case "Splice":
+				break;
+			case "If":
+				break;
+			case "Soulshift":
+				break;
+			case "Champion":
+				break;
+			case "Wither":
+				break;
+			case "Double":
+				break;
+			case "Transmute":
+				break;
+			case "CantBlock":
+				break;
+			case "Phasing":
+				break;
+			case "Provoke":
+				break;
+			case "Undying":
+				break;
+			case "Devour":
+				break;
+			case "No":
+				break;
+			case "MayEffectFromOpeningHand":
+				break;
+			case "CantBeBlockedByAmount":
+				break;
+			case "Prevent":
+				break;
+			case "As":
+				break;
+			case "Rebound":
+				break;
+			case "Recover":
+				break;
+			case "Play":
+				break;
+			case "Dredge":
+				break;
+			case "Fortify":
+				break;
+			case "Soulbond":
+				break;
+			case "Delve":
+				break;
+			case "Desertwalk":
+				break;
+			case "Each":
+				break;
+			case "SpellCantTarget":
+				break;
+			case "Nonbasic":
+				break;
+			case "All":
+				break;
+			case "Epic":
+				break;
+			case "Damage":
+				break;
+			case "Tribute":
+				break;
+			case "Players":
+				break;
+			case "AlternateAdditionalCost":
+				break;
+			case "Replicate":
+				break;
+			case "Hideaway":
+				break;
+			case "CantEquip":
+				break;
+			case "Snow":
+				break;
+			case "Goblin":
+				break;
+			case "Fox":
+				break;
+			case "Moonfolk":
+				break;
+			case "Rat":
+				break;
+			case "Snake":
+				break;
+			case "Reveal":
+				break;
+			case "etbCounters":
+				break;
+			case "Whenever":
+				break;
+			case "Ripple":
+				break;
+			default:
+				break;
+			}
+			return a;
+		}       
 
-        //public static bool operator ==(Ability a, EffectType e)
-        //{
-        //    if (a.AbilityType == e)
-        //        return true;
-
-        //    foreach (Effect ef in a.Effects)
-        //    {
-        //        if (ef.TypeOfEffect == e)
-        //            return true;
-        //    }
-        //    return false;
-        //}
-        //public static bool operator !=(Ability a, EffectType e)
-        //{
-        //    if (a.AbilityType == e)
-        //        return false;
-
-        //    foreach (Effect ef in a.Effects)
-        //    {
-        //        if (ef.TypeOfEffect == e)
-        //            return false;
-        //    }
-        //    return true;
-        //}
-    }
+		public override string ToString ()
+		{
+			string tmp = "ability: ";
+			if (IsTriggeredAbility)
+				tmp = "Triggered " + tmp;
+			else if (IsActivatedAbility)
+				tmp = "Activated " + tmp;
+			tmp += this.AbilityType.ToString();
+			return tmp;
+		}
+	}
 
 }

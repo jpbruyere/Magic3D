@@ -44,108 +44,156 @@ namespace Magic3D
         {
             CostType = _type;
         }
-        public static implicit operator Cost(CostTypes ct)
+        
+		#region Operators
+		public static implicit operator Cost(CostTypes ct)
         {
             return new Cost(ct);
         }
         public static Cost operator +(Cost c1, Cost c2)
         {
-			Costs cs1 = c1 as Costs;
-			Costs cs2 = c2 as Costs;
+            Mana m = c1 as Mana;
+            Mana n = c2 as Mana;
+            Costs cst1 = c1 as Costs;
+            if (cst1 != null)
+            {
+                for (int i = 0; i < cst1.CostList.Count; i++)
+                {
+                    Mana cst1m = cst1.CostList[i] as Mana;
+                    if (cst1m != null)
+                    {
+                        if (cst1m.IsSameType(n))
+                        {
+                            cst1m.count += n.count;
+                            return cst1;
+                        }
+                    }
+                }
+            
+            }
 
-			if (cs1 != null) {
-				if (cs2 != null)
-					return cs1 + cs2;
-				return cs1 + c2;
-			} else if (cs2 != null)
-				return c1 + cs2;
+            if (!(m == null || n == null))
+            {
+                if (m.IsSameType(n))
+                {
+                    m.count += n.count;
+                    return m;
+                }
+            }
 
-			Mana m = c1 as Mana;
-			Mana n = c2 as Mana;
+            if (c1 == null)
+                if (c2 == null)
+                    return null;
+                else
+                    return c2;
+            else if (c2 == null)
+                return c1;
 
-			if (m == null) {
-				if (n == null)
-					return null;
-				return n;
-			}
-			if (n == null)
-				return m;
-			return m + n;
+            Costs sum = new Costs();
+            sum += c1;
+            sum += c2;
+            return sum;
         }
 		public static Cost operator -(Cost c1, Cost c2)
 		{
-			Costs cs1 = c1 as Costs;
-			Costs cs2 = c2 as Costs;
-
-			if (cs1 != null) {
-				if (cs2 != null)
-					return cs1 - cs2;
-				return cs1 - c2;
-			} else if (cs2 != null)
-				return c1 - cs2;
-
 			Mana m = c1 as Mana;
 			Mana n = c2 as Mana;
+			Costs cst1 = c1 as Costs;
+			if (cst1 != null)
+			{
+				for (int i = 0; i < cst1.CostList.Count; i++)
+				{
+					Mana cst1m = cst1.CostList[i] as Mana;
+					if (cst1m != null)
+					{
+						if (cst1m.IsSameType(n))
+						{
+							cst1m.count -= n.count;
+							return cst1;
+						}
+					}
+				}
 
-			if (m == null) {
-				if (n == null)
-					return null;
-				return -n;
 			}
-			if (n == null)
-				return m;
-			return m - n;
-		}        
+
+			if (!(m == null || n == null))
+			{
+				if (m.IsSameType(n))
+				{
+					m.count += n.count;
+					return m;
+				}
+			}
+
+			if (c1 == null)
+			if (c2 == null)
+				return null;
+			else
+				return c2;
+			else if (c2 == null)
+				return c1;
+
+			Costs sum = new Costs();
+			sum += c1;
+			sum += c2;
+			return sum;
+		}
+        
 		public static bool operator <(Cost c1, Cost c2)
         {
-			Costs cs1 = c1 as Costs;
-			Costs cs2 = c2 as Costs;
-
-			if (cs1 != null) {
-				if (cs2 != null)
-					return (cs1 < cs2);
-				return cs1 < c2;
-			} else if (cs2 != null)
-				return c1 < cs2;
-
-			Mana m = c1 as Mana;
-			Mana n = c2 as Mana;
-
-			if (m == null) {
-				if (n == null)
-					return false;
+            if (c2 == null)
+                return false;
+			if (c1 == null) {
+				if (c2.CostType == CostTypes.Mana) {
+					if ((c2 as Mana).count == 0)
+						return false;
+				}
 				return true;
 			}
-			if (n == null)
-				return false;
-			return m < n;
+			Cost right = c2.Clone();
+			ManaTypes dominant = right.GetDominantMana ();
+            Cost left = c1.Clone();
+			left.OrderFirst (dominant);
+			right.OrderFirst (dominant);
+            Cost result = right.Pay(ref left);
+            return result == null ? false : true;
         }
         public static bool operator >(Cost c1, Cost c2)
         {
-			Costs cs1 = c1 as Costs;
-			Costs cs2 = c2 as Costs;
-
-			if (cs1 != null) {
-				if (cs2 != null)
-					return cs1 > cs2;
-				return cs1 > c2;
-			} else if (cs2 != null)
-				return c1 > cs2;
-
-			Mana m = c1 as Mana;
-			Mana n = c2 as Mana;
-
-			if (m == null) {
-				if (n == null)
-					return true;
-				return false;
-			}
-			if (n == null)
-				return true;
-			return m > n;
+            if (c1 == null)
+                return false;
+            Cost left = c2.Clone();
+            Cost right = c1.Clone();
+            return left.Pay(ref right) == null ? true : false;
         }
+		public static bool operator ==(Cost c, CostTypes ct){
+			return c == null ? false : c.CostType == ct;
+		} 
+		public static bool operator !=(Cost c, CostTypes ct){
+			return ct == null ? true : c.CostType != ct;
+		} 
+		#endregion
 
-        public static Cost Parse(string costString)
+//		public virtual ManaTypes DominantColor {
+//			get {
+//				Dictionary<ManaTypes,int> counter = new Dictionary<ManaTypes, int> ();
+//				ManaTypes[] colors = Enum.GetValues (typeof(ManaTypes));
+//				for (int i = 0; i < colors.Count(); i++) {
+//					counter.Add (colors [i], 0);
+//				}
+//				Costs csts = this as Costs;
+//				if (csts != null) {					
+//					foreach (Cost co in csts.CostList) {
+//						Mana m = co as Mana;
+//						if (co == null)
+//							continue;
+//						counter [m.TypeOfMana] += m.count;
+//					}
+//				}
+//			}
+//		}
+
+		public static Cost Parse(string costString)
         {
             if (costString.ToLower() == "no cost")
                 return null;
@@ -154,7 +202,7 @@ namespace Magic3D
             if (costString.ToLower() == "combo any")
                 return new Mana(ManaTypes.ComboAny);
 
-			Cost sum = null;
+            Costs sum = new Costs();
 
             string[] tmp = costString.Split(new char[] { });
 
@@ -224,32 +272,30 @@ namespace Magic3D
                     }
                 }
 
-				if (choice.Manas.Count == 1) {
-					//trick to parse multiple W W instead of nW
-					Costs cs = sum as Costs;
-					if (cs != null){
-						Mana m = cs.CostList.LastOrDefault () as Mana;
-						if (m != null) {
-							if (m.TypeOfMana == choice.Manas [0].TypeOfMana) {
-								m.count += choice.Manas [0].count;
-								continue;
-							}
-						}
-					}
-					sum += choice.Manas [0];
-				}else
+                if (choice.Manas.Count == 1)
+                    sum += choice.Manas[0];
+                else
                     sum += choice;
             }
 
-//            if (sum.CostList.Count == 0)
-//                return null;
-//            if (sum.CostList.Count == 1)
-//                return sum.CostList[0];
-//            else
-//                return sum;
+            if (sum.CostList.Count == 0)
+                return null;
+            if (sum.CostList.Count == 1)
+                return sum.CostList[0];
+            else
+                return sum;
             return sum;
         }
 
+		public static bool IsNullOrCountIsZero(Cost c)
+		{
+			if (c == null)
+				return true;
+			Mana m = c as Mana;
+			if (m == null)
+				return false;
+			return m.count == 0;
+		}
         public virtual bool Contains(Cost c)
         {
             Costs cst = this as Costs;
@@ -295,9 +341,9 @@ namespace Magic3D
         public virtual Cost Pay(ref Cost c)
         {
             Cost result = null;
-
             if (c != null)
             {
+				c.OrderFirst(this.GetDominantMana ());
                 Costs cl = c as Costs;
                 if (cl != null)
                 {
@@ -340,6 +386,11 @@ namespace Magic3D
             }
             return "erreur";
         }
+		public virtual void OrderFirst(ManaTypes mt){			
+		}
+		public virtual ManaTypes GetDominantMana(){
+			return ManaTypes.Any;
+		}
     }
     public class Costs : Cost
     {
@@ -415,64 +466,30 @@ namespace Magic3D
                 c.CostList.Add(ct.Clone());
             return c;
         }
-
-		public static Cost operator +(Costs cs1, Costs cs2)
-		{
-			Cost tmp = null;
-			for (int i = 0; i < cs2.CostList.Count; i++)
-				tmp += cs1 + cs2.CostList [i];
-			return tmp;
-		}
-		public static Cost operator +(Costs cs1, Cost cs2)
+        public static Costs operator +(Costs sum, Cost c)
         {
-			Cost tmp = null;
-			for (int i = 0; i < cs1.CostList.Count; i++)
-				tmp += (cs1.CostList [i] + cs2);
-			return tmp;
+            Mana m = c as Mana;
+            if (m != null)
+            {
+                for (int i = 0; i < sum.CostList.Count; i++)
+                {
+                    Mana mm = sum.CostList[i] as Mana;
+
+                    if (mm == null)
+                        continue;
+
+                    if (mm.IsSameType(m))
+                    {
+                        sum.CostList[i] += m;
+                        return sum;
+                    }
+                }
+            }
+            sum.CostList.Add(c);
+            return sum;
         }
-		public static Cost operator -(Costs cs1, Costs cs2)
-		{
-			Cost tmp = null;
-			for (int i = 0; i < cs2.CostList.Count; i++)
-				tmp += cs1 - cs2.CostList [i];
-			return tmp;
-		}
-		public static Cost operator -(Costs cs1, Cost cs2)
-		{
-			Cost tmp = null;
-			for (int i = 0; i < cs1.CostList.Count; i++)
-				tmp += cs1.CostList [i] - cs2;
-			return tmp;
-		}
-		public static bool operator <(Costs cs1, Costs cs2)
-		{
-			for (int i = 0; i < cs2.CostList.Count; i++)
-				if (cs1 > cs2.CostList [i])
-					return false;
-			return true;
-		}
-		public static bool operator <(Costs cs1, Cost cs2)
-		{
-			for (int i = 0; i < cs1.CostList.Count; i++)
-				if (cs1.CostList [i] > cs2)
-					return false;
-			return true;
-		}
-		public static bool operator >(Costs cs1, Costs cs2)
-		{
-			for (int i = 0; i < cs2.CostList.Count; i++)
-				if (cs1 < cs2.CostList [i])
-					return false;
-			return true;
-		}
-		public static bool operator >(Costs cs1, Cost cs2)
-		{
-			for (int i = 0; i < cs1.CostList.Count; i++)
-				if (cs1.CostList [i] < cs2)
-					return false;
-			return true;
-		}        
-		//public static ManaSum operator +(ManaSum sum, ManaChoice choice)
+
+        //public static ManaSum operator +(ManaSum sum, ManaChoice choice)
         //{
         //    if (choice.Manas.Count == 1)
         //        return sum + choice.Manas[0];
@@ -501,5 +518,26 @@ namespace Magic3D
 
             return tmp;
         }
+
+		public override void OrderFirst (ManaTypes mt)
+		{
+			List<Cost> manas = new List<Cost> ();
+			List<Cost> others = new List<Cost> ();
+			foreach (Cost c in CostList) {
+				if (c is Mana)
+					manas.Add (c);
+				else
+					others.Add (c);
+			}
+			CostList = manas.OrderBy (m => (m as Mana).TypeOfMana).Concat(others).ToList();
+		}
+
+		public override ManaTypes GetDominantMana()
+		{
+			IList<Mana> manas = CostList.OfType<Mana> ().
+				Where (m => m.TypeOfMana != ManaTypes.Colorless && m.TypeOfMana != ManaTypes.Life).
+				OrderBy (mm => mm.count).ToList();
+			return (manas.Count > 0) ? manas.FirstOrDefault ().TypeOfMana : ManaTypes.Colorless;
+		}
     }
 }

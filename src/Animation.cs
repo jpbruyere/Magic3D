@@ -31,9 +31,9 @@ namespace Magic3D
 
     public class Animation
     {
-
 		public event AnimationEventHandler AnimationFinished;
 
+		public static Random random = new Random ();
 		public static int DelayMs = 0;
 
         protected GetterDelegate getValue;
@@ -48,6 +48,15 @@ namespace Magic3D
         //public FieldInfo member;
         public Object AnimatedInstance;
 
+		public Animation(Object instance, string _propertyName)
+		{
+			propertyName = _propertyName;
+			AnimatedInstance = instance;
+			PropertyInfo pi = instance.GetType().GetProperty(propertyName);
+			getValue = (GetterDelegate)Delegate.CreateDelegate(typeof(GetterDelegate), instance, pi.GetGetMethod());
+			setValue = (SetterDelegate)Delegate.CreateDelegate(typeof(SetterDelegate), instance, pi.GetSetMethod());
+		}
+
 		public static void StartAnimation(Animation a, int delayMs = 0, AnimationEventHandler OnEnd = null)
         {
 
@@ -55,7 +64,10 @@ namespace Magic3D
 			if (Animation.GetAnimation (a.AnimatedInstance, a.propertyName, ref aa)) {
 				aa.CancelAnimation ();
 			}
-
+//			if (a.AnimatedInstance is CardInstance) {
+//				if ((a.AnimatedInstance as CardInstance).Model.Name.StartsWith ("Spider"))
+// 					Debugger.Break ();
+//			}
 			//a.AnimationFinished += onAnimationFinished;
 
 			a.AnimationFinished += OnEnd;
@@ -70,9 +82,20 @@ namespace Magic3D
         }
 
         static Stack<Animation> anims = new Stack<Animation>();
-
+		static int frame = 0;
         public static void ProcessAnimations()
         {
+			frame++;
+
+//			#region FLYING anim
+//			if (frame % 20 == 0){
+//				foreach (Player p in MagicEngine.CurrentEngine.Players) {
+//					foreach (CardInstance c in p.InPlay.Cards.Where(ci => ci.HasAbility(AbilityEnum.Flying) && ci.z < 0.4f)) {
+//						
+//					}
+//				}
+//			}
+//			#endregion
             //Stopwatch animationTime = new Stopwatch();
             //animationTime.Start();
 			 
@@ -97,6 +120,7 @@ namespace Magic3D
 				a.Process ();
 				count++;
 			}
+				
             //animationTime.Stop();
             //Debug.WriteLine("animation: {0} ticks \t {1} ms ", animationTime.ElapsedTicks,animationTime.ElapsedMilliseconds);
         }
@@ -112,7 +136,7 @@ namespace Magic3D
 
             return false;
         }
-        public virtual void Process(){}
+		public virtual void Process () {}
         public void CancelAnimation()
         {
 			//Debug.WriteLine("Cancel anim: " + this.ToString()); 
@@ -135,6 +159,52 @@ namespace Magic3D
 				this.propertyName);
 		}
     }
+	public class ShakeAnimation : Animation
+	{
+		public float LowBound;
+		public float HighBound;
+
+		bool rising = true;
+
+		public ShakeAnimation(
+			Object instance, 
+			string _propertyName, 
+			float lowBound, float highBound)
+			: base(instance, _propertyName)
+		{
+			
+			LowBound = Math.Min (lowBound, highBound);
+			HighBound = Math.Max (lowBound, highBound);
+
+			float value = getValue ();
+
+			if (value > HighBound)
+				rising = false;
+		}
+		const float stepMin = 0.001f, stepMax = 0.005f;
+		public override void Process ()
+		{
+			float value = getValue ();	
+			float step = stepMin + (float)random.NextDouble () * stepMax;
+
+			if (rising) {				
+				value += step;
+				if (value > HighBound) {
+					value = HighBound;
+					rising = false;
+				}
+			} else {
+				value -= step;
+				if (value < LowBound) {
+					value = LowBound;
+					rising = true;
+				} else if (value > HighBound)
+					value -= step * 10f;
+			}
+			setValue (value);
+		}
+
+	}
     public class FloatAnimation : Animation
     {
 
@@ -143,14 +213,10 @@ namespace Magic3D
 
 
         public FloatAnimation(Object instance, string _propertyName, float Target, float step = 0.2f)
+			: base(instance, _propertyName)
         {
-            propertyName = _propertyName;
-            AnimatedInstance = instance;
-            PropertyInfo pi = instance.GetType().GetProperty(propertyName);
+            
             TargetValue = Target;
-
-            getValue = (GetterDelegate)Delegate.CreateDelegate(typeof(GetterDelegate), instance, pi.GetGetMethod());
-            setValue = (SetterDelegate)Delegate.CreateDelegate(typeof(SetterDelegate), instance, pi.GetSetMethod());
 
             float value = getValue();
 

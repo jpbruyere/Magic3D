@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using OpenTK;
 
 namespace Magic3D
 {
@@ -13,32 +14,32 @@ namespace Magic3D
 		public InPlayGroup()
 			: base(CardGroupEnum.InPlay)
 		{
-			y = -2.5f;
+			y = -4.5f;
 			HorizontalSpacing = 1.5f;
 			MaxHorizontalSpace = 7f;
 
 			LandsLayout.x = -1f;
 			LandsLayout.y = -4.2f;
 			LandsLayout.HorizontalSpacing = 1.5f;
-			LandsLayout.VerticalSpacing = -0.001f;
+			LandsLayout.VerticalSpacing = -0.01f;
 			LandsLayout.MaxHorizontalSpace = 4f;
 
 			CreatureLayout.x = 0f;
-			CreatureLayout.y = -1.5f;
+			CreatureLayout.y = -1.8f;
 			CreatureLayout.HorizontalSpacing = 1.5f;
-			CreatureLayout.VerticalSpacing = 0.001f;
+			CreatureLayout.VerticalSpacing = 0.01f;
 			CreatureLayout.MaxHorizontalSpace = 6f;
 
-			OtherLayout.x = 2f; 
+			OtherLayout.x = 4f; 
 			OtherLayout.y = -2.7f;
 			OtherLayout.HorizontalSpacing = 1.5f;
-			OtherLayout.VerticalSpacing = 0.001f;
-			OtherLayout.MaxHorizontalSpace = 3f;
+			OtherLayout.VerticalSpacing = 0.01f;
+			OtherLayout.MaxHorizontalSpace = 4f;
 
 			CombatingCreature.x = -0;
-			CombatingCreature.y = -0.6f;
+			CombatingCreature.y = -0.7f;
 			CombatingCreature.HorizontalSpacing = 1.5f;
-			CombatingCreature.VerticalSpacing = 0.001f;
+			CombatingCreature.VerticalSpacing = 0.01f;
 			CombatingCreature.MaxHorizontalSpace = 7f;
 		}
 
@@ -57,7 +58,7 @@ namespace Magic3D
 			LandsLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Land && !(c.IsAttached || c.Combating)).ToList();
 			CreatureLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Creature && !(c.IsAttached || c.Combating)).ToList();
 			OtherLayout.Cards = Cards.Where(c => c.Model.Types != CardTypes.Land && c.Model.Types != CardTypes.Creature
-				&& !(c.IsAttached || c.Combating)).ToList();
+				&& !(c.IsAttachedToACardInTheSameCamp || c.Combating)).ToList();
 
 			LandsLayout.UpdateLayout();
 			CreatureLayout.UpdateLayout();
