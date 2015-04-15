@@ -49,12 +49,34 @@ namespace Magic3D
             TypeOfEffect = _type;
         }
 		#endregion
-
-		public virtual void Apply(CardInstance _source, Ability _ability, object _target = null)
-		{			
-			IList _targets = _target as IList;
-
+		public virtual void Apply(CardInstance _source, Ability _ability, Player _target)
+		{
+			Player affected = _target;
+			if (affected == null)
+				affected = _source.Controler;
+			
 			switch (TypeOfEffect) {
+
+			default:
+				throw new ArgumentOutOfRangeException ();
+			}
+		}
+		protected virtual void ApplySingle(CardInstance _source, Ability _ability, object _target = null)
+		{			
+			Player player = _target as Player;
+			CardInstance ci = _target as CardInstance;
+			if (ci == null)
+				ci = _source;
+			if (player == null)
+				player = _source.Controler;
+			
+			switch (TypeOfEffect) {
+			case EffectType.GainLife:				
+				player.LifePoints += (this as NumericEffect).Amount;
+				break;
+			case EffectType.LoseLife:
+				player.LifePoints -= (this as NumericEffect).Amount;
+				break;
 			case EffectType.Unset:
 				break;
 			case EffectType.Loose:
@@ -74,24 +96,11 @@ namespace Magic3D
 			case EffectType.Destroy:
 				break;
 			case EffectType.Tap:
-				if (_target == null || ListIsNullOrEmpty(_targets))
-					_source.tappedWithoutEvent = true;
-				else if (_targets != null) {					
-					foreach (CardInstance t in _targets)
-						t.Tap ();
-				} else
-					(_target as CardInstance).Tap();			
+				ci.tappedWithoutEvent = true;
 				break;
 			case EffectType.DoesNotUntap:
-				break;
-			case EffectType.CantAttack:
-				break;
-			case EffectType.CantBlock:
 				break;			
 			case EffectType.TapAll:
-				break;
-			case EffectType.LoseLife:
-				(_source.Controler as Player).LifePoints -= (this as NumericEffect).Amount;
 				break;
 			case EffectType.PreventDamage:
 				break;
@@ -101,22 +110,12 @@ namespace Magic3D
 				break;
 			case EffectType.ChangeZone:
 				ChangeZoneAbility cza = _ability as ChangeZoneAbility;
-
-				if (_target == null || ListIsNullOrEmpty (_targets)) {
-					_source.ChangeZone (cza.Destination);
-					if (cza.Tapped)
-						_source.tappedWithoutEvent = true;
-				} else if (_targets != null) {					
-					foreach (CardInstance t in _targets) {
-						t.ChangeZone (cza.Destination);
-						if (cza.Tapped)
-							t.tappedWithoutEvent = true;
-					}
-				} else {
-					(_target as CardInstance).ChangeZone (cza.Destination);
-					if (cza.Tapped)
-						(_target as CardInstance).tappedWithoutEvent = true;
-				}
+				ci.Reset ();
+				ci.ChangeZone (cza.Destination);
+				if (cza.Tapped)
+					ci.tappedWithoutEvent = true;
+				else
+					ci.tappedWithoutEvent = false;
 				break;
 			case EffectType.Draw:
 				break;
@@ -147,9 +146,6 @@ namespace Magic3D
 			case EffectType.UntapAll:
 				break;
 			case EffectType.PutCounter:
-				break;
-			case EffectType.GainLife:
-				(_source.Controler as Player).LifePoints += (this as NumericEffect).Amount;
 				break;
 			case EffectType.PutCounterAll:
 				break;
@@ -292,6 +288,14 @@ namespace Magic3D
 			default:
 				throw new ArgumentOutOfRangeException ();
 			}
+		}
+		public virtual void Apply(CardInstance _source, Ability _ability, object _target)
+		{			
+			IList targets = _target as IList;
+			if (ListIsNullOrEmpty(targets))
+				ApplySingle (_source, _ability, _target);
+			foreach (object o in targets)
+				ApplySingle (_source, _ability, o);					
 		}
 
 

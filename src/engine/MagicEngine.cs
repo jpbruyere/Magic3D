@@ -142,8 +142,14 @@ namespace Magic3D
 		{
 			//first cancel incomplete action of priority player
 			if (NextActionOnStack != null) {
-				if (NextActionOnStack.CardSource.Controler == pp && !NextActionOnStack.IsComplete)
-					CancelLastActionOnStack ();
+				if (NextActionOnStack.CardSource.Controler == pp){
+					if (!NextActionOnStack.IsComplete) {
+						if (!CancelLastActionOnStack ()) {
+							pp.PhaseDone = false;
+							return;
+						}
+					}
+				}
 			}
 
 			priorityPlayer++;
@@ -350,13 +356,40 @@ namespace Magic3D
 			case GamePhases.DeclareBlocker:
 				break;
 			case GamePhases.FirstStrikeDame:
+				Chrono.Reset ();
+				foreach (CardInstance ac in cp.AttackingCreature.Where
+					(cpac => cpac.HasAbility(AbilityEnum.FirstStrike) || 
+						cpac.HasAbility(AbilityEnum.DoubleStrike))) {
+					Damage d = new Damage (null, ac, ac.Power);
+
+					foreach (CardInstance def in ac.BlockingCreatures.Where
+						(cpac => cpac.HasAbility(AbilityEnum.FirstStrike) || 
+							cpac.HasAbility(AbilityEnum.DoubleStrike)))
+						MagicStack.Push (new Damage (ac, def, def.Power));
+
+					if (ac.BlockingCreatures.Count == 0) {
+						d.Target = cp.Opponent;
+						MagicStack.Push (d);
+					} else if (ac.BlockingCreatures.Count == 1) {
+						d.Target = ac.BlockingCreatures [0];
+						MagicStack.Push (d);
+					} else {
+						//push damages one by one for further resolution
+						for (int i = 0; i < ac.Power; i++)
+							MagicStack.Push (new Damage (null, d.Source, 1));
+					}
+				}
+
+				CheckStackForUnasignedDamage ();
 				break;
 			case GamePhases.CombatDamage:
 				Chrono.Reset ();
-				foreach (CardInstance ac in cp.AttackingCreature) {
+				foreach (CardInstance ac in cp.AttackingCreature.Where
+					(cpac => !cpac.HasAbility(AbilityEnum.FirstStrike))) {
 					Damage d = new Damage (null, ac, ac.Power);
 
-					foreach (CardInstance def in ac.BlockingCreatures)
+					foreach (CardInstance def in ac.BlockingCreatures.Where
+						(cpac => !cpac.HasAbility(AbilityEnum.FirstStrike)))
 						MagicStack.Push (new Damage (ac, def, def.Power));
 
 					if (ac.BlockingCreatures.Count == 0) {
@@ -581,17 +614,22 @@ namespace Magic3D
 			}
 			Magic.btOk.Visible = false;
 		}
-		public void CancelLastActionOnStack()
+		public bool CancelLastActionOnStack()
 		{
 			MagicAction ma = NextActionOnStack;
 			if (ma == null)
-				return;
+				return true;
 			if (ma.IsComplete)
 				Debug.Print ("Canceling completed action");
+			if (ma.IsMandatory) {
+				Debug.Print ("Unable to cancel mandatory action");
+				return false;
+			}
 			if (ma.CardSource.Controler != pp)
 				Debug.Print ("Canceling action of another player");
 
 			MagicStack.Pop ();
+			return true;
 		}
 		public void ResolveStack ()
 		{

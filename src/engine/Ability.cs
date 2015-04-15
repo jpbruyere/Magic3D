@@ -25,7 +25,7 @@ namespace Magic3D
 		public ChangeZoneAbility()
 		{
 			AbilityType = AbilityEnum.Unset;
-			Effects.Add (new NumericEffect(EffectType.ChangeZone,1));
+			Effects.Add (new Effect(EffectType.ChangeZone));
 		}
 	}
 
@@ -67,6 +67,10 @@ namespace Magic3D
 		public string Description = "";
 		public int MinimumTargetCount = -1;
 		public int MaximumTargetCount = -1;
+		/// <summary>
+		/// if true, ability activation can't be cancelled and have to be completed
+		/// </summary>
+		public bool Mandatory = false;
 
 		public bool IsTriggeredAbility {
 			get { return Trigger != null; }
@@ -158,6 +162,7 @@ namespace Magic3D
 			string[] tmp = strAbility.Split (new char[] { '|' });
 
 			AbilityCategory Category = AbilityCategory.Acivated;
+			bool mandatory = false;
 
 			foreach (string ab in tmp) {
 				int v;
@@ -639,12 +644,10 @@ namespace Magic3D
 					}
 					break;
 				case AbilityFieldsEnum.ChangeNum:
-					if (!int.TryParse (value, out v)) {
-						Debug.WriteLine ("changeNum amount: " + value);
-						break;
-					}
-					a.RequiredTargetCount = 1;
-					a.Effects.OfType<NumericEffect>().FirstOrDefault().Amount = v;
+					if (int.TryParse (value, out v))
+						a.RequiredTargetCount = v;
+					else
+						SVarToResolve.RegisterSVar(value, a, a.GetType().GetProperty("RequiredTargetCount"));
 					break;
 				case AbilityFieldsEnum.GainControl:
 					break;
@@ -713,6 +716,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.SorcerySpeed:
 					break;
 				case AbilityFieldsEnum.Mandatory:
+					mandatory = true;
 					break;
 				case AbilityFieldsEnum.Planeswalker:
 					break;
@@ -1309,6 +1313,7 @@ namespace Magic3D
 				a.RequiredTargetCount = 1;
 			}
 			a.Category = Category;
+			a.Mandatory = mandatory;
 		}
 
 

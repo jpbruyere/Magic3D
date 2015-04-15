@@ -23,7 +23,10 @@ namespace Magic3D
 //			else//if it's a spell ab, no cost and no message
 //				return;
 
-			Magic.AddLog ("Trying to activate " + CardSource.Model.Name + " ability");
+			if (Source.Mandatory)
+				Magic.AddLog (CardSource.Model.Name + " ability activation.");
+			else
+				Magic.AddLog ("Trying to activate " + CardSource.Model.Name + " ability");
 
 			if (CardSource.Controler.ManaPool != null && RemainingCost != null)
 				PayCost (ref CardSource.Controler.ManaPool);
@@ -56,7 +59,11 @@ namespace Magic3D
 				return Source.RequiredTargetCount;
 			}
 		}
-
+		public override bool IsMandatory {
+			get {
+				return Source.Mandatory;
+			}
+		}
 		public override bool IsComplete
 		{
 			get {
@@ -67,7 +74,8 @@ namespace Magic3D
 		}
 		public override void PrintNextMessage ()
 		{			
-			Magic.btOk.Visible = true;
+			if (!IsMandatory)
+				Magic.btOk.Visible = true;
 			//once a mana has been spent for this ab, prompt for target is shown
 			//only if required target count not reached
 			if (RemainingCost < Source.ActivationCost) {
@@ -257,7 +265,11 @@ namespace Magic3D
 			if (CurrentAbility != null)
 				currentAbilityActivation.Validate();
 		}
-
+		public override bool IsMandatory {
+			get {
+				return false;
+			}
+		}
 
 		public override bool TryToAddTarget (CardInstance c)
 		{
@@ -324,5 +336,6 @@ namespace Magic3D
 		public abstract int RequiredTargetCount { get; }
 		public abstract MultiformAttribut<Target> ValidTargets { get; }
 		public abstract List<Object> SelectedTargets { get; }
+		public abstract bool IsMandatory { get; }
 	}
 }

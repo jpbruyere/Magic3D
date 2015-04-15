@@ -39,6 +39,8 @@ namespace Magic3D
 				return CardGroupEnum.InPlay;
 			case "Library":
 				return CardGroupEnum.Library;
+			case "Hand":
+				return CardGroupEnum.Hand;
 			default:
 				Debug.WriteLine ("Unknow zone: " + zone);
 				return CardGroupEnum.Any;					
