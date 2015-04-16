@@ -264,7 +264,7 @@ namespace Magic3D
 					case MagicEventType.ChangeZone:
 
 						bool valid = false;
-						foreach (CardTarget ct in t.ValidTarget.Values.OfType<CardTarget>()) {
+						foreach (Target ct in t.ValidTarget.Values) {
 							if (ct.Accept(arg.Source,arg.Source))
 								valid = true;		
 						}
@@ -526,6 +526,9 @@ namespace Magic3D
 
 		public void ClickOnCard (CardInstance c)
 		{
+			if (pp != ip)				
+				return;
+			
 			if (MagicStack.Count > 0) {
 				MagicAction ma = MagicStack.Peek () as MagicAction;
 				if (ma != null) {
@@ -546,10 +549,6 @@ namespace Magic3D
 				break;
 			case CardGroupEnum.Hand:
 				#region hand
-				if (c.Controler != ip){// || c.Controler != cp)
-					c.Controler.Hand.toogleShowAll();
-					return;
-				}
 				if (CurrentPhase == GamePhases.Main1 || CurrentPhase == GamePhases.Main2){
 					if (c.HasType(CardTypes.Land)) {
 						if (cp.AllowedLandsToBePlayed>0)
@@ -559,45 +558,53 @@ namespace Magic3D
 					}
 				}else if (CurrentPhase != GamePhases.CleanUp && CurrentPhase != GamePhases.Untap){
 					//play instant and abilities
+					if (c.HasType(CardTypes.Instant))
+						PushOnStack(new Spell (c));
 				}
 				break;
 				#endregion
 			case CardGroupEnum.InPlay:
 				#region inPlay
 				if (CurrentPhase == GamePhases.DeclareAttacker) {
-					if (!c.Combating && !c.CanAttack)
+					if (c.CanAttack && ip == cp && c.Controler == ip){
+						c.Combating = !c.Combating;
+						c.CurrentGroup.UpdateLayout ();
 						return;
-					c.Combating = !c.Combating;
-					c.CurrentGroup.UpdateLayout ();
+					}
 				} else if (CurrentPhase == GamePhases.DeclareBlocker) {
-					if (c.Controler == ip) {
-						if (c.Combating) {
-							c.Combating = false;
-							c.BlockedCreature.BlockingCreatures.Remove (ip.CurrentBlockingCreature);
-							c.BlockedCreature = null;
-							c.Controler.InPlay.UpdateLayout ();
-						}
-						c.Controler.CurrentBlockingCreature = c;
-						return;
-					} else if (ip.CurrentBlockingCreature != null && c.Combating) {
-						if (ip.CurrentBlockingCreature.Combating) {
-							//remove blocker
-							ip.CurrentBlockingCreature.Combating = false;
-							ip.CurrentBlockingCreature.BlockedCreature.BlockingCreatures.Remove (ip.CurrentBlockingCreature);
-							ip.CurrentBlockingCreature.BlockedCreature = null;
-						} else if (ip.CurrentBlockingCreature.CanBlock (c)) {
-							//try to add blocker
-							c.BlockingCreatures.Add (ip.CurrentBlockingCreature);
-							ip.CurrentBlockingCreature.BlockedCreature = c;
-							ip.CurrentBlockingCreature.Combating = true;
-							ip.CurrentBlockingCreature = null;
-						} else
+					if (ip != cp){//ip may declare blockers if it's not the current player
+						if (c.Controler == ip) {
+							if (c.CanBlock()){
+								if (c.Combating) {
+									c.Combating = false;
+									c.BlockedCreature.BlockingCreatures.Remove (ip.CurrentBlockingCreature);
+									c.BlockedCreature = null;
+									c.Controler.InPlay.UpdateLayout ();
+								}
+								c.Controler.CurrentBlockingCreature = c;
+								return;
+							}
+						} else if (ip.CurrentBlockingCreature != null && c.Combating) {
+							if (ip.CurrentBlockingCreature.Combating) {
+								//remove blocker
+								ip.CurrentBlockingCreature.Combating = false;
+								ip.CurrentBlockingCreature.BlockedCreature.BlockingCreatures.Remove (ip.CurrentBlockingCreature);
+								ip.CurrentBlockingCreature.BlockedCreature = null;
+							} else if (ip.CurrentBlockingCreature.CanBlock (c)) {
+								//try to add blocker
+								c.BlockingCreatures.Add (ip.CurrentBlockingCreature);
+								ip.CurrentBlockingCreature.BlockedCreature = c;
+								ip.CurrentBlockingCreature.Combating = true;
+								ip.CurrentBlockingCreature = null;
+							}
+							ip.InPlay.UpdateLayout ();
 							return;
-						ip.InPlay.UpdateLayout ();
+						}
 					}
 				} else if (CurrentPhase == GamePhases.CombatDamage) {
 					
-				} else if (c.Controler == ip) {					
+				} 
+				if (c.Controler == ip) {					
 					#region activable abilities
 					if (!(c.IsTapped || c.HasSummoningSickness)) {
 						Ability[] activableAbs = c.Model.Abilities.Where (

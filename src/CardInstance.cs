@@ -242,18 +242,25 @@ namespace Magic3D
                 return true;
             }
         }
-        public bool CanBlock(CardInstance blockedCard)
-        { 
-            if (_isTapped)
+		/// <summary>
+		/// Determines whether this instance can block the specified CardInstance.
+		/// </summary>
+		/// <param name="blockedCard">Null value can be passed to check basic conditions for defenders</param>
+		public bool CanBlock(CardInstance blockedCard = null)
+        { 			
+			if (_isTapped || !HasType (CardTypes.Creature))
                 return false;
+			
+			if (HasEffect(EffectType.CantBlock))
+				return false;
+
+			if (blockedCard == null)
+				return true;
 
             if ( blockedCard.HasAbility(AbilityEnum.Flying) && 
                 ! (this.HasAbility(AbilityEnum.Flying) || this.HasAbility(AbilityEnum.Reach)))
                 return false;
-
-			if (HasEffect(EffectType.CantBlock))
-				return false;
-			
+							
             return true;
         }
        

@@ -131,7 +131,11 @@ namespace Magic3D
 							break;
 						case "Other":
 							ctar.CanBeTargetted = false;
-							break;						
+							break;
+						case "TypeYouCtrl":
+							ctar.TypeOfTarget = TargetType.Permanent;
+							ctar.Controler = ControlerType.You;
+							break;
 						case "attacking":
 							ctar.CombatState = CombatImplication.Attacking;
 							break;

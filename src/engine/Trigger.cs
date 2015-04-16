@@ -40,6 +40,30 @@ namespace Magic3D
 		public Ability Exec;
 		public string Description;
 
+//		public bool Match(MagicEventArg arg)
+//		{
+//			if (Type != arg.Type)
+//				return false;
+//			switch (Type) {
+//			case MagicEventType.ChangeZone:
+//
+//				bool valid = false;
+////				foreach (CardTarget ct in t.ValidTarget.Values.OfType<CardTarget>()) {
+////					if (ct.Accept (arg.Source, arg.Source))
+////						valid = true;		
+////				}
+//
+//				if (!valid)
+//					break;
+//
+//				ChangeZoneEventArg czea = arg as ChangeZoneEventArg;
+//				if ((czea.Origine == Origine || Origine == CardGroupEnum.Any)
+//				    && (czea.Destination == Destination || Destination == CardGroupEnum.Any))
+//					return true;
+//				break;
+//			}			
+//		}
+
 		static List<string> list = new List<string> ();
 
 		public override string ToString ()

@@ -34,6 +34,8 @@ namespace Magic3D
 			object o = svars.FirstOrDefault ().instance;
 			object value = null;
 
+			if (o is Ability)
+				value = Ability.Parse (datas);
 			if (o is Trigger)
 				value = Ability.Parse (datas, o as Trigger);
 			else {

@@ -33,17 +33,22 @@ namespace Magic3D
 		public static CardGroupEnum ParseZoneName(string zone)
 		{
 			switch (zone) {
-			case "Any":
-				return CardGroupEnum.Any;
+//			case "Any":
+//				return CardGroupEnum.Any;
 			case "Battlefield":
 				return CardGroupEnum.InPlay;
-			case "Library":
-				return CardGroupEnum.Library;
-			case "Hand":
-				return CardGroupEnum.Hand;
+			case "Exile":
+				return CardGroupEnum.Exhiled;
+//			case "Library":
+//				return CardGroupEnum.Library;
+//			case "Hand":				
+//				return CardGroupEnum.Hand;
+//			case "Graveyard":
+//				return CardGroupEnum.Graveyard;
 			default:
-				Debug.WriteLine ("Unknow zone: " + zone);
-				return CardGroupEnum.Any;					
+				return (CardGroupEnum) Enum.Parse (typeof(CardGroupEnum), zone);
+//				Debug.WriteLine ("Unknow zone: " + zone);
+//				return CardGroupEnum.Any;					
 			}
 		}
 		public CardGroupEnum GroupName;
