@@ -88,6 +88,15 @@ namespace Magic3D
 			else if (WaitForTarget) {
 				Magic.AddLog (Source.TargetPrompt);
 			}
+			//show library cards if needeed
+			if (WaitForTarget && ValidTargets != null) {
+				if (ValidTargets.Values.OfType<CardTarget> ().Where
+					(cct => cct.ValidGroup == CardGroupEnum.Library).Count () > 0) {
+					if (!CardSource.Controler.Library.IsExpanded)
+						CardSource.Controler.Library.toogleShowAll();
+				}else if (CardSource.Controler.Library.IsExpanded)
+					CardSource.Controler.Library.toogleShowAll();
+			}
 		}
 		bool validated = false;
 		public override void Validate ()
@@ -178,20 +187,20 @@ namespace Magic3D
 
 		public MagicAction CurrentAbility {
 			get {
-				//TODO: double check currentAbility
-				if (currentAbilityActivation != null){
+				if (currentAbilityActivation == null)
+					currentAbilityActivation = NextAbilityToProcess;
+				while (currentAbilityActivation != null) {
 					if (currentAbilityActivation.IsComplete) {
 						spellAbilities.Add (currentAbilityActivation);
 						currentAbilityActivation = null;
-					}
-				}
-
-				if (currentAbilityActivation == null)
+					} else
+						return currentAbilityActivation;
 					currentAbilityActivation = NextAbilityToProcess;
-				
-				return currentAbilityActivation;
+				}		
+				return null;
 			}
 		}
+
 		public AbilityActivation NextAbilityToProcess
 		{
 			get {
@@ -199,8 +208,7 @@ namespace Magic3D
 				Ability a =
 					CardSource.Model.Abilities.Where (
 						sma => sma.Category == AbilityCategory.Spell &&
-						!abs.Contains (sma) && 
-						(sma.ActivationCost != null || sma.AcceptTargets)
+						!abs.Contains (sma)
 					).FirstOrDefault();
 
 				return a == null ? null :

@@ -124,6 +124,7 @@ namespace Magic3D
 				break;
 			case TargetType.Card:
 			case TargetType.Attached:
+			case TargetType.Permanent:
 				if (Controler == ControlerType.All)
 					cards = engine.Players.SelectMany (p => p.InPlay.Cards);
 				else if (Controler == ControlerType.You)

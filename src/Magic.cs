@@ -540,7 +540,7 @@ namespace Magic3D
 			case Key.U:
 				if (CardInstance.selectedCard == null)
 					return;
-				CardInstance.selectedCard.updateArrows ();			
+				CardInstance.selectedCard.tappedWithoutEvent = false;			
 				break;
 			case Key.L:
 				engine.ip.Library.toogleShowAll ();
@@ -549,6 +549,14 @@ namespace Magic3D
 				foreach (CardInstance ci in engine.Players.SelectMany(p => p.InPlay.Cards.Where(c => c.HasType(CardTypes.Creature))))
 					ci.UpdateOverlay ();
 				
+				break;
+			case Key.Delete:
+				if (CardInstance.selectedCard == null)
+					return;
+				CardInstance.selectedCard.ChangeZone(CardGroupEnum.Hand);			
+				break;
+			case Key.KeypadPlus:
+				engine.ip.AllowedLandsToBePlayed++;
 				break;
 			}
 		}

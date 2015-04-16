@@ -72,10 +72,10 @@ namespace Magic3D
 			
 			switch (TypeOfEffect) {
 			case EffectType.GainLife:				
-				player.LifePoints += (this as NumericEffect).Amount;
+				player.LifePoints += (this as NumericEffect).Amount.GetValue(_source);
 				break;
 			case EffectType.LoseLife:
-				player.LifePoints -= (this as NumericEffect).Amount;
+				player.LifePoints -= (this as NumericEffect).Amount.GetValue(_source);
 				break;
 			case EffectType.Unset:
 				break;
@@ -346,22 +346,6 @@ namespace Magic3D
 		public NumericEffect(EffectType et, IntegerValue amount) : base(et)
 		{
 			Amount = amount;
-		}
-
-		public override void Apply (CardInstance _source, Ability _ability, object _target)
-		{
-			switch (TypeOfEffect) {
-			case EffectType.AddPower:
-				break;
-			case EffectType.AddTouchness:
-				break;
-			case EffectType.SetPower:
-				break;
-			case EffectType.SetTouchness:
-				break;
-			default:
-				break;
-			}
 		}
     }
     [Serializable]

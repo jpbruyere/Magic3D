@@ -36,7 +36,7 @@ namespace Magic3D
 		public override  void UpdateLayout ()
 		{
 //vertical layouting            
-			if (isExpanded)
+			if (IsExpanded)
 				return;
 			
 			float hSpace = HorizontalSpacing;
@@ -90,8 +90,8 @@ namespace Magic3D
 		}			
 		public override void toogleShowAll ()
 		{
-			isExpanded = !isExpanded;
-			if (isExpanded) {
+			IsExpanded = !IsExpanded;
+			if (IsExpanded) {
 				Vector3 v = Magic.vGroupedFocusedPoint;
 				float aCam = Magic.FocusAngle;
 
@@ -127,9 +127,9 @@ namespace Magic3D
 		}
 		public void RevealToUIPlayer()
 		{
-			isExpanded = !isExpanded;
+			IsExpanded = !IsExpanded;
 
-			if (!isExpanded) {
+			if (!IsExpanded) {
 				UpdateLayout ();
 				return;
 			}

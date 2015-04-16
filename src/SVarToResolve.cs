@@ -47,6 +47,8 @@ namespace Magic3D
 					string[] tmp2 = div [0].Split (' ');
 					if (tmp2 [0] == "Valid")
 						cc.CardsToCount = Target.ParseTargets (tmp2 [1]);
+					else
+						cc.CardsToCount = Target.ParseTargets (tmp2 [0]);
 					if (div.Count() == 2) {
 						tmp2 = div [1].Split ('.');
 						int v = 0;

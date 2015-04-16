@@ -64,8 +64,6 @@ namespace Magic3D
 //			}			
 //		}
 
-		static List<string> list = new List<string> ();
-
 		public override string ToString ()
 		{
 			return Description;
@@ -76,12 +74,6 @@ namespace Magic3D
 			Trigger t = new Trigger (MagicEventType.Unset);
 			string[] tmp = str.Trim ().Split (new char[] { '|' });
 
-			//t.Targets = new List<object> ();
-			//t.Effects = new List<Effect> ();
-
-
-//			using (Stream s = new FileStream ("trigVars.txt",FileMode.Append)) {				
-//				using (TextWriter tw = new StreamWriter (s)) {
 			foreach (string i in tmp) {
 				string[] f = i.Trim ().Split (new char[] { '$' });
 				string data = f [1].Trim ();
@@ -127,14 +119,8 @@ namespace Magic3D
 						Debug.WriteLine ("Trigger parsing: Unknown phase:" + data);
 						break;
 					}
-
-							//tw.WriteLine (data + ",");
 					break;
 				case "TriggerZones":
-//							if (list.Contains (data))
-//								break;
-//							list.Add (data);
-//							tw.WriteLine ("case \"" + data + "\":\n\tbreak;");
 					break;
 				case "CheckSVar":
 					break;
@@ -150,10 +136,7 @@ namespace Magic3D
 					Debug.WriteLine ("Unknown trigger var:" + f [0]);
 					break;
 				}
-
 			}
-//				}
-//			}
 			return t;
 		}
 	}

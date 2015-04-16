@@ -133,9 +133,10 @@ namespace Magic3D
 			ChangeZone (CardGroupEnum.Graveyard);			
         }
 
-        public void Reset()
+		public void Reset(bool _positionReset = false)
         {
-            ResetPositionAndRotation();
+			if (_positionReset)
+            	ResetPositionAndRotation();
             ResetOverlay();
 
 			Damages.Clear();

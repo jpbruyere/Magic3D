@@ -5,7 +5,7 @@ namespace Magic3D
 {
 	public abstract class Layout3d
 	{
-		protected bool isExpanded = false;
+		public bool IsExpanded = false;
 
 		public float x = 0.0f;
 		public float y = 0.0f;
