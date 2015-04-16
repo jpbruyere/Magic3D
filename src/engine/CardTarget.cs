@@ -36,6 +36,10 @@ namespace Magic3D
 			CardInstance c = _target as CardInstance;
 			if (c == null)
 				return false;
+			
+			if (TypeOfTarget == TargetType.Self && _target != _source)
+				return false;
+			
 			if (TypeOfTarget == TargetType.EquipedBy || TypeOfTarget == TargetType.EnchantedBy) {
 				if (_target is CardInstance)
 					return  _source.AttachedTo == _target;

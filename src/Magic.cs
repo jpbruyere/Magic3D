@@ -525,9 +525,9 @@ namespace Magic3D
 				}
 				if (CardInstance.selectedCard == null)
 					return;
-				using (Stream s = new FileStream(CardInstance.selectedCard.Model.FilePath,FileMode.Open))
-					using (StreamReader sr = new StreamReader (s))
-						txtCard.Text = sr.ReadToEnd ();
+				
+				using (StreamReader sr = new StreamReader (CardInstance.selectedCard.Model.Stream))
+					txtCard.Text = sr.ReadToEnd ();
 					
 				wCardText.Visible = true;
 				break;

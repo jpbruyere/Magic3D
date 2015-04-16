@@ -128,6 +128,9 @@ namespace Magic3D
         {
 			for (int i = 0; i < AnimationList.Count; i++) {
 				Animation anim = AnimationList [i];
+				if (anim == null) {					
+					continue;
+				}
 				if (anim.AnimatedInstance == instance && anim.propertyName == PropertyName) {
 					a = anim;
 					return true;

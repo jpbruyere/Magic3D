@@ -58,8 +58,9 @@ namespace Magic3D
 		public bool HasFocus = false;
 		public bool HasSummoningSickness = false;
 
+		public IList<EffectGroup> PumpEffect = new List<EffectGroup> ();
 		public IList<EffectGroup> Effects{
-			get { return Model.SpellEffects; }
+			get { return Model.SpellEffects.Concat(PumpEffect).ToList(); }
 		}
 //		public IList<Effect> ActiveEffects{
 //			get { }
@@ -201,20 +202,7 @@ namespace Magic3D
         }
         public bool HasAbility(AbilityEnum ab)
         {
-			if (getAbilitiesByType(ab).Count()==0 || HasEffect(EffectType.LooseAllAbilities))
-                return false;
-
-//            foreach (Effect e in Effects)
-//            {
-//                if (e.TypeOfEffect == EffectType.Loose)
-//                {
-//                    AbilityEffect ae = e as AbilityEffect;
-//                    if (ae != null)
-//                        if (ae.Ability.AbilityType == ab)
-//                            return false;
-//                }
-//            }
-            return true;
+			return getAbilitiesByType (ab).Count () > 0;
         }
 		public bool HasColor(ManaTypes color)
 		{
@@ -321,10 +309,10 @@ namespace Magic3D
             get
             {
                 int tmp = Model.Power;
-
+				List<Effect> activeEffects = new List<Effect> ();
 				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingSpellEffects) {
 					bool valid = false;
-					foreach (EffectGroup eg in ci.Effects) {
+					foreach (EffectGroup eg in ci.Effects) {						
 						foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
 							if (!ct.Accept (this, ci)) {
 								valid = false;
@@ -334,14 +322,13 @@ namespace Magic3D
 						}
 						if (!valid)
 							continue;
-
 						foreach (NumericEffect e in  eg.OfType<NumericEffect>()) {
 							switch (e.TypeOfEffect) {
 							case EffectType.AddPower:
-								tmp += e.Amount.GetValue(ci);
+								tmp += e.Amount.GetValue(ci) * e.Multiplier;
 								break;
 							case EffectType.SetPower:
-								tmp = e.Amount.GetValue(ci);
+								tmp = e.Amount.GetValue(ci) * e.Multiplier;
 								break;
 							}
 						}						

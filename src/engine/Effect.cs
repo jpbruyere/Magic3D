@@ -95,6 +95,7 @@ namespace Magic3D
 			case EffectType.Counter:
 				break;
 			case EffectType.Destroy:
+				ci.PutIntoGraveyard ();
 				break;
 			case EffectType.Tap:
 				ci.tappedWithoutEvent = true;
@@ -337,6 +338,7 @@ namespace Magic3D
     [Serializable]
     public class NumericEffect : Effect
     {
+		public int Multiplier = 1;
         public IntegerValue Amount;
 
 		public NumericEffect() : base() {}

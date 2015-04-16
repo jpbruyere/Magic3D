@@ -29,6 +29,7 @@ namespace Magic3D
 		}
 	}
 
+
 	public enum AbilityCategory{		
 		Acivated,
 		Spell,
@@ -141,7 +142,15 @@ namespace Magic3D
 		{
 			if (Effects == null)
 				return;
-			Effects.Apply (_source, this, _targets);		
+			if (this.AbilityType == AbilityEnum.Pump) {
+				foreach (CardInstance ci in _targets.OfType<CardInstance>()) {
+					EffectGroup eg = Effects.Clone ();
+					eg.AddRange (Effects);
+					eg.Affected = new CardTarget(TargetType.Self);
+					ci.PumpEffect.Add (eg);
+				}				
+			}else
+				Effects.Apply (_source, this, _targets);		
 		}
 
 		public static Ability Parse (string strAbility)
@@ -163,6 +172,7 @@ namespace Magic3D
 
 			AbilityCategory Category = AbilityCategory.Acivated;
 			bool mandatory = false;
+			NumericEffect numEff = null;
 
 			foreach (string ab in tmp) {
 				int v;
@@ -197,6 +207,9 @@ namespace Magic3D
 						a = new ManaAbility ();
 						break;
 					case "Pump":
+						
+						a.AbilityType = AbilityEnum.Pump;
+						a.Effects.TrigEnd = new Trigger(MagicEventType.EndTurn);
 						break;
 					case "Attach":
 					case "Animate":
@@ -208,6 +221,7 @@ namespace Magic3D
 					case "Counter":
 						break;
 					case "Destroy":
+						a.Effects.Add(new Effect(EffectType.Destroy));
 						break;
 					case "Tap":
 						a.Effects.Add(new Effect(EffectType.Tap));
@@ -434,14 +448,6 @@ namespace Magic3D
 				case AbilityFieldsEnum.Produced:
 					(a as ManaAbility).ProducedMana = Mana.Parse (value);
 					break;
-				case AbilityFieldsEnum.NumDef:                        
-					if (!int.TryParse (value, out v))
-						break;
-					a.Effects.Add (new NumericEffect {
-						TypeOfEffect = EffectType.AddTouchness,
-						Amount = v
-					});
-					break;
 				case AbilityFieldsEnum.AILogic:
 					#region AIlogic 
 					switch (value.Trim ()) {
@@ -585,6 +591,19 @@ namespace Magic3D
 				case AbilityFieldsEnum.ValidCards:
 					break;
 				case AbilityFieldsEnum.KW:
+					AbilityEnum ae = AbilityEnum.Unset;
+					if (Enum.TryParse (value, true, out ae)) {
+						a.Effects.Add (new AbilityEffect (new Ability (ae)));
+						break;
+					}
+					switch (value) {
+					case "Double Strike":
+						a.Effects.Add (new AbilityEffect (new Ability(AbilityEnum.DoubleStrike)));
+						break;
+					default:
+						Debug.WriteLine ("unknown KW in pumping: " + value);
+						break;
+					}
 					break;
 				case AbilityFieldsEnum.LifeAmount:
 					if (!int.TryParse (value, out v)) {
@@ -605,7 +624,38 @@ namespace Magic3D
 				case AbilityFieldsEnum.Destination:
 					(a as ChangeZoneAbility).Destination = CardGroup.ParseZoneName (value);
 					break;
+				//TODO:make single function to parse numeric fields that could be a counter
 				case AbilityFieldsEnum.NumAtt:
+					numEff = new NumericEffect (EffectType.AddPower);
+					if (value [0] == '+')
+						value = value.Substring (1);
+					else if (value [0] == '-') {
+						numEff.Multiplier = -1;
+						value = value.Substring (1);
+					}						
+					if (int.TryParse (value, out v))
+						numEff.Amount = v;
+					else
+						SVarToResolve.RegisterSVar(value, numEff, numEff.GetType().GetField("Amount"));
+
+					a.Effects.Add (numEff);
+					numEff = null;
+					break;
+				case AbilityFieldsEnum.NumDef:                        
+					numEff = new NumericEffect (EffectType.AddTouchness);
+					if (value [0] == '+')
+						value = value.Substring (1);
+					else if (value [0] == '-') {
+						numEff.Multiplier = -1;
+						value = value.Substring (1);
+					}						
+					if (int.TryParse (value, out v))
+						numEff.Amount = v;
+					else
+						SVarToResolve.RegisterSVar(value, numEff, numEff.GetType().GetField("Amount"));
+
+					a.Effects.Add (numEff);
+					numEff = null;
 					break;
 				case AbilityFieldsEnum.Defined:
 					break;

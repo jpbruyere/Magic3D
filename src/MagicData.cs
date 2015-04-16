@@ -158,8 +158,23 @@ namespace Magic3D
 			Stream cardStream = GetCardDataStream (cfn);
 			if (cardStream == null)
 				return false;
+			
+
+
+			#if DEBUG
+			MemoryStream ms = new MemoryStream();
+			cardStream.CopyTo (ms);
+			ms.Seek(0,SeekOrigin.Begin);
+			LoadCardData(ms);
+			cardStream.Seek(0,SeekOrigin.Begin);
+			c = cardDatabase [name];
+			c.Stream = cardStream;
+			#else
 			LoadCardData(cardStream);
 			c = cardDatabase [name];
+			#endif
+
+
 			return true;
 		}
 		public static void LoadCardData(string path){

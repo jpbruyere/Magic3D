@@ -24,6 +24,10 @@ namespace Magic3D
 		//TODO:fix data links
         static Random rnd = new Random();
                 
+		#if DEBUG
+		public Stream Stream;
+		#endif
+
 		public string FilePath;
         public string Name;
         public Cost Cost;

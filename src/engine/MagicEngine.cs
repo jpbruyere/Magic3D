@@ -71,6 +71,12 @@ namespace Magic3D
 				return Players.SelectMany (p => p.InPlay.Cards.Where (c => c.Model.SpellEffects.Count() > 0)).ToList();
 			}
 		}
+		public IList<CardInstance> CardsInPlayHavingPumpEffects
+		{
+			get {
+				return Players.SelectMany (p => p.InPlay.Cards.Where (c => c.PumpEffect.Count() > 0)).ToList();
+			}
+		}
 		//public List<ActiveEffect> SpellEffectsInPlay = new List<ActiveEffect> ();
 
 		public int currentPlayerIndex {
@@ -247,7 +253,8 @@ namespace Magic3D
 			
 		void MagicEngine_MagicEvent (MagicEventArg arg)
 		{
-			#region check triggers 
+			#region check triggers
+
 			if (arg.Source != null)
 			{
 				foreach (Trigger t in arg.Source.Model.Triggers){					
@@ -280,7 +287,25 @@ namespace Magic3D
 					}
 				}
 			}
-
+			//check pump effect
+			//todo should simplify trigger checking with a single function
+			foreach (CardInstance ci in CardsInPlayHavingPumpEffects) {
+				List<EffectGroup> egToRemove = new List<EffectGroup>();
+				foreach (EffectGroup eg in ci.PumpEffect) {
+					if (eg.TrigEnd != null){
+						if (eg.TrigEnd.Type != arg.Type)
+							continue;
+						switch (eg.TrigEnd.Type) {
+						case MagicEventType.EndTurn:
+							egToRemove.Add(eg);
+							break;
+						}
+					}
+				}
+				foreach (EffectGroup egtr in egToRemove) {
+					ci.PumpEffect.Remove(egtr);
+				}
+			}
 			#endregion
 
 			switch (arg.Type) {
@@ -474,6 +499,10 @@ namespace Magic3D
 			case GamePhases.EndOfTurn:
 				break;
 			case GamePhases.CleanUp:
+				MagicEvent (new MagicEventArg {
+					Type = MagicEventType.EndTurn
+						//Player = Players [currentPlayer]
+				});
 				currentPlayerIndex++;
 
 				priorityPlayer = _currentPlayer;
