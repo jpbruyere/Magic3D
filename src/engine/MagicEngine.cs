@@ -577,7 +577,7 @@ namespace Magic3D
 							if (c.CanBlock()){
 								if (c.Combating) {
 									c.Combating = false;
-									c.BlockedCreature.BlockingCreatures.Remove (ip.CurrentBlockingCreature);
+									c.BlockedCreature.BlockingCreatures.Remove (c);
 									c.BlockedCreature = null;
 									c.Controler.InPlay.UpdateLayout ();
 								}
@@ -585,6 +585,7 @@ namespace Magic3D
 								return;
 							}
 						} else if (ip.CurrentBlockingCreature != null && c.Combating) {
+							//TODO:there's a redundant test here
 							if (ip.CurrentBlockingCreature.Combating) {
 								//remove blocker
 								ip.CurrentBlockingCreature.Combating = false;

@@ -19,6 +19,7 @@ namespace Magic3D
 		EnchantedBy,
 		EquipedBy,
 		Attached,
+		Kicked,
     }
     public enum ControlerType
     {
@@ -125,7 +126,10 @@ namespace Magic3D
 							break;
 						case "YouCtrl":
 							ctar.Controler = ControlerType.You;
-							break;						
+							break;
+						case "YouDontCtrl":
+							ctar.Controler = ControlerType.Opponent;
+							break;
 						case "OppCtrl":
 							ctar.Controler = ControlerType.Opponent;
 							break;
@@ -150,6 +154,11 @@ namespace Magic3D
 							break;
 						case "equipped":
 							ctar.HavingAttachedCards += CardTypes.Equipment;
+							break;
+						case "kicked":
+							if (ctar.TypeOfTarget != TargetType.Self)
+								Debugger.Break();
+							ctar.TypeOfTarget = TargetType.Kicked;
 							break;
 						case "Attached":
 							ctar.TypeOfTarget = TargetType.Attached;

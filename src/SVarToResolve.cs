@@ -36,7 +36,7 @@ namespace Magic3D
 
 			if (o is Ability)
 				value = Ability.Parse (datas);
-			if (o is Trigger)
+			else if (o is Trigger)
 				value = Ability.Parse (datas, o as Trigger);
 			else {
 				string[] tmp = datas.Split ('$');
@@ -58,6 +58,8 @@ namespace Magic3D
 						}
 					}
 					value = cc;
+					break;
+				case "LifeAmount":
 					break;
 				default:
 					Debug.WriteLine ("unandle svar: " + datas);

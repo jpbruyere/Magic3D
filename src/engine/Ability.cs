@@ -63,7 +63,7 @@ namespace Magic3D
 		public AbilityCategory Category;
 		public AbilityEnum AbilityType = AbilityEnum.Unset;
 		public EffectGroup Effects = new EffectGroup ();
-		public string SubAbilityId;
+		public Ability SubAbility;
 		public Cost ActivationCost = null;
 		public string Description = "";
 		public int MinimumTargetCount = -1;
@@ -150,7 +150,12 @@ namespace Magic3D
 					ci.PumpEffect.Add (eg);
 				}				
 			}else
-				Effects.Apply (_source, this, _targets);		
+				Effects.Apply (_source, this, _targets);
+
+			if (SubAbility == null)
+				return;
+
+			MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (_source, SubAbility));
 		}
 
 		public static Ability Parse (string strAbility)
@@ -173,6 +178,8 @@ namespace Magic3D
 			AbilityCategory Category = AbilityCategory.Acivated;
 			bool mandatory = false;
 			NumericEffect numEff = null;
+			//example: for destroy, only inplay cards can be targeted
+			CardGroupEnum validCardTargetZoneFix = CardGroupEnum.Any;
 
 			foreach (string ab in tmp) {
 				int v;
@@ -188,6 +195,7 @@ namespace Magic3D
 				AbilityFieldsEnum varName;
 				Enum.TryParse (ab.Substring (0, dollarPos), true, out varName);
 				string value = ab.Substring (dollarPos + 1).Trim ();
+
 
 				Effect e = null;
 
@@ -222,6 +230,7 @@ namespace Magic3D
 						break;
 					case "Destroy":
 						a.Effects.Add(new Effect(EffectType.Destroy));
+						validCardTargetZoneFix = CardGroupEnum.InPlay;
 						break;
 					case "Tap":
 						a.Effects.Add(new Effect(EffectType.Tap));
@@ -242,6 +251,9 @@ namespace Magic3D
 					case "DealDamage":
 						break;
 					case "ChangeZone":
+						a = new ChangeZoneAbility();
+						break;
+					case "ChangeZoneAll":
 						a = new ChangeZoneAbility();
 						break;
 					case "Draw":
@@ -266,8 +278,6 @@ namespace Magic3D
 					case "PumpAll":
 						break;
 					case "RemoveCounterAll":
-						break;
-					case "ChangeZoneAll":
 						break;
 					case "DamageAll":
 						break;
@@ -581,7 +591,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.RememberObjects:
 					break;
 				case AbilityFieldsEnum.SubAbility:
-					a.SubAbilityId = value;
+					SVarToResolve.RegisterSVar(value, a, a.GetType().GetField("SubAbility"));
 					break;
 				case AbilityFieldsEnum.TargetType:
 					break;
@@ -606,11 +616,12 @@ namespace Magic3D
 					}
 					break;
 				case AbilityFieldsEnum.LifeAmount:
-					if (!int.TryParse (value, out v)) {
-						Debug.WriteLine ("life amount: " + value);
-						break;
-					}
-					a.Effects.OfType<NumericEffect> ().FirstOrDefault ().Amount = v;
+					numEff = a.Effects.OfType<NumericEffect> ().LastOrDefault ();
+					if (int.TryParse (value, out v))
+						numEff.Amount = v;
+					else
+						SVarToResolve.RegisterSVar(value, numEff, numEff.GetType().GetField("Amount"));
+					
 					break;
 				case AbilityFieldsEnum.Amount:
 					break;
@@ -1363,6 +1374,16 @@ namespace Magic3D
 			if (!a.AcceptTargets && a.ValidTargets != null) {
 				Debug.WriteLine ("required target forced to 1.");
 				a.RequiredTargetCount = 1;
+			}
+			//
+			if (validCardTargetZoneFix != CardGroupEnum.Any) {
+				if (a.ValidTargets == null)
+					a.ValidTargets = new CardTarget (TargetType.Card) { ValidGroup = validCardTargetZoneFix };
+				else {
+					foreach (CardTarget ct in a.ValidTargets.Values.OfType<CardTarget>()) {
+						ct.ValidGroup += validCardTargetZoneFix;
+					}
+				}
 			}
 			a.Category = Category;
 			a.Mandatory = mandatory;
