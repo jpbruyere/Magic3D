@@ -14,7 +14,7 @@ namespace Magic3D
 //				ma.					
 //			}
 		}
-		public override void UpdateLayout ()
+		public override void UpdateLayout (bool anim = true)
 		{
 			
 		}

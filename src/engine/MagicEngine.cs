@@ -71,6 +71,13 @@ namespace Magic3D
 				return Players.SelectMany (p => p.InPlay.Cards.Where (c => c.Model.SpellEffects.Count() > 0)).ToList();
 			}
 		}
+		public IList<CardInstance> CardsInPlayHavingEffects
+		{
+			get {
+				return Players.SelectMany (p => p.InPlay.Cards.Where (c => c.Effects.Count() > 0)).ToList();
+			}
+		}
+
 		public IList<CardInstance> CardsInPlayHavingTriggers
 		{
 			get {
@@ -532,7 +539,11 @@ namespace Magic3D
 				break;
 			case CardGroupEnum.Hand:
 				#region hand
-				//should first cancel incomplete action
+				//player controling interface may only click in his own hand
+				if (c.Controler != ip)
+					return;
+				if (!CancelLastActionOnStack())
+					return;
 				if (CurrentPhase == GamePhases.Main1 || CurrentPhase == GamePhases.Main2){
 					if (c.HasType(CardTypes.Land)) {
 						if (cp.AllowedLandsToBePlayed>0){
@@ -627,6 +638,7 @@ namespace Magic3D
 		{			
 			MagicStack.Push (s);
 		}
+		//TODO:should be changed...
 		public void ClearIncompleteActions()
 		{
 			while (MagicStack.Count > 0) {
@@ -638,6 +650,10 @@ namespace Magic3D
 			}
 			Magic.btOk.Visible = false;
 		}
+		/// <summary>
+		/// Cancel incomplete action on stack before doing anything else
+		/// </summary>
+		/// <returns>True if cancelation succed or if nothing has to be canceled, false otherwise</returns>
 		public bool CancelLastActionOnStack()
 		{
 			MagicAction ma = NextActionOnStack;
@@ -678,6 +694,9 @@ namespace Magic3D
 				}
 			}
 		}
+		/// <summary>
+		/// Check completeness of last action on stack.
+		/// </summary>
 		public void checkLastActionOnStack ()
 		{
 			if (MagicStack.Count == 0)
@@ -698,16 +717,16 @@ namespace Magic3D
 					Magic.AddLog ("Not enough mana available");
 					CancelLastActionOnStack ();
 					return;
-				} else if (pp.ManaPool != null && ma.RemainingCost != null) {
+				} else if (pp.ManaPool != null && ma.RemainingCost != null)
 					ma.PayCost (ref pp.ManaPool);
-				}
-			}
-
-			if (ma.IsComplete) {
+				
+				if (ma.IsComplete && ma.GoesOnStack)
+					GivePriorityToNextPlayer ();				
+				
+			}else{
 				if (ma.GoesOnStack) {
 					//should show spell to player...
 					UpdateStackLayouting();
-
 					GivePriorityToNextPlayer ();				
 				} else {
 					MagicStack.Pop ();
@@ -828,7 +847,7 @@ namespace Magic3D
 		#endregion
 		public void UpdateOverlays()
 		{
-			foreach (CardInstance ci in CardsInPlayHavingSpellEffects) {
+			foreach (CardInstance ci in CardsInPlayHavingEffects) {
 				foreach (EffectGroup eg in ci.Effects) {
 					foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
 						foreach (CardInstance c in ct.GetValidTargetsInPlay (ci))

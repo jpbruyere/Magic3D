@@ -157,7 +157,7 @@ namespace Magic3D
 		{
 			List<Ability> abs = new List<Ability>();
 
-			foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingSpellEffects) {
+			foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingEffects) {
 				bool valid = false;
 				foreach (EffectGroup eg in ci.Effects) {
 					foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
@@ -278,12 +278,7 @@ namespace Magic3D
 
                 _isTapped = value;
 
- 				if (_isTapped)
-                {
-                    Animation.StartAnimation(new FloatAnimation(this, "zAngle", -MathHelper.PiOver2, MathHelper.Pi * 0.1f));
-                }
-                else
-                    Animation.StartAnimation(new FloatAnimation(this, "zAngle", 0f, MathHelper.Pi * 0.1f));
+				this.Controler.InPlay.UpdateLayout ();
             }
         }
         public void Tap()
@@ -310,13 +305,13 @@ namespace Magic3D
 			set { _controler = value; }
 		}
 
-		public int Power
+		public int 	Power
         {
             get
             {
                 int tmp = Model.Power;
 				List<Effect> activeEffects = new List<Effect> ();
-				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingSpellEffects) {
+				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingEffects) {
 					bool valid = false;
 					foreach (EffectGroup eg in ci.Effects) {						
 						foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
@@ -349,7 +344,7 @@ namespace Magic3D
             {
                 int tmp = Model.Toughness;
 
-				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingSpellEffects) {
+				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingEffects) {
 					bool valid = false;
 					foreach (EffectGroup eg in ci.Effects) {
 						foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {

@@ -32,6 +32,11 @@ namespace Magic3D
 				PayCost (ref CardSource.Controler.ManaPool);
 
 			PrintNextMessage ();
+
+			if (Source.Category == AbilityCategory.Spell)
+				return;
+			if (IsComplete && GoesOnStack)
+				MagicEngine.CurrentEngine.GivePriorityToNextPlayer ();
 		}
 			
 		/// <summary>
@@ -179,6 +184,9 @@ namespace Magic3D
 				PayCost (ref CardSource.Controler.ManaPool);
 			
 			PrintNextMessage ();
+
+			if (IsComplete && GoesOnStack)
+				MagicEngine.CurrentEngine.GivePriorityToNextPlayer ();
 		}
 		#endregion
         

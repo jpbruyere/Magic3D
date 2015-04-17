@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using go;
+using System.Threading;
 
 namespace Magic3D
 {
@@ -103,6 +104,7 @@ namespace Magic3D
 			else
 			{
 				if (e.pp == this) {
+					Magic.AddLog ("AI just had priority");
 					e.GivePriorityToNextPlayer ();
 				}
 //				switch (e.CurrentPhase)

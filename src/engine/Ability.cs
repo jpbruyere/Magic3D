@@ -160,12 +160,29 @@ namespace Magic3D
 			if (Effects == null)
 				return;
 			if (this.AbilityType == AbilityEnum.Pump) {
-				foreach (CardInstance ci in _targets.OfType<CardInstance>()) {
-					EffectGroup eg = Effects.Clone ();
-					eg.AddRange (Effects);
-					eg.Affected = new CardTarget(TargetType.Self);
-					ci.PumpEffect.Add (eg);
-				}				
+				if (this.AcceptTargets) {
+					foreach (CardInstance ci in _targets.OfType<CardInstance>()) {
+						//TODO:make single function for pumping effect clonage
+						EffectGroup eg = Effects.Clone ();
+						eg.AddRange (Effects);
+						eg.Affected = new CardTarget (TargetType.Self);
+						ci.PumpEffect.Add (eg);
+					}
+				} else {
+					if (Effects.Affected == null) {
+						EffectGroup eg = Effects.Clone ();
+						eg.AddRange (Effects);
+						eg.Affected = new CardTarget (TargetType.Self);
+						_source.PumpEffect.Add (eg);
+					} else {
+						foreach (CardInstance ci in Effects.GetAffectedCardInstances(_source,this)) {
+							EffectGroup eg = Effects.Clone ();
+							eg.AddRange (Effects);
+							eg.Affected = new CardTarget (TargetType.Self);
+							ci.PumpEffect.Add (eg);
+						}
+					}
+				}
 			}else
 				Effects.Apply (_source, this, _targets);
 

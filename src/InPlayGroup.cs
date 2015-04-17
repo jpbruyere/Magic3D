@@ -6,7 +6,7 @@ namespace Magic3D
 {
 	public class InPlayGroup : CardGroup
 	{
-		public CardLayout LandsLayout = new CardLayout();
+		public CardLayout LandsLayout = new Magic3D.LandsLayout();
 		public CardLayout CreatureLayout = new CardLayout();
 		public CardLayout OtherLayout = new CardLayout();
 		public CardLayout CombatingCreature = new CardLayout();
@@ -18,11 +18,11 @@ namespace Magic3D
 			HorizontalSpacing = 1.5f;
 			MaxHorizontalSpace = 7f;
 
-			LandsLayout.x = -0f;
+			LandsLayout.x = -1f;
 			LandsLayout.y = -4.2f;
-			LandsLayout.HorizontalSpacing = 1.5f;
+			LandsLayout.HorizontalSpacing = 1.4f;
 			LandsLayout.VerticalSpacing = 0.01f;
-			LandsLayout.MaxHorizontalSpace = 10f;
+			LandsLayout.MaxHorizontalSpace = 5f;
 
 			CreatureLayout.x = -0f;
 			CreatureLayout.y = -2.0f;
@@ -43,26 +43,17 @@ namespace Magic3D
 			CombatingCreature.MaxHorizontalSpace = 7f;
 		}
 
-		public override void AddCard(CardInstance c)
-		{
-			base.AddCard(c);
-			UpdateLayout();
-		}
-		public override void RemoveCard(CardInstance c)
-		{
-			base.RemoveCard(c);
-			UpdateLayout();
-		}
-		public override void UpdateLayout()
+
+		public override void UpdateLayout(bool anim = true)
 		{
 			LandsLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Land && !(c.IsAttached || c.Combating)).ToList();
 			CreatureLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Creature && !(c.IsAttached || c.Combating)).ToList();
 			OtherLayout.Cards = Cards.Where(c => c.Model.Types != CardTypes.Land && c.Model.Types != CardTypes.Creature
 				&& !(c.IsAttachedToACardInTheSameCamp || c.Combating)).ToList();
 
-			LandsLayout.UpdateLayout();
-			CreatureLayout.UpdateLayout();
-			OtherLayout.UpdateLayout();
+			LandsLayout.UpdateLayout(anim);
+			CreatureLayout.UpdateLayout(anim);
+			OtherLayout.UpdateLayout(anim);
 
 			if (MagicEngine.CurrentEngine.CurrentPhase > GamePhases.BeforeCombat &&
 				MagicEngine.CurrentEngine.CurrentPhase <= GamePhases.EndOfCombat)
@@ -71,7 +62,7 @@ namespace Magic3D
 				if (CombatingCreature.Cards.Count == 0)
 					return;
 				if (MagicEngine.CurrentEngine.cp == Cards[0].Controler)
-					CombatingCreature.UpdateLayout();
+					CombatingCreature.UpdateLayout(anim);
 				else
 					CombatingCreature.UpdateDefendersLayout();
 			}

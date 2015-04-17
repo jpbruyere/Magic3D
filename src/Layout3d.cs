@@ -45,7 +45,7 @@ namespace Magic3D
 
 		public abstract void Render ();
 			
-		public abstract  void UpdateLayout ();
+		public abstract void UpdateLayout (bool anim = true);
 		public abstract void toogleShowAll ();
 	}
 }

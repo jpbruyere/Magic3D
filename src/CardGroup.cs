@@ -56,7 +56,7 @@ namespace Magic3D
         public bool IsVisible = true;
 		public bool IsSelected = false;
 
-		public virtual void AddCard(CardInstance c)
+		public virtual void AddCard(CardInstance c, bool anim = true)
         {
             if (c == null)
                 return;
@@ -83,29 +83,12 @@ namespace Magic3D
 //			Animation.StartAnimation(new AngleAnimation(c, "xAngle", this.xAngle, MathHelper.Pi * 0.03f));
             
 			Cards.Add(c);
-			UpdateLayout ();
+			UpdateLayout (anim);
 		}
-        public virtual void RemoveCard(CardInstance c)
+		public virtual void RemoveCard(CardInstance c, bool anim = true)
         {
             Cards.Remove(c);
-
-            //c.CurrentGroup = null;
-
-//            float hSpace = HorizontalSpacing;
-//
-//            if (HorizontalSpacing * (Cards.Count + 1) > MaxHorizontalSpace)
-//                hSpace = MaxHorizontalSpace / (Cards.Count + 1);
-//
-//            float halfWidth = hSpace * (Cards.Count) / 2;
-//
-//            foreach (CardInstance i in Cards)
-//            {
-//                Animation.StartAnimation(new FloatAnimation(i, "x", this.x - halfWidth + hSpace * Cards.IndexOf(i)));
-//                Animation.StartAnimation(new FloatAnimation(c, "z", this.z + VerticalSpacing * Cards.IndexOf(i)));
-//            }
-
-            //Animation.StartAnimation(new FloatAnimation(c, "y", this.y, 0.2f));
-			UpdateLayout();
+			UpdateLayout(anim);
         }   
 
 		public CardInstance TakeTopOfStack

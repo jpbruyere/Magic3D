@@ -8,6 +8,7 @@ namespace Magic3D
 
 	public class CardLayout : Layout3d
 	{
+		protected const float attachedCardsSpacing = 0.01f;
 		public List<CardInstance> Cards = new List<CardInstance> ();
 
 		public override void Render ()
@@ -33,7 +34,7 @@ namespace Magic3D
 			}
 		}
 
-		public override  void UpdateLayout ()
+		public override  void UpdateLayout (bool anim = true)
 		{
 //vertical layouting            
 			if (IsExpanded)
@@ -51,37 +52,40 @@ namespace Magic3D
 			float cY = this.y;
 			float cZ = this.z;
 
-			float attachedCardsSpacing = 0.01f;
+			if (anim) {
+				foreach (CardInstance c in Cards) {
+					float aX = cX;
+					float aY = cY;
+					float aZ = cZ + c.AttachedCards.Count * attachedCardsSpacing;
 
+					Animation.StartAnimation (new FloatAnimation (c, "x", aX, 0.2f));
+					Animation.StartAnimation (new FloatAnimation (c, "y", aY, 0.2f));
+					if (c.CurrentGroup.GroupName == CardGroupEnum.InPlay && c.HasAbility (AbilityEnum.Flying))
+						Animation.StartAnimation (new ShakeAnimation (c, "z", 0.5f, 0.6f));
+					else
+						Animation.StartAnimation (new FloatAnimation (c, "z", aZ, 0.2f));
+					Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
+					Animation.StartAnimation (new AngleAnimation (c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
+					if (c.IsTapped)
+						Animation.StartAnimation (new FloatAnimation (c, "zAngle", -MathHelper.PiOver2, MathHelper.Pi * 0.1f));
+					else
+						Animation.StartAnimation (new FloatAnimation (c, "zAngle", 0f, MathHelper.Pi * 0.1f));
+
+					cX += hSpace;
+					cZ += VerticalSpacing;
+				}
+				return;
+			}
 			foreach (CardInstance c in Cards) {
-				float aX = cX;
-				float aY = cY;
-				float aZ = cZ + c.AttachedCards.Count * attachedCardsSpacing;
-
-				Animation.StartAnimation (new FloatAnimation (c, "x", aX, 0.2f));
-				Animation.StartAnimation (new FloatAnimation (c, "y", aY, 0.2f));
-				if (c.CurrentGroup.GroupName == CardGroupEnum.InPlay && c.HasAbility(AbilityEnum.Flying))
-					Animation.StartAnimation(new ShakeAnimation(c ,"z", 0.5f, 0.6f));
-				else
-					Animation.StartAnimation (new FloatAnimation (c, "z", aZ, 0.2f));
-				Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
-				Animation.StartAnimation (new AngleAnimation (c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
+				c.x = cX;
+				c.y = cY;
+				c.z = cZ + c.AttachedCards.Count * attachedCardsSpacing;
+				c.xAngle = xAngle;
+				c.yAngle = yAngle;
 				if (c.IsTapped)
-					Animation.StartAnimation(new FloatAnimation(c, "zAngle", -MathHelper.PiOver2, MathHelper.Pi * 0.1f));
+					c.zAngle = -MathHelper.PiOver2;
 				else
-					Animation.StartAnimation(new FloatAnimation(c, "zAngle", 0f, MathHelper.Pi * 0.1f));
-				
-//				foreach (CardInstance ac in c.AttachedCards) {
-//					aX += 0.15f;
-//					aY += 0.15f;
-//					aZ -= attachedCardsSpacing;
-//
-//					Animation.StartAnimation (new FloatAnimation (ac, "x", aX, 0.2f));
-//					Animation.StartAnimation (new FloatAnimation (ac, "y", aY, 0.2f));
-//					Animation.StartAnimation (new FloatAnimation (ac, "z", aZ, 0.2f));
-//					Animation.StartAnimation (new AngleAnimation (ac, "xAngle", xAngle, MathHelper.Pi * 0.3f));
-//					Animation.StartAnimation (new AngleAnimation (ac, "yAngle", yAngle, MathHelper.Pi * 0.3f));
-//				}
+					c.zAngle = 0f;
 
 
 				cX += hSpace;

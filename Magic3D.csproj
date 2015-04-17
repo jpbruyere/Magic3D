@@ -414,6 +414,10 @@
       <LogicalName>
       </LogicalName>
     </Compile>
+    <Compile Include="src\LandsLayout.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">

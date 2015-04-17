@@ -35,8 +35,13 @@ namespace Magic3D
     }
 
     public class Cost
-    {
-        public CostTypes CostType;
+    {		
+
+		CostTypes costType;
+		public virtual CostTypes CostType {
+			get {return costType;}
+			set {costType = value;}
+		}
 
         public Cost()
         { }
@@ -156,7 +161,7 @@ namespace Magic3D
 			left.OrderFirst (dominant);
 			right.OrderFirst (dominant);
             Cost result = right.Pay(ref left);
-            return result == null ? false : true;
+			return result == null || result == CostTypes.Tap ? false : true;
         }
         public static bool operator >(Cost c1, Cost c2)
         {
@@ -395,6 +400,16 @@ namespace Magic3D
     public class Costs : Cost
     {
         public List<Cost> CostList = new List<Cost>();
+		public override CostTypes CostType {
+			get {
+				return CostList.Count == 1 ?
+					CostList[0].CostType :
+					base.CostType;
+			}
+			set {
+				base.CostType = value;
+			}
+		}
         public Costs()
             : base(CostTypes.Composite)
         {

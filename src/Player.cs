@@ -315,7 +315,7 @@ namespace Magic3D
 			lock (pgBar) {
 				pgBar.Visible = false;
 			}
-			Reset ();
+			Reset (false);
 
 			DeckLoaded = true;
 		}
@@ -324,7 +324,7 @@ namespace Magic3D
         /// <summary>
         /// init life points, put all cards in library
         /// </summary>
-        public void Reset()
+		public void Reset(bool anim = true)
         {
 			Keep = false;
 			CardToDraw = 7;
@@ -341,7 +341,7 @@ namespace Magic3D
 
                 c.ResetPositionAndRotation();
 				c.yAngle = MathHelper.Pi;
-                Library.AddCard(c);
+                Library.AddCard(c, anim);
             }
         }
 
