@@ -48,7 +48,7 @@ namespace Magic3D
         
         public string S = "";
         public string AlternateMode = "";
-        public MultiformAttribut<ManaTypes> Colors = new MultiformAttribut<ManaTypes>();
+        public MultiformAttribut<ManaTypes> Colors;
         public string Loyalty = "";
         public string HandLifeModifier = "";
         public string DeckHints = "";

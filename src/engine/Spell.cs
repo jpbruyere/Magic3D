@@ -103,13 +103,13 @@ namespace Magic3D
 		{
 			validated = true;
 		}
-		public override bool TryToAddTarget (CardInstance c)
+		public override bool TryToAddTarget (object c)
 		{
 			if (!WaitForTarget)
 				return false;
 
 			//other target group are possible, should change
-			foreach (CardTarget ct in ValidTargets.Values.OfType<CardTarget>())
+			foreach (Target ct in ValidTargets.Values)
 			{
 				if (ct.Accept(c,CardSource)){
 					SelectedTargets.Add(c);
@@ -118,7 +118,7 @@ namespace Magic3D
 				}
 			}
 
-			Magic.AddLog ("Invalid target: " + c.Model.Name);
+			Magic.AddLog ("Invalid target: " + c.ToString());
 			PrintNextMessage ();
 			return false;
 		}
@@ -279,7 +279,7 @@ namespace Magic3D
 			}
 		}
 
-		public override bool TryToAddTarget (CardInstance c)
+		public override bool TryToAddTarget (object c)
 		{
 			if (CurrentAbility == null)
 				return false;
@@ -339,7 +339,7 @@ namespace Magic3D
 		/// </summary>
 		/// <returns>true if spellActivation has all possible targets and the cost(s) is paid</returns>
 		public abstract void Resolve ();
-		public abstract bool TryToAddTarget (CardInstance c);
+		public abstract bool TryToAddTarget (object c);
 		public abstract void Validate ();
 		public abstract int RequiredTargetCount { get; }
 		public abstract MultiformAttribut<Target> ValidTargets { get; }

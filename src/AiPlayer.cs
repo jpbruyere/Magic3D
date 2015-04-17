@@ -177,9 +177,12 @@ namespace Magic3D
 
 		public bool AITryToPlayLand()
 		{            
+			//TODO: take mana as ordered in pay cost
 			CardInstance[] lands = Hand.Cards.Where(c => c.Model.Types == CardTypes.Land).ToArray();
 
 			if (lands.Length > 0) {
+				lands [0].ChangeZone (CardGroupEnum.InPlay);
+				AllowedLandsToBePlayed--;
 				MagicEngine.CurrentEngine.RaiseMagicEvent (new MagicEventArg (MagicEventType.PlayLand, lands [0]));
 				return true;
 			}

@@ -29,6 +29,23 @@ namespace Magic3D
 		}
 	}
 
+	public class TokeAbility : Ability
+	{
+		public IntegerValue Amount;
+		public IntegerValue Power;
+		public IntegerValue Toughness;
+		public string Name;
+		public MultiformAttribut<CardTypes> Types = new MultiformAttribut<CardTypes>();
+		public ControlerType Owner;
+		public MultiformAttribut<ManaTypes> Colors = new MultiformAttribut<ManaTypes>();
+
+		public TokeAbility()
+		{
+			AbilityType = AbilityEnum.Unset;
+			Effects.Add (new Effect (EffectType.Token));
+		}
+	}
+
 
 	public enum AbilityCategory{		
 		Acivated,

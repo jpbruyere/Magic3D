@@ -71,6 +71,12 @@ namespace Magic3D
 				return Players.SelectMany (p => p.InPlay.Cards.Where (c => c.Model.SpellEffects.Count() > 0)).ToList();
 			}
 		}
+		public IList<CardInstance> CardsInPlayHavingTriggers
+		{
+			get {
+				return Players.SelectMany (p => p.InPlay.Cards.Where (c => c.Model.Triggers.Count()>0)).ToList();
+			}
+		}
 		public IList<CardInstance> CardsInPlayHavingPumpEffects
 		{
 			get {
@@ -255,35 +261,11 @@ namespace Magic3D
 		{
 			#region check triggers
 
-			if (arg.Source != null)
-			{
-				foreach (Trigger t in arg.Source.Model.Triggers){					
-					if (t.Type != arg.Type)
-						continue;
-					switch (t.Type) {
-					case MagicEventType.ChangeZone:
-
-						bool valid = false;
-						foreach (Target ct in t.ValidTarget.Values) {
-							if (ct.Accept(arg.Source,arg.Source))
-								valid = true;		
-						}
-
-						if (!valid)
-							break;
-						
-						ChangeZoneEventArg czea = arg as ChangeZoneEventArg;
-						if ((czea.Origine == t.Origine || t.Origine == CardGroupEnum.Any)
-							&& (czea.Destination == t.Destination || t.Destination == CardGroupEnum.Any))
-						{			
-							Magic.AddLog(arg.Source.ToString() + " => " + t.ToString());
-							PushOnStack (new AbilityActivation (arg.Source, t.Exec));
-						}
-						break;
-					default:
-						Magic.AddLog(arg.Source.ToString() + " => " + t.ToString());
-						PushOnStack (new AbilityActivation (arg.Source, t.Exec));
-					break;
+			//check cards in play having trigger effects
+			foreach (CardInstance ci in CardsInPlayHavingTriggers) {
+				foreach (Trigger t in ci.Model.Triggers){					
+					if (t.ExecuteIfMatch(arg, ci)){
+						Magic.AddLog("=> " + t.ToString());
 					}
 				}
 			}
@@ -325,8 +307,6 @@ namespace Magic3D
 			//Land and mana abililies don't go on the stack, so
 			//there are resolved here
 			case MagicEventType.PlayLand:
-				arg.Source.ChangeZone (CardGroupEnum.InPlay);
-				cp.AllowedLandsToBePlayed--;
 				break;
 			case MagicEventType.ActivateAbility:
 				break;
@@ -353,6 +333,7 @@ namespace Magic3D
 			switch (pea.Phase) {
 			case GamePhases.Untap:
 				cp.AllowedLandsToBePlayed = 1;
+				cp.LifePointsGainedThisTurn = cp.LifePointsLooseThisTurn = 0;
 				cp.CardToDraw = 1;
 				foreach (CardInstance c in cp.InPlay.Cards) {
 					c.HasSummoningSickness = false;
@@ -409,14 +390,16 @@ namespace Magic3D
 				break;
 			case GamePhases.CombatDamage:
 				Chrono.Reset ();
-				foreach (CardInstance ac in cp.AttackingCreature.Where
-					(cpac => !cpac.HasAbility(AbilityEnum.FirstStrike))) {
+				foreach (CardInstance ac in cp.AttackingCreature) {
 					Damage d = new Damage (null, ac, ac.Power);
 
 					foreach (CardInstance def in ac.BlockingCreatures.Where
 						(cpac => !cpac.HasAbility(AbilityEnum.FirstStrike)))
 						MagicStack.Push (new Damage (ac, def, def.Power));
 
+					if (ac.HasAbility (AbilityEnum.FirstStrike)&&!ac.HasAbility (AbilityEnum.DoubleStrike))
+						return;
+					
 					if (ac.BlockingCreatures.Count == 0) {
 						d.Target = cp.Opponent;
 						MagicStack.Push (d);
@@ -549,10 +532,14 @@ namespace Magic3D
 				break;
 			case CardGroupEnum.Hand:
 				#region hand
+				//should first cancel incomplete action
 				if (CurrentPhase == GamePhases.Main1 || CurrentPhase == GamePhases.Main2){
 					if (c.HasType(CardTypes.Land)) {
-						if (cp.AllowedLandsToBePlayed>0)
+						if (cp.AllowedLandsToBePlayed>0){
+							c.ChangeZone (CardGroupEnum.InPlay);
+							cp.AllowedLandsToBePlayed--;
 							MagicEvent (new MagicEventArg (MagicEventType.PlayLand, c));
+						}
 					} else {
 						PushOnStack(new Spell (c));
 					}
@@ -702,8 +689,6 @@ namespace Magic3D
 			
 			if (ma.CardSource.Controler != pp) {
 				return;
-				//				Debug.WriteLine ("ERROR: last action controle has not priority.");
-				//				CancelLastActionOnStack ();
 
 			}if (!ma.IsComplete) {
 				if (ma.RemainingCost == CostTypes.Tap) {

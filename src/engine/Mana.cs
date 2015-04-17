@@ -157,6 +157,22 @@ namespace Magic3D
         }
         public override Cost Pay(ref Cost c)
         {
+			if (c == null)
+				return this;
+			
+			c.OrderFirst(this.GetDominantMana ());
+			Costs cl = c as Costs;
+			if (cl != null) {
+				Cost tmp = this.Clone ();
+				for (int i = 0; i < cl.CostList.Count; i++) {
+					Cost cli = cl.CostList [i];
+					tmp = tmp.Pay (ref cli);
+					if (tmp == null)
+						break;
+				}
+				return tmp;
+			}
+
             Mana m = c as Mana;
             
             if (m == null)
@@ -250,5 +266,10 @@ namespace Magic3D
             }
             return "error";
         }
+
+		public override ManaTypes GetDominantMana ()
+		{
+			return TypeOfMana;
+		}
     }
 }

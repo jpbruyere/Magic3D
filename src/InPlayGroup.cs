@@ -18,20 +18,20 @@ namespace Magic3D
 			HorizontalSpacing = 1.5f;
 			MaxHorizontalSpace = 7f;
 
-			LandsLayout.x = -1f;
+			LandsLayout.x = -0f;
 			LandsLayout.y = -4.2f;
 			LandsLayout.HorizontalSpacing = 1.5f;
-			LandsLayout.VerticalSpacing = -0.01f;
-			LandsLayout.MaxHorizontalSpace = 4f;
+			LandsLayout.VerticalSpacing = 0.01f;
+			LandsLayout.MaxHorizontalSpace = 10f;
 
-			CreatureLayout.x = 0f;
-			CreatureLayout.y = -1.8f;
+			CreatureLayout.x = -0f;
+			CreatureLayout.y = -2.0f;
 			CreatureLayout.HorizontalSpacing = 1.5f;
 			CreatureLayout.VerticalSpacing = 0.01f;
-			CreatureLayout.MaxHorizontalSpace = 6f;
+			CreatureLayout.MaxHorizontalSpace = 8f;
 
 			OtherLayout.x = 4f; 
-			OtherLayout.y = -2.7f;
+			OtherLayout.y = -3.7f;
 			OtherLayout.HorizontalSpacing = 1.5f;
 			OtherLayout.VerticalSpacing = 0.01f;
 			OtherLayout.MaxHorizontalSpace = 4f;

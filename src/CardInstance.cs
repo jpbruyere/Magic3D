@@ -207,12 +207,10 @@ namespace Magic3D
         }
 		public bool HasColor(ManaTypes color)
 		{
-			if (!Model.Colors.Contains (color))
-				return false;
-
+			return Model.Colors == null ?
+				Model.Cost.GetDominantMana() == color : 
+				Model.Colors.Contains (color);
 			//TODO:test with color gain or loose effects
-
-			return true;
 		}
 		public bool HasType(CardTypes t)
 		{

@@ -45,6 +45,8 @@ namespace Magic3D
 		public bool Keep = false;
 		public int CardToDraw = 7;
 		public bool PhaseDone = false;
+		public int LifePointsLooseThisTurn = 0;
+		public int LifePointsGainedThisTurn = 0;
 
 		public Library Library;
 		public CardGroup Hand;
@@ -79,8 +81,9 @@ namespace Magic3D
 			Hand.VerticalSpacing = -0.01f;
 
 			Graveyard = new CardGroup(CardGroupEnum.Graveyard);
-			Graveyard.x = -4;
+			Graveyard.x = -5.5f;
 			Graveyard.y = -2.8f;
+			Graveyard.VerticalSpacing = -0.01f;
 
 			InPlay = new InPlayGroup();
 
@@ -122,6 +125,9 @@ namespace Magic3D
             get { return _lifePoints; }
             set
             {
+				if (_lifePoints == value)
+					return;
+
                 _lifePoints = value;
 
                 if (labPts != null)
@@ -224,8 +230,20 @@ namespace Magic3D
 			labCpts = playerPanel.FindByName ("labCpts") as Label;
 			pgBar = playerPanel.FindByName ("pgBar") as ProgressBar;
 			playerPanel.Background = InactiveColor;
-
+			playerPanel.MouseClick += PlayerPanel_MouseClick;
         }
+
+		void PlayerPanel_MouseClick (object sender, MouseButtonEventArgs e)
+		{
+			MagicEngine me = MagicEngine.CurrentEngine;
+			if (me.pp != me.ip)
+				return;			
+			if (me.NextActionOnStack == null)
+				return;
+			if (me.NextActionOnStack.IsComplete)
+				return;
+			me.NextActionOnStack.TryToAddTarget (this);
+		}
 		public void UpdateUi()
 		{
 			if (ManaPool == null)
@@ -346,6 +364,8 @@ namespace Magic3D
         }			
 		public void AddDamages(Damage d)
 		{
+			LifePointsLooseThisTurn	+= d.Amount;
+			//test here damage prevention effects
 			LifePoints -= d.Amount;
 
 			MagicEngine.CurrentEngine.RaiseMagicEvent(new DamageEventArg(d));

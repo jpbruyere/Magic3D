@@ -40,33 +40,54 @@ namespace Magic3D
 		public Ability Exec;
 		public string Description;
 
-//		public bool Match(MagicEventArg arg)
-//		{
-//			if (Type != arg.Type)
-//				return false;
-//			switch (Type) {
-//			case MagicEventType.ChangeZone:
-//
-//				bool valid = false;
-////				foreach (CardTarget ct in t.ValidTarget.Values.OfType<CardTarget>()) {
-////					if (ct.Accept (arg.Source, arg.Source))
-////						valid = true;		
-////				}
-//
-//				if (!valid)
-//					break;
-//
-//				ChangeZoneEventArg czea = arg as ChangeZoneEventArg;
-//				if ((czea.Origine == Origine || Origine == CardGroupEnum.Any)
-//				    && (czea.Destination == Destination || Destination == CardGroupEnum.Any))
-//					return true;
-//				break;
-//			}			
-//		}
+		bool targetIsValid(object target, CardInstance source)
+		{			
+			foreach (Target ct in ValidTarget.Values) {
+				if (ct.Accept (target, source))
+					return true;
+			}
+			return false;
+		}
+
+		public bool ExecuteIfMatch(MagicEventArg arg, CardInstance triggerSource)
+		{
+			if (Type != arg.Type)
+				return false;
+													
+			switch (Type) {
+			case MagicEventType.ChangeZone:
+				
+				if (!targetIsValid (arg.Source, triggerSource))
+					return false;
+				
+				ChangeZoneEventArg czea = arg as ChangeZoneEventArg;
+				if ((czea.Origine == Origine || Origine == CardGroupEnum.Any)
+				    && (czea.Destination == Destination || Destination == CardGroupEnum.Any))
+					MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (arg.Source, Exec));
+				else
+					return false;
+				return true;
+			case MagicEventType.CastSpell:								
+				if (targetIsValid ((arg as SpellEventArg).Spell.CardSource, triggerSource))
+					MagicEngine.CurrentEngine.PushOnStack 
+						(new AbilityActivation ((arg as SpellEventArg).Spell.CardSource, Exec));
+				else
+					return false;
+				return true;						
+			default:
+				Debug.WriteLine ("default trigger handler: " + this.ToString());
+				if (targetIsValid (arg.Source, triggerSource))
+					MagicEngine.CurrentEngine.PushOnStack 
+						(new AbilityActivation (arg.Source, Exec));
+				else
+					return false;
+				return true;
+			}
+		}
 
 		public override string ToString ()
 		{
-			return Description;
+			return string.Format("{0}: {1}", Type.ToString(), Description);
 		}
 
 		public static Trigger Parse (string str)
@@ -84,10 +105,12 @@ namespace Magic3D
 						t.Type = MagicEventType.ChangeZone;
 						break;
 					case "Phase":
+						t.Type = MagicEventType.BeginPhase;
 						break;
 					case "Attacks":
 						break;
 					case "SpellCast":
+						t.Type = MagicEventType.CastSpell;
 						break;
 					default:
 						Debug.WriteLine ("Unknown trigger " + f [0] + " value:" + data);

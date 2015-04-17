@@ -297,7 +297,7 @@ namespace Magic3D
 						c.Alternate = true;
 						break;
 					case "colors":
-						c.Colors.Value = (ManaTypes)Enum.Parse(typeof(ManaTypes), tmp[1], true);
+						c.Colors += (ManaTypes)Enum.Parse(typeof(ManaTypes), tmp[1], true);
 						break;
 					case "loyalty":
 						c.Loyalty = tmp[1];
