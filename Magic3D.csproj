@@ -306,18 +306,6 @@
       <LogicalName>
       </LogicalName>
     </Compile>
-    <Compile Include="src\CardLayout.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\InPlayGroup.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\Library.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
     <Compile Include="src\tmp\NumericValue.cs">
       <LogicalName>
       </LogicalName>
@@ -374,19 +362,7 @@
       <LogicalName>
       </LogicalName>
     </Compile>
-    <Compile Include="src\CardGroup.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
     <Compile Include="src\engine\NewCost.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\MagicStackLayout.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\Layout3d.cs">
       <LogicalName>
       </LogicalName>
     </Compile>
@@ -414,7 +390,31 @@
       <LogicalName>
       </LogicalName>
     </Compile>
-    <Compile Include="src\LandsLayout.cs">
+    <Compile Include="src\LayoutsAndGroups\CardLayout.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\LayoutsAndGroups\LandsLayout.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\LayoutsAndGroups\Layout3d.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\LayoutsAndGroups\CardGroup.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\LayoutsAndGroups\InPlayGroup.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\LayoutsAndGroups\Library.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\LayoutsAndGroups\MagicStackLayout.cs">
       <LogicalName>
       </LogicalName>
     </Compile>
@@ -472,6 +472,10 @@
       </LogicalName>
     </Folder>
     <Folder Include="Datas\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="src\LayoutsAndGroups\">
       <LogicalName>
       </LogicalName>
     </Folder>

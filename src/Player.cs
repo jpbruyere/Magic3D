@@ -83,7 +83,7 @@ namespace Magic3D
 			Graveyard = new CardGroup(CardGroupEnum.Graveyard);
 			Graveyard.x = -5.5f;
 			Graveyard.y = -2.8f;
-			Graveyard.VerticalSpacing = -0.01f;
+			Graveyard.VerticalSpacing = 0.01f;
 
 			InPlay = new InPlayGroup();
 

@@ -36,17 +36,17 @@ namespace Magic3D
 			float cY = this.y;
 			float cZ = this.z;
 
-			foreach (CardInstance c in Cards.Where(ci => ci.IsTapped)) {
-				Animation.StartAnimation (new FloatAnimation (c, "x", cX, 0.3f));
-				Animation.StartAnimation (new FloatAnimation (c, "y", cY, 0.2f));
-				Animation.StartAnimation (new FloatAnimation (c, "z", cZ + c.AttachedCards.Count * attachedCardsSpacing, 0.2f));
-				Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
-				Animation.StartAnimation (new AngleAnimation (c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
-				Animation.StartAnimation (new FloatAnimation (c, "zAngle", -MathHelper.PiOver2, MathHelper.Pi * 0.1f));
-				
-				cX += 0.15f;
-				cZ += VerticalSpacing;
-			}
+//			foreach (CardInstance c in Cards).Where(ci => ci.IsTapped)) {
+//				Animation.StartAnimation (new FloatAnimation (c, "x", cX, 0.3f));
+//				Animation.StartAnimation (new FloatAnimation (c, "y", cY, 0.2f));
+//				Animation.StartAnimation (new FloatAnimation (c, "z", cZ + c.AttachedCards.Count * attachedCardsSpacing, 0.2f));
+//				Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
+//				Animation.StartAnimation (new AngleAnimation (c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
+//				Animation.StartAnimation (new FloatAnimation (c, "zAngle", -MathHelper.PiOver2, MathHelper.Pi * 0.1f));
+//				
+//				cX += 0.15f;
+//				cZ += VerticalSpacing;
+//			}
 
 
 			IEnumerable<CardInstance> untapped = Cards.Where (ci => !ci.IsTapped);//.OrderBy (cci => cci.Model.Types);
@@ -62,20 +62,23 @@ namespace Magic3D
 
 			float halfWidth = hSpace * (Cards.Count/groupBy) / 2;
 
-			cX = this.x - halfWidth;
+			cX = this.x - MaxHorizontalSpace / 2.0f;
 			cY = this.y;
 			cZ = this.z;
 
 			hSpace += (groupBy - 1) * 0.1f;
 
-			foreach (CardInstance c in untapped) {
+			foreach (CardInstance c in Cards){ //untapped) {
 				int subI = i % groupBy;
 				Animation.StartAnimation (new FloatAnimation (c, "x", cX + subI * 0.1f, 0.3f));
 				Animation.StartAnimation (new FloatAnimation (c, "y", cY - subI * 0.2f, 0.2f));
 				Animation.StartAnimation (new FloatAnimation (c, "z", cZ + c.AttachedCards.Count * attachedCardsSpacing, 0.2f));
 				Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
 				Animation.StartAnimation (new AngleAnimation (c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
-				Animation.StartAnimation (new FloatAnimation (c, "zAngle", 0, MathHelper.Pi * 0.1f));
+				if (c.IsTapped)
+					Animation.StartAnimation (new FloatAnimation (c, "zAngle", -MathHelper.PiOver2, MathHelper.Pi * 0.1f));
+				else
+					Animation.StartAnimation (new FloatAnimation (c, "zAngle", 0, MathHelper.Pi * 0.1f));
 
 				i++;
 

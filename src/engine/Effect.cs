@@ -67,7 +67,7 @@ namespace Magic3D
 			CardInstance ci = _target as CardInstance;
 			if (ci == null)
 				ci = _source;
-			if (player == null)
+			if (player == null && _source != null)
 				player = _source.Controler;
 			
 			switch (TypeOfEffect) {
@@ -87,6 +87,7 @@ namespace Magic3D
 				
 				break;
 			case EffectType.Discard:
+				ci.ChangeZone (CardGroupEnum.Graveyard);
 				break;
 			case EffectType.Pump:
 				break;

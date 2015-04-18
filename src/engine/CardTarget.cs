@@ -34,8 +34,8 @@ namespace Magic3D
 		public override bool Accept (object _target, CardInstance _source)
 		{
 			CardInstance c = _target as CardInstance;
-			if (c == null)
-				return false;
+			if (c == null)				
+				return base.Accept(_target,_source);		
 			
 			if (TypeOfTarget == TargetType.Self && _target != _source)
 				return false;

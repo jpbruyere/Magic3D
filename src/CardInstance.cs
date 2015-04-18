@@ -29,7 +29,7 @@ namespace Magic3D
 		#endregion
 
 		#region CTOR
-		public CardInstance(MagicCard mc)
+		public CardInstance(MagicCard mc = null)
 		{
 			Model = mc;
 		}

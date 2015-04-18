@@ -161,6 +161,11 @@ namespace Magic3D
 		{
 			//first cancel incomplete action of priority player
 			if (NextActionOnStack != null) {
+				//cardsource could be null for action request by engine (ex: discard at cleanup)
+				if (NextActionOnStack.CardSource == null){
+					pp.PhaseDone = false;
+					return;
+				}
 				if (NextActionOnStack.CardSource.Controler == pp){
 					if (!NextActionOnStack.IsComplete) {
 						if (!CancelLastActionOnStack ()) {
@@ -434,6 +439,15 @@ namespace Magic3D
 						}
 					}
 				}
+				int cardDiff = cp.Hand.Cards.Count - 7;
+				Ability discard = new Ability (EffectType.Discard);
+				discard.ValidTargets += new CardTarget () { ValidGroup = CardGroupEnum.Hand };
+				discard.Mandatory = true;
+				discard.RequiredTargetCount = 1;
+
+				for (int i = 0; i < cardDiff; i++) {
+					MagicStack.Push (new AbilityActivation (null, discard) { GoesOnStack = false});
+				}
 				break;
 			}
 		}
@@ -701,15 +715,18 @@ namespace Magic3D
 		{
 			if (MagicStack.Count == 0)
 				return;
+			
 			MagicAction ma = MagicStack.Peek () as MagicAction;
 
 			if (ma == null)
 				return;
-			
-			if (ma.CardSource.Controler != pp) {
-				return;
 
-			}if (!ma.IsComplete) {
+			if (ma.CardSource != null){
+				if (ma.CardSource.Controler != pp)
+					return;
+			}
+
+			if (!ma.IsComplete) {
 				if (ma.RemainingCost == CostTypes.Tap) {
 					ma.RemainingCost = null;
 					ma.CardSource.Tap ();

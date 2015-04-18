@@ -23,13 +23,15 @@ namespace Magic3D
 //			else//if it's a spell ab, no cost and no message
 //				return;
 
-			if (Source.Mandatory)
-				Magic.AddLog (CardSource.Model.Name + " ability activation.");
-			else
-				Magic.AddLog ("Trying to activate " + CardSource.Model.Name + " ability");
+			if (CardSource != null) {
+				if (Source.Mandatory)
+					Magic.AddLog (CardSource.Model.Name + " ability activation.");
+				else
+					Magic.AddLog ("Trying to activate " + CardSource.Model.Name + " ability");
 
-			if (CardSource.Controler.ManaPool != null && RemainingCost != null)
-				PayCost (ref CardSource.Controler.ManaPool);
+				if (CardSource.Controler.ManaPool != null && RemainingCost != null)
+					PayCost (ref CardSource.Controler.ManaPool);
+			}
 
 			PrintNextMessage ();
 
@@ -93,6 +95,10 @@ namespace Magic3D
 			else if (WaitForTarget) {
 				Magic.AddLog (Source.TargetPrompt);
 			}
+
+			if (CardSource == null)
+				return;
+			
 			//show library cards if needeed
 			if (WaitForTarget && ValidTargets != null) {
 				if (ValidTargets.Values.OfType<CardTarget> ().Where
@@ -323,6 +329,8 @@ namespace Magic3D
 
 		public MagicAction(CardInstance _source)
 		{
+			if (_source == null)
+				return;
 			CardSource = _source;
 			if (CardSource.HasType (CardTypes.Land))
 				GoesOnStack = false;

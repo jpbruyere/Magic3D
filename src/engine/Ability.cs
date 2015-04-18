@@ -1741,8 +1741,14 @@ namespace Magic3D
 				tmp = "Triggered " + tmp;
 			else if (IsActivatedAbility)
 				tmp = "Activated " + tmp;
-			tmp += this.AbilityType.ToString();
-			return tmp;
+			if (this.AbilityType != AbilityEnum.Unset) {
+				tmp += this.AbilityType.ToString ();
+				return tmp;
+			}
+			foreach (Effect e in Effects) {
+				tmp += e.ToString() + ", ";
+			}
+			return tmp.Substring (0, tmp.Length - 2);
 		}
 	}
 
