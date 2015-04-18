@@ -97,7 +97,7 @@ namespace Magic3D
 			get { return ActivationCost == null && Trigger == null; }
 		}
 		public bool IsActivatedAbility {
-			get { return Trigger == null && ActivationCost != null; }
+			get { return Trigger == null && Category != AbilityCategory.Spell; }
 		}
 
 		public bool HasContinuousMode {
@@ -484,6 +484,7 @@ namespace Magic3D
 					}
 					break;
 				case AbilityFieldsEnum.NumCards:
+					
 					break;
 				case AbilityFieldsEnum.References:
 					break;
@@ -1499,13 +1500,24 @@ namespace Magic3D
 			case "Horsemanship":
 				a = new Ability (AbilityEnum.Horsemanship);
 				break;
+			case "Lifelink":
+				a = new Ability (AbilityEnum.Flying);
+				break;
+			case "Haunt":
+				a = new Ability (AbilityEnum.Haunt);
+				break;
+			case "Reach":
+				a = new Ability (AbilityEnum.Reach);
+				break;
+			case "Shroud":
+				a = new Ability (AbilityEnum.Shroud);
+				break;
+
 			case "Enchant":
                     //AttachAbility aa = new AttachAbility();
                     //aa.ValidTargets.Value = (CardTypes)Enum.Parse(typeof(CardTypes),tmp[1],true);
 				return null;
 			case "Cumulative":
-				break;
-			case "Haunt":
 				break;
 			case "TypeCycling":
 				break;
@@ -1519,8 +1531,6 @@ namespace Magic3D
 				a.ValidTargets += ct;
 				a.ActivationCost = Cost.Parse (tmp [1]);
 				a.RequiredTargetCount = 1;
-				break;
-			case "Reach":
 				break;
 			case "Flashback":
 				break;
@@ -1537,6 +1547,9 @@ namespace Magic3D
 			case "Persist":
 				break;
 			case "Kicker":
+				a = new Ability (AbilityEnum.Kicker) { Category = AbilityCategory.Spell };
+				a.ActivationCost = Cost.Parse (tmp [1]);
+				a.Description = "Pay kicker cost?";
 				break;
 			case "etbCounter":
 				break;
@@ -1546,15 +1559,11 @@ namespace Magic3D
 				break;
 			case "Conspire":
 				break;
-			case "Lifelink":
-				break;
 			case "Exalted":
 				break;
 			case "Morph":
 				break;
 			case "Cycling":
-				break;
-			case "Shroud":
 				break;
 			case "Fuse":
 				break;

@@ -57,7 +57,7 @@ namespace Magic3D
 			switch (Type) {
 			case MagicEventType.ChangeZone:
 				
-				if (!targetIsValid (arg.Source, triggerSource))
+ 				if (!targetIsValid (arg.Source, triggerSource))
 					return false;
 				
 				ChangeZoneEventArg czea = arg as ChangeZoneEventArg;

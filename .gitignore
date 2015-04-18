@@ -3,3 +3,6 @@ obj/
 bin/
 .hg*
 src/tmp/
+Magic3D.sln
+Magic3D.userprefs
+MagicMedieval.ttf

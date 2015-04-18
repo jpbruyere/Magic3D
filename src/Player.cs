@@ -515,7 +515,7 @@ namespace Magic3D
                 {
                     if (a.ActivationCost.Contains(CostTypes.Tap))
                     {
-                        if (ma.RemainingCost.Contains(a.ProducedMana))
+                        if (ma.remainingCost.Contains(a.ProducedMana))
                         {
 							MagicEngine.CurrentEngine.PushOnStack(new AbilityActivation(c,a));
                             return;

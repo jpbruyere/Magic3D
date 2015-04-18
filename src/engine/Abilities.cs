@@ -21,6 +21,7 @@ namespace Magic3D
         Intimidate,
         Reach,
         Deathtouch,
+		Shroud,
         Shadow,
         Flashback,
         Echo,
@@ -48,5 +49,7 @@ namespace Magic3D
 
         Mana,
 		Pump,
+
+		Kicker,
     }
 }

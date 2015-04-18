@@ -298,10 +298,6 @@
       <LogicalName>
       </LogicalName>
     </Compile>
-    <Compile Include="src\engine\svarEnum.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
     <Compile Include="src\engine\Trigger.cs">
       <LogicalName>
       </LogicalName>

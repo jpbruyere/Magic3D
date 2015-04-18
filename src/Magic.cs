@@ -241,8 +241,12 @@ namespace Magic3D
 
 		void BtOk_MouseClick (object sender, MouseButtonEventArgs e)
 		{			
-			MagicEngine.CurrentEngine.CancelLastActionOnStack ();
-			btOk.Visible = false;			
+			if (engine.NextActionOnStack != null) {
+				engine.NextActionOnStack.Validate ();
+			}
+				
+			//MagicEngine.CurrentEngine.CancelLastActionOnStack ();
+			//btOk.Visible = false;			
 		}
 		public static void AddLog(string msg)
 		{
@@ -277,8 +281,8 @@ namespace Magic3D
 			uiMainMenu.Visible = false;
 			Players = new Player[] 
 			{ 
-				new Player("player 1","Lightforce.dck"), 
-				new AiPlayer("player 2","Kor Armory.dck")
+				new Player("player 1","Kor Armory.dck"), 
+				new AiPlayer("player 2","Lightforce.dck")
 			};
 			this.AddWidget (Players [0].playerPanel);
 			this.AddWidget (Players [1].playerPanel);
@@ -553,6 +557,7 @@ namespace Magic3D
 			case Key.Delete:
 				if (CardInstance.selectedCard == null)
 					return;
+				CardInstance.selectedCard.Reset ();
 				CardInstance.selectedCard.ChangeZone(CardGroupEnum.Hand);			
 				break;
 			case Key.KeypadPlus:

@@ -16,8 +16,8 @@ namespace Magic3D
 		{
 			Source = a;
 			if (!Cost.IsNullOrCountIsZero (Source.ActivationCost)) {
-				RemainingCost = Source.ActivationCost.Clone ();
-				RemainingCost.OrderFirst (Source.ActivationCost.GetDominantMana ());
+				remainingCost = Source.ActivationCost.Clone ();
+				remainingCost.OrderFirst (Source.ActivationCost.GetDominantMana ());
 			}
 			
 //			else//if it's a spell ab, no cost and no message
@@ -29,7 +29,7 @@ namespace Magic3D
 				else
 					Magic.AddLog ("Trying to activate " + CardSource.Model.Name + " ability");
 
-				if (CardSource.Controler.ManaPool != null && RemainingCost != null)
+				if (CardSource.Controler.ManaPool != null && remainingCost != null)
 					PayCost (ref CardSource.Controler.ManaPool);
 			}
 
@@ -85,12 +85,12 @@ namespace Magic3D
 				Magic.btOk.Visible = true;
 			//once a mana has been spent for this ab, prompt for target is shown
 			//only if required target count not reached
-			if (RemainingCost < Source.ActivationCost) {
+			if (remainingCost < Source.ActivationCost) {
 				if (SelectedTargets.Count < RequiredTargetCount)
 					Magic.AddLog (Source.TargetPrompt);
 				else
 					base.PrintNextMessage ();
-			} else if (RemainingCost != null)
+			} else if (remainingCost != null)
 				base.PrintNextMessage ();
 			else if (WaitForTarget) {
 				Magic.AddLog (Source.TargetPrompt);
@@ -112,7 +112,7 @@ namespace Magic3D
 		bool validated = false;
 		public override void Validate ()
 		{
-			validated = true;
+			
 		}
 		public override bool TryToAddTarget (object c)
 		{
@@ -160,6 +160,9 @@ namespace Magic3D
 				p.ManaPool += ma.ProducedMana.Clone();
 				p.UpdateUi ();
 				break;
+			case AbilityEnum.Kicker:
+				CardSource.Kicked = true;
+				break;
 			default:
 				//triggered Ability ou activated
 				if (!(this.Source.IsActivatedAbility||this.Source.IsTriggeredAbility)) {
@@ -180,8 +183,8 @@ namespace Magic3D
 		{            
 
 			if (_cardInstance.Model.Cost != null) {
-				RemainingCost = _cardInstance.Model.Cost.Clone ();
-				RemainingCost.OrderFirst(_cardInstance.Model.Cost.GetDominantMana());
+				remainingCost = _cardInstance.Model.Cost.Clone ();
+				remainingCost.OrderFirst(_cardInstance.Model.Cost.GetDominantMana());
 			}
 
 			Magic.AddLog ("Trying to cast: " + CardSource.Model.Name);
@@ -198,7 +201,17 @@ namespace Magic3D
         
 		List<AbilityActivation> spellAbilities = new List<AbilityActivation>();
 		AbilityActivation currentAbilityActivation = null;
-
+		public override Cost RemainingCost {
+			get {
+				return currentAbilityActivation == null ? remainingCost : currentAbilityActivation.RemainingCost;
+			}
+			set {
+				if (currentAbilityActivation == null)
+					remainingCost = value;
+				else
+					currentAbilityActivation.RemainingCost = value;
+			}
+		}
 		public MagicAction CurrentAbility {
 			get {
 				if (currentAbilityActivation == null)
@@ -218,7 +231,14 @@ namespace Magic3D
 		public AbilityActivation NextAbilityToProcess
 		{
 			get {
+				//already done activation
 				IEnumerable<Ability> abs = spellAbilities.Select (saa => saa.Source);
+
+				//add kicker if base cost is not paid to exclude list
+				//it will be processed only when base cost is paid
+				if (remainingCost != null)
+					abs = abs.Concat (CardSource.Model.Abilities.Where (ema => ema.AbilityType == AbilityEnum.Kicker));				
+				
 				Ability a =
 					CardSource.Model.Abilities.Where (
 						sma => sma.Category == AbilityCategory.Spell &&
@@ -262,7 +282,7 @@ namespace Magic3D
         
 		public override void Resolve ()
 		{
-			foreach (AbilityActivation aa in spellAbilities) {
+			foreach (AbilityActivation aa in spellAbilities.Where(sa => sa.IsComplete)) {
 				aa.Resolve ();
 			}
 
@@ -284,8 +304,15 @@ namespace Magic3D
 		}			
 		public override void Validate ()
 		{
-			if (CurrentAbility != null)
-				currentAbilityActivation.Validate();
+			if (currentAbilityActivation == null)
+				return;//maybe cancel spell if not completed
+			if (currentAbilityActivation.IsMandatory)
+				return;
+			
+			spellAbilities.Add (currentAbilityActivation);
+			currentAbilityActivation = null;
+
+			PrintNextMessage ();
 		}
 		public override bool IsMandatory {
 			get {
@@ -318,13 +345,23 @@ namespace Magic3D
 		public override string ToString ()
 		{
 			return CardSource.Model.Name;
-		}			
+		}	
     }
 
 	public abstract class MagicAction
 	{
 		public CardInstance CardSource;
-		public Cost RemainingCost;
+		public Cost remainingCost;
+
+		public virtual Cost RemainingCost {
+			get {
+				return remainingCost;
+			}
+			set {
+				remainingCost = value;
+			}
+		}
+
 		public bool GoesOnStack = true;
 
 		public MagicAction(CardInstance _source)
@@ -342,7 +379,7 @@ namespace Magic3D
 			PrintNextMessage ();
 		}
 		public virtual bool IsComplete {
-			get { return Cost.IsNullOrCountIsZero(RemainingCost); }
+			get { return Cost.IsNullOrCountIsZero(remainingCost); }
 		}
 		public virtual void PrintNextMessage()
 		{

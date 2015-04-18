@@ -727,10 +727,10 @@ namespace Magic3D
 			}
 
 			if (!ma.IsComplete) {
-				if (ma.RemainingCost == CostTypes.Tap) {
-					ma.RemainingCost = null;
+				if (ma.remainingCost == CostTypes.Tap) {
+					ma.remainingCost = null;
 					ma.CardSource.Tap ();
-				} else if ((pp.AvailableManaOnTable + pp.ManaPool) < ma.RemainingCost) {
+				} else if ((pp.AvailableManaOnTable + pp.ManaPool) < ma.remainingCost) {
 					Magic.AddLog ("Not enough mana available");
 					CancelLastActionOnStack ();
 					return;

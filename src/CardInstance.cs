@@ -58,6 +58,8 @@ namespace Magic3D
 		public bool HasFocus = false;
 		public bool HasSummoningSickness = false;
 
+		public bool Kicked = false;
+
 		public IList<EffectGroup> PumpEffect = new List<EffectGroup> ();
 		public IList<EffectGroup> Effects{
 			get { return Model.SpellEffects.Concat(PumpEffect).ToList(); }
@@ -141,6 +143,7 @@ namespace Magic3D
 
 			Damages.Clear();
             Combating = false;
+			Kicked = false;
             if (BlockedCreature != null)
             {
                 BlockedCreature.BlockingCreatures.Remove(this);
@@ -823,7 +826,11 @@ namespace Magic3D
 		}
 		public void ResetOverlay()
 		{
-			GL.DeleteTextures(1, ref pointsTexture);
+			if (GL.IsTexture (pointsTexture))
+				GL.DeleteTexture (pointsTexture);
+			if (GL.IsTexture (abilitiesTexture))
+				GL.DeleteTexture (abilitiesTexture);
+			pointsTexture = abilitiesTexture = 0;
 		}
 
 		#endregion

@@ -264,8 +264,6 @@ namespace Magic3D
 						case "picture":
 							c.picturePath = tmp[3];
 							break;
-						case "X":
-							break;
 						case "remaideck":
 							break;
 						case "piccount":

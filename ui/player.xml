@@ -2,7 +2,7 @@
 <Container
 	HorizontalAlignment="Left" VerticalAlignment="Top"
 	Margin="10" Width="200" Height="100">
-	<Border Margin="10" BorderWidth="1" >
+	<Border Margin="10" BorderWidth="1" Focusable="false">
 		<Group>
 			<HorizontalStack HorizontalAlignment="Left" VerticalAlignment="Top">
 			<Image Name="pic" Margin="1" Path="image2/normal.svg" Height="20" Width="20" />
