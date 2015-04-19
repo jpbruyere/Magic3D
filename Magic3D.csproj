@@ -62,14 +62,6 @@
       <LogicalName>
       </LogicalName>
     </None>
-    <None Include="src\tmp\magic3D_old.cs">
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="src\tmp\SpellDialog.cs">
-      <LogicalName>
-      </LogicalName>
-    </None>
     <None Include="images\abstract1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <LogicalName>
@@ -185,28 +177,6 @@
       <LogicalName>
       </LogicalName>
     </None>
-    <None Include="..\..\blender\coins\coin.mtl">
-      <Link>meshes\coin.mtl</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="..\..\blender\coins\coin.obj">
-      <Link>meshes\coin.obj</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="..\..\blender\coins\dollar.jpg">
-      <Link>meshes\dollar.jpg</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="src\tmp\magic3D.cs">
-      <LogicalName>
-      </LogicalName>
-    </None>
     <None Include="ui\text.goml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <LogicalName>
@@ -225,6 +195,14 @@
       <LogicalName>
       </LogicalName>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="meshes\coin.obj">
+      <LogicalName>
+      </LogicalName>
+    </None>
+    <None Include="meshes\dollar.jpg">
+      <LogicalName>
+      </LogicalName>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -293,10 +271,6 @@
       </LogicalName>
     </Compile>
     <Compile Include="src\engine\Trigger.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\tmp\NumericValue.cs">
       <LogicalName>
       </LogicalName>
     </Compile>
@@ -438,10 +412,6 @@
       </LogicalName>
     </Folder>
     <Folder Include="src\render\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
-    <Folder Include="src\tmp\">
       <LogicalName>
       </LogicalName>
     </Folder>
