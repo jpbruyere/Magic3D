@@ -1,5 +1,5 @@
 # Magic3D
-Stupid card game developped for programming skill's improvment
+Stupid card game developped for programming skill's improvment. It's far from finished...
 
 Data's come from [Slightly Magic](http://www.slightlymagic.net) and if you've already downloaded card arts, the cached
 directory will be shared.
@@ -10,7 +10,7 @@ directory will be shared.
 ```
 cd Magic3D
 git submodule init
-git submodule update
+git submodule update .
 ```
 - build OpenTK first:
 ```
