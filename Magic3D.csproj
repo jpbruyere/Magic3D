@@ -34,12 +34,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="OpenTK.Compatibility">
-      <HintPath>..\..\..\data2\src\opentk-git\Binaries\OpenTK\Release\OpenTK.Compatibility.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenTK">
-      <HintPath>..\..\..\data2\src\opentk-git\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.Cairo" />
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
@@ -488,7 +482,11 @@
       <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
       <Name>GGL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\data2\devel\MiscUtil\MiscUtil\MiscUtil.csproj">
+    <ProjectReference Include="OpenTK\Source\OpenTK\OpenTK.csproj">
+      <Project>{A37A7E14-0000-0000-0000-000000000000}</Project>
+      <Name>OpenTK</Name>
+    </ProjectReference>
+    <ProjectReference Include="MiscUtil\MiscUtil.csproj">
       <Project>{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}</Project>
       <Name>MiscUtil</Name>
     </ProjectReference>

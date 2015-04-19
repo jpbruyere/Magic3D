@@ -13,7 +13,7 @@ using System.Net;
 using System.Drawing.Imaging;
 using System.Drawing;
 
-using GLU = OpenTK.Graphics.Glu;
+//using GLU = OpenTK.Graphics.Glu;
 using Cairo;
 
 namespace Magic3D

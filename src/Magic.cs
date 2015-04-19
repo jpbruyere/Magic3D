@@ -11,7 +11,7 @@ using go;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
-using GLU = OpenTK.Graphics.Glu;
+//using GLU = OpenTK.Graphics.Glu;
 using System.Linq;
 
 namespace Magic3D
@@ -407,14 +407,14 @@ namespace Magic3D
 			GL.Enable(EnableCap.CullFace);
 			GL.PrimitiveRestartIndex (int.MaxValue);
 			GL.Enable (EnableCap.PrimitiveRestart);
-			GL.Enable (EnableCap.PointSprite);
-			GL.Enable(EnableCap.VertexProgramPointSize);
-			GL.PointParameter(PointSpriteCoordOriginParameter.LowerLeft);
+//			GL.Enable (EnableCap.PointSprite);
+//			GL.Enable(EnableCap.VertexProgramPointSize);
+//			GL.PointParameter(PointSpriteCoordOriginParameter.LowerLeft);
 			GL.Enable (EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-			GL.ShadeModel(ShadingModel.Smooth);
-			GL.Hint (HintTarget.LineSmoothHint, HintMode.Nicest);
+//			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+//			GL.ShadeModel(ShadingModel.Smooth);
+//			GL.Hint (HintTarget.LineSmoothHint, HintMode.Nicest);
 
 			abstractTex = new Texture(@"images/abstract1.jpg");
 
@@ -690,9 +690,12 @@ namespace Magic3D
 			modelview = Matrix4.LookAt(vEye, vEyeTarget, Vector3.UnitZ);
 
 			GL.GetInteger(GetPName.Viewport, viewport);
-
-			texturedShader.ProjectionMatrix = projection;
-			texturedShader.ModelViewMatrix = modelview;
+			try {
+				texturedShader.ProjectionMatrix = projection;
+				texturedShader.ModelViewMatrix = modelview;
+			} catch (Exception ex) {
+				
+			}
 
 		}
 		[STAThread]

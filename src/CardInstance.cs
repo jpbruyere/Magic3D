@@ -11,7 +11,7 @@ using go;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-using GLU = OpenTK.Graphics.Glu;
+//using GLU = OpenTK.Graphics.Glu;
 
 namespace Magic3D
 {

@@ -1,0 +1,118 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magic3D", "Magic3D.csproj", "{9F17A2A7-87CF-4175-9014-BFA7344D935B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGL", "..\..\..\data2\devel\GGL\GGL.csproj", "{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GOLib", "..\..\..\data2\devel\GOLib\GOLib.csproj", "{C2980F9B-4798-4C05-99E2-E174810F7C7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK", "OpenTK\Source\OpenTK\OpenTK.csproj", "{A37A7E14-0000-0000-0000-000000000000}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiscUtil", "MiscUtil\MiscUtil.csproj", "{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+		Debug|Linux_x86 = Debug|Linux_x86
+		Debug|Win_x86 = Debug|Win_x86
+		Release|Linux_x86 = Release|Linux_x86
+		Release|Win_x86 = Release|Win_x86
+		Release 2.0|Any CPU = Release 2.0|Any CPU
+		Documentation|Any CPU = Documentation|Any CPU
+		Nsis|Any CPU = Nsis|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|Linux_x86.ActiveCfg = Debug|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|Linux_x86.Build.0 = Debug|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|Win_x86.ActiveCfg = Debug|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|Win_x86.Build.0 = Debug|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|x86.Build.0 = Debug|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Documentation|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Documentation|Any CPU.Build.0 = Debug|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Nsis|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Nsis|Any CPU.Build.0 = Debug|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release 2.0|Any CPU.ActiveCfg = Release 2.0|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release 2.0|Any CPU.Build.0 = Release 2.0|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|Linux_x86.ActiveCfg = Release|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|Linux_x86.Build.0 = Release|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|Win_x86.ActiveCfg = Release|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|Win_x86.Build.0 = Release|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|x86.ActiveCfg = Release|Any CPU
+		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|x86.Build.0 = Release|Any CPU
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Linux_x86.ActiveCfg = Debug|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Linux_x86.Build.0 = Debug|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Win_x86.ActiveCfg = Debug|Win_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Win_x86.Build.0 = Debug|Win_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|x86.ActiveCfg = Debug|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|x86.Build.0 = Debug|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Documentation|Any CPU.ActiveCfg = Debug|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Documentation|Any CPU.Build.0 = Debug|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Nsis|Any CPU.ActiveCfg = Debug|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Nsis|Any CPU.Build.0 = Debug|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release 2.0|Any CPU.ActiveCfg = Debug|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release 2.0|Any CPU.Build.0 = Debug|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|Linux_x86.ActiveCfg = Release|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|Linux_x86.Build.0 = Release|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|Win_x86.ActiveCfg = Release|Win_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|Win_x86.Build.0 = Release|Win_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|x86.ActiveCfg = Release|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|x86.Build.0 = Release|Linux_x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Debug|Linux_x86.ActiveCfg = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Debug|Linux_x86.Build.0 = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Debug|Win_x86.ActiveCfg = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Debug|Win_x86.Build.0 = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Debug|x86.ActiveCfg = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Debug|x86.Build.0 = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Documentation|Any CPU.ActiveCfg = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Documentation|Any CPU.Build.0 = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Nsis|Any CPU.ActiveCfg = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Nsis|Any CPU.Build.0 = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Release 2.0|Any CPU.ActiveCfg = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Release 2.0|Any CPU.Build.0 = Debug|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Release|Linux_x86.ActiveCfg = Release|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Release|Linux_x86.Build.0 = Release|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Release|Win_x86.ActiveCfg = Release|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Release|Win_x86.Build.0 = Release|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Release|x86.ActiveCfg = Release|x86
+		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Release|x86.Build.0 = Release|x86
+		{A37A7E14-0000-0000-0000-000000000000}.Debug|Linux_x86.ActiveCfg = Debug|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Debug|Linux_x86.Build.0 = Debug|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Debug|Win_x86.ActiveCfg = Debug|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Debug|Win_x86.Build.0 = Debug|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Debug|x86.ActiveCfg = Release|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Debug|x86.Build.0 = Release|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Documentation|Any CPU.ActiveCfg = Documentation|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Documentation|Any CPU.Build.0 = Documentation|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Nsis|Any CPU.ActiveCfg = Nsis|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Nsis|Any CPU.Build.0 = Nsis|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Release 2.0|Any CPU.ActiveCfg = Debug|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Release 2.0|Any CPU.Build.0 = Debug|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Release|Linux_x86.ActiveCfg = Release|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Release|Linux_x86.Build.0 = Release|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Release|Win_x86.ActiveCfg = Release|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Release|Win_x86.Build.0 = Release|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Release|x86.ActiveCfg = Release|Any CPU
+		{A37A7E14-0000-0000-0000-000000000000}.Release|x86.Build.0 = Release|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Linux_x86.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Linux_x86.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Win_x86.ActiveCfg = Debug|Linux_x86
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Win_x86.Build.0 = Debug|Linux_x86
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|x86.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Documentation|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Documentation|Any CPU.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Nsis|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Nsis|Any CPU.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release 2.0|Any CPU.ActiveCfg = Debug|Linux_x86
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release 2.0|Any CPU.Build.0 = Debug|Linux_x86
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Linux_x86.ActiveCfg = Release|Linux_x86
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Linux_x86.Build.0 = Release|Linux_x86
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Win_x86.ActiveCfg = Release|Linux_x86
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Win_x86.Build.0 = Release|Linux_x86
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|x86.ActiveCfg = Release|Linux_x86
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|x86.Build.0 = Release|Linux_x86
+	EndGlobalSection
+EndGlobal
