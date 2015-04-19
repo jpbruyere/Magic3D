@@ -41,6 +41,8 @@ namespace Magic3D
 				return false;
 			if (TypeOfTarget == TargetType.Kicked && !(_source.Kicked && _target == _source))
 				return false;
+			if (TypeOfTarget == TargetType.Permanent && c.CurrentGroup.GroupName != CardGroupEnum.InPlay)
+				return false;
 			
 			if (TypeOfTarget == TargetType.EquipedBy || TypeOfTarget == TargetType.EnchantedBy) {
 				if (_target is CardInstance)

@@ -27,7 +27,7 @@ namespace Magic3D
 				if (Source.Mandatory)
 					Magic.AddLog (CardSource.Model.Name + " ability activation.");
 				else
-					Magic.AddLog ("Trying to activate " + CardSource.Model.Name + " ability");
+					Magic.AddLog (Source.Message);
 
 				if (CardSource.Controler.ManaPool != null && remainingCost != null)
 					PayCost (ref CardSource.Controler.ManaPool);
@@ -110,9 +110,14 @@ namespace Magic3D
 			}
 		}
 		bool validated = false;
+		/// <summary>
+		/// action will be complete if MinTarget <= targets <= MaxTarget 
+		/// </summary>
 		public override void Validate ()
 		{
-			
+			validated = true;
+			if (!IsComplete && MagicEngine.CurrentEngine.NextActionOnStack == this)
+				MagicEngine.CurrentEngine.CancelLastActionOnStack ();
 		}
 		public override bool TryToAddTarget (object c)
 		{
@@ -304,15 +309,17 @@ namespace Magic3D
 		}			
 		public override void Validate ()
 		{
-			if (currentAbilityActivation == null)
+			if (currentAbilityActivation == null){
+				MagicEngine.CurrentEngine.CancelLastActionOnStack ();
 				return;//maybe cancel spell if not completed
+			}
 			if (currentAbilityActivation.IsMandatory)
 				return;
-			
+
+			currentAbilityActivation.Validate ();
+
 			spellAbilities.Add (currentAbilityActivation);
 			currentAbilityActivation = null;
-
-			PrintNextMessage ();
 		}
 		public override bool IsMandatory {
 			get {
@@ -327,8 +334,10 @@ namespace Magic3D
 					
 			if (CurrentAbility.TryToAddTarget(c))
 			{				
-				if (currentAbilityActivation.IsComplete)
-					PrintNextMessage ();
+				//trick to force update of current ability
+				//should simplify currentAbilityActivation update
+				MagicAction tmp = CurrentAbility;
+				PrintNextMessage ();
 				return true;
 			}
 			return false;
@@ -336,8 +345,8 @@ namespace Magic3D
 
 		public override void PrintNextMessage ()
 		{
-			if (CurrentAbility != null)
-				CurrentAbility.PrintNextMessage ();
+			if (currentAbilityActivation != null)
+				currentAbilityActivation.PrintNextMessage ();
 			else
 				base.PrintNextMessage ();
 		}

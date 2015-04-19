@@ -309,6 +309,10 @@ namespace Magic3D
 		}
 		#endregion
 
+		public override string ToString ()
+		{
+			return TypeOfEffect.ToString ();
+		}
         void Effect_MagicEvent(MagicEventArg arg)
         {
 //            if (TrigStart.Type != MagicEventType.Unset)

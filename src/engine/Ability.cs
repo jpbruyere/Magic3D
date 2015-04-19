@@ -83,6 +83,7 @@ namespace Magic3D
 		public Ability SubAbility;
 		public Cost ActivationCost = null;
 		public string Description = "";
+		public string Message = "";
 		public int MinimumTargetCount = -1;
 		public int MaximumTargetCount = -1;
 		/// <summary>
@@ -1438,10 +1439,14 @@ namespace Magic3D
 				return null;
 			}
 
-			string[] tmp = str.Split (new char[] { ' ' });
+			int ptrFirstSpace = str.IndexOf (" ");
+			string data = str.Substring (ptrFirstSpace + 1, str.Length - ptrFirstSpace - 1);
 
+			//string[] tmp = str.Split (new char[] { ' ' });
+			if (ptrFirstSpace < 0)
+				ptrFirstSpace = str.Length;
             
-			switch (tmp [0]) {
+			switch (str.Substring(0,ptrFirstSpace)) {
 			case "CARDNAME":
 				
 				break;
@@ -1461,7 +1466,7 @@ namespace Magic3D
 				a = new Ability (AbilityEnum.Mountainwalk);
 				break;
 			case "First":
-				if (tmp [1] != "Strike")
+				if (data != "Strike")
 					Debugger.Break ();
 				return new Ability (AbilityEnum.FirstStrike);
 			case "Flying":
@@ -1529,7 +1534,7 @@ namespace Magic3D
 				ct.Controler = ControlerType.You;
 				ct.ValidCardTypes += CardTypes.Creature;
 				a.ValidTargets += ct;
-				a.ActivationCost = Cost.Parse (tmp [1]);
+				a.ActivationCost = Cost.Parse (data);
 				a.RequiredTargetCount = 1;
 				break;
 			case "Flashback":
@@ -1548,8 +1553,8 @@ namespace Magic3D
 				break;
 			case "Kicker":
 				a = new Ability (AbilityEnum.Kicker) { Category = AbilityCategory.Spell };
-				a.ActivationCost = Cost.Parse (tmp [1]);
-				a.Description = "Pay kicker cost?";
+				a.ActivationCost = Cost.Parse (data);
+				a.Message = "Kick ?";
 				break;
 			case "etbCounter":
 				break;
@@ -1745,7 +1750,7 @@ namespace Magic3D
 
 		public override string ToString ()
 		{
-			string tmp = "ability: ";
+			string tmp = Description;
 			if (IsTriggeredAbility)
 				tmp = "Triggered " + tmp;
 			else if (IsActivatedAbility)

@@ -246,7 +246,7 @@ namespace Magic3D
 			}
 				
 			//MagicEngine.CurrentEngine.CancelLastActionOnStack ();
-			//btOk.Visible = false;			
+			btOk.Visible = false;			
 		}
 		public static void AddLog(string msg)
 		{
