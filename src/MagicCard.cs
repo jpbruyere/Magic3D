@@ -105,16 +105,18 @@ namespace Magic3D
 
             texture = new int[nbrImg];
 
-            string[] subPath = { "", "4E/", "5E/", "10E/" };
+            string[] subPath = { "", "4E", "5E", "10E" };
+
             foreach (string sb in subPath)
             {
+				string basePath = System.IO.Path.Combine (MagicData.cardsArtPath, sb);
                 for (int i = 0; i < nbrImg; i++)
                 {
                     string f = "";
                     if (nbrImg == 1)
-                        f = Directory.GetFiles(MagicData.cardsArtPath + sb, Name + ".full.jpg").FirstOrDefault();
+                        f = Directory.GetFiles(basePath, Name + ".full.jpg").FirstOrDefault();
                     else
-                        f = Directory.GetFiles(MagicData.cardsArtPath + sb, Name + (i + 1) + ".full.jpg").FirstOrDefault();
+                        f = Directory.GetFiles(basePath, Name + (i + 1) + ".full.jpg").FirstOrDefault();
 
                     if (File.Exists(f))
                     {

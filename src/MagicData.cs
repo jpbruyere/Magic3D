@@ -36,6 +36,9 @@ namespace Magic3D
 
 		public static void InitCardModel()
 		{
+			if (!Directory.Exists (cardsArtPath))
+				Directory.CreateDirectory (cardsArtPath);
+
 			hSVGsymbols = loadRessourceSvg ("Magic3D.image2.abilities.svg");
 
 			CardBack = new Texture(@"images/card_back.jpg");
@@ -50,7 +53,6 @@ namespace Magic3D
 			//			imgManaR = new ImageSurface(@"images/manar.png");
 			//			imgManaB = new ImageSurface(@"images/manab.png");
 			//			imgManaU = new ImageSurface(@"images/manau.png");
-			testSvg();
 		}
 
 		public static List<MagicCard> MissingPicToDownload = new List<MagicCard>();
@@ -87,15 +89,16 @@ namespace Magic3D
 
 					Debug.WriteLine("downloading:" + "http:" + path);
 					WebClient webClient = new WebClient();
+					string localPath = System.IO.Path.Combine (cardsArtPath, name + ".full.jpg");
 					try
 					{
-						webClient.DownloadFile("http:" + path, cardsArtPath + name + ".full.jpg");
+						webClient.DownloadFile("http:" + path, localPath);
 						Debug.WriteLine("->ok");
 					}
 					catch (Exception)
 					{
-						if (File.Exists(cardsArtPath + name + ".full.jpg"))
-							File.Delete(cardsArtPath + name + ".full.jpg");
+						if (File.Exists(localPath))
+							File.Delete(localPath);
 					}
 					lock (mc)
 					{
@@ -106,49 +109,16 @@ namespace Magic3D
 			}
 		}
 
-		const string rootDir = @"/mnt/data/";
-		public const string cardsArtPath = @"/home/jp/.cache/forge/pics/cards/";
-		const string cardsDBPath = rootDir + @"MagicCardDataBase/";
+		public static string cardsArtPath = 
+			System.IO.Path.Combine(
+				Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), 
+				@".cache/forge/pics/cards");
 
 		const int maxCard = 1000;
 
 		static Dictionary<string, MagicCard> cardDatabase = new Dictionary<string, MagicCard>(StringComparer.OrdinalIgnoreCase);
 
-		public static void LoadCardDatabase()
-		{
 
-			string[] dirs = Directory.GetDirectories(cardsDBPath);
-
-			foreach (string dir in dirs)
-			{
-				string[] files = Directory.GetFiles(dir, "*.txt");
-
-				foreach (string f in files)
-				{
-					LoadCardData (f);
-
-					if (cardDatabase.Count > maxCard)
-						return;
-
-				}
-
-			}
-		}
-		public static bool TryGetCard(string name, ref MagicCard c){
-			if (cardDatabase.ContainsKey (name)) {
-				c = cardDatabase [name];
-				return true;
-			}
-			string cfn = name.Trim ().Replace (' ', '_').ToLower () + ".txt";
-			foreach (string file in Directory.EnumerateFiles(
-				cardsDBPath, cfn, SearchOption.AllDirectories))
-			{
-				LoadCardData(file);
-				c = cardDatabase [name];
-				return true;
-			}
-			return false;
-		}
 		public static bool TryGetCardFromZip(string name, ref MagicCard c){
 			if (cardDatabase.ContainsKey (name)) {
 				c = cardDatabase [name];
@@ -404,32 +374,6 @@ namespace Magic3D
 				s.CopyTo (ms);
 				return new Rsvg.Handle (ms.ToArray ());
 			}
-		}
-
-		static void testSvg()
-		{
-			using (ImageSurface draw =
-				new ImageSurface(Format.Argb32, 1024, 1024))
-			{
-				using (Context gr = new Context(draw))
-				{
-					go.Rectangle r = new go.Rectangle(0, 0, 1024, 1024);
-
-					gr.Color = go.Color.Red;
-
-					gr.Rectangle(r);
-					gr.Fill ();
-					//tests
-					//gr.MoveTo(0,0);
-					//gr.Scale (0.3, 0.3);
-					MagicData.hSVGsymbols.RenderCairoSub (gr,"#Flying");
-
-					//MagicData.hSVGsymbols.RenderCairo (gr);
-					draw.Flush();
-				}
-				draw.WriteToPng(@"/home/jp/test.png");
-			}
-
 		}
 	}
 }
