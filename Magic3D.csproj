@@ -402,6 +402,10 @@
       <LogicalName>
       </LogicalName>
     </Compile>
+    <Compile Include="src\engine\Effects\ChangeZoneEffect.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">

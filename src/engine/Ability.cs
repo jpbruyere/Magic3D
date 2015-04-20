@@ -6,15 +6,6 @@ using System.Diagnostics;
 
 namespace Magic3D
 {
-//	public class ManaAbility : Ability
-//	{
-//		public ManaAbility ()
-//		{
-//			AbilityType = AbilityEnum.Mana;
-//		}
-//
-//		public Cost ProducedMana;
-//	}
 
 	public class ChangeZoneAbility : Ability
 	{
@@ -294,10 +285,10 @@ namespace Magic3D
 					case "DealDamage":
 						break;
 					case "ChangeZone":
-						a = new ChangeZoneAbility();
+						a.Effects.Add (new ChangeZoneEffect());
 						break;
 					case "ChangeZoneAll":
-						a = new ChangeZoneAbility();
+						a.Effects.Add (new ChangeZoneEffect());
 						break;
 					case "Draw":
 						break;
@@ -316,7 +307,7 @@ namespace Magic3D
 					case "ChooseColor":
 						break;
 					case "Dig":
-						a = new ChangeZoneAbility();
+						a.Effects.Add (new ChangeZoneEffect());
 						break;
 					case "PumpAll":
 						break;
@@ -674,10 +665,10 @@ namespace Magic3D
 				case AbilityFieldsEnum.NumDmg:
 					break;
 				case AbilityFieldsEnum.Origin:
-					(a as ChangeZoneAbility).Origin = CardGroup.ParseZoneName (value);
+					a.Effects.OfType<ChangeZoneEffect>().LastOrDefault().Origin = CardGroup.ParseZoneName (value);
 					break;
 				case AbilityFieldsEnum.Destination:
-					(a as ChangeZoneAbility).Destination = CardGroup.ParseZoneName (value);
+					a.Effects.OfType<ChangeZoneEffect>().LastOrDefault().Destination = CardGroup.ParseZoneName (value);
 					break;
 				//TODO:make single function to parse numeric fields that could be a counter
 				case AbilityFieldsEnum.NumAtt:
@@ -747,7 +738,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.ChangeType:
 					a.ValidTargets = Target.ParseTargets (value);
 					foreach (CardTarget ct in a.ValidTargets.Values.OfType<CardTarget>()) {
-						ct.ValidGroup += (a as ChangeZoneAbility).Origin;
+						ct.ValidGroup += a.Effects.OfType<ChangeZoneEffect>().LastOrDefault().Origin;
 					}
 					break;
 				case AbilityFieldsEnum.ChangeNum:
@@ -972,7 +963,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.Abilities:
 					break;
 				case AbilityFieldsEnum.Tapped:
-					(a as ChangeZoneAbility).Tapped = bool.Parse (value);
+					a.Effects.OfType<ChangeZoneEffect>().LastOrDefault().Tapped = bool.Parse (value);
 					break;
 				case AbilityFieldsEnum.UnlessPayer:
 					break;

@@ -49,19 +49,8 @@ namespace Magic3D
             TypeOfEffect = _type;
         }
 		#endregion
-		public virtual void Apply(CardInstance _source, Ability _ability, Player _target)
-		{
-			Player affected = _target;
-			if (affected == null)
-				affected = _source.Controler;
-			
-			switch (TypeOfEffect) {
 
-			default:
-				throw new ArgumentOutOfRangeException ();
-			}
-		}
-		protected virtual void ApplySingle(CardInstance _source, Ability _ability, object _target = null)
+		protected virtual void ApplySingle(CardInstance _source, object _target = null)
 		{			
 			Player player = _target as Player;
 			CardInstance ci = _target as CardInstance;
@@ -116,10 +105,9 @@ namespace Magic3D
 			case EffectType.DealDamage:
 				break;
 			case EffectType.ChangeZone:
-				ChangeZoneAbility cza = _ability as ChangeZoneAbility;
 				ci.Reset ();
-				ci.ChangeZone (cza.Destination);
-				if (cza.Tapped)
+				ci.ChangeZone ((this as ChangeZoneEffect).Destination);
+				if ((this as ChangeZoneEffect).Tapped)
 					ci.tappedWithoutEvent = true;
 				else
 					ci.tappedWithoutEvent = false;
@@ -300,9 +288,9 @@ namespace Magic3D
 		{			
 			IList targets = _target as IList;
 			if (ListIsNullOrEmpty(targets))
-				ApplySingle (_source, _ability, _target);
+				ApplySingle (_source, _target);
 			foreach (object o in targets)
-				ApplySingle (_source, _ability, o);					
+				ApplySingle (_source, o);					
 		}
 
 
