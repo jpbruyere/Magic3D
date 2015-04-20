@@ -169,9 +169,10 @@ namespace Magic3D
 
 				foreach (Player p in players) {
 					for (int i = 0; i < tkEff.Amount.GetValue (_source, _target); i++) {
-						p.InPlay.AddCard (new CardInstance (tk) { Controler = p });
+						p.InPlay.AddCard (new CardInstance (tk) { Controler = p, IsToken = true, HasSummoningSickness = true });
 					}
 					p.InPlay.UpdateLayout ();
+					engine.UpdateOverlays ();
 				}					
 
 				break;

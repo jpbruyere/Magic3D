@@ -57,7 +57,7 @@ namespace Magic3D
         public CardGroup CurrentGroup;
 		public bool HasFocus = false;
 		public bool HasSummoningSickness = false;
-
+		public bool IsToken = false;
 		public bool Kicked = false;
 
 		public IList<EffectGroup> PumpEffect = new List<EffectGroup> ();

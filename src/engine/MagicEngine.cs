@@ -327,6 +327,8 @@ namespace Magic3D
 			case MagicEventType.TapCard:
 				break;
 			case MagicEventType.ChangeZone:
+				if (arg.Source.IsToken)
+					arg.Source.CurrentGroup.Cards.Remove (arg.Source);
 				break;
 			case MagicEventType.Unset:
 				break;
