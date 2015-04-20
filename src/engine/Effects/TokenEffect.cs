@@ -23,7 +23,8 @@ using System;
 namespace Magic3D
 {
 	public class TokenEffect : Effect
-	{
+	{		
+
 		public IntegerValue Amount;
 		public IntegerValue Power;
 		public IntegerValue Toughness;
@@ -31,10 +32,27 @@ namespace Magic3D
 		public MultiformAttribut<CardTypes> Types = new MultiformAttribut<CardTypes>();
 		public ControlerType Owner;
 		public MultiformAttribut<ManaTypes> Colors = new MultiformAttribut<ManaTypes>();
+		public string Image;
 
 		public TokenEffect ()
 		{
 			TypeOfEffect = EffectType.Token;
+		}
+
+		public static ControlerType ParseTokenOWnew(string tkowner)
+		{
+			switch (tkowner) {
+			case "Player.Opponent":
+				return ControlerType.Opponent;
+			case "Each":
+				return ControlerType.All;
+			case "Player.IsNotRemembered":
+				return ControlerType.IsNotRemembered;
+			case "Player.Other":
+				return ControlerType.Opponent;
+			default:
+				return (ControlerType)Enum.Parse(typeof(ControlerType),tkowner);
+			}
 		}
 	}
 

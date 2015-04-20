@@ -47,8 +47,14 @@ namespace Magic3D
 					string[] tmp2 = div [0].Split (' ');
 					if (tmp2 [0] == "Valid")
 						cc.CardsToCount = Target.ParseTargets (tmp2 [1]);
-					else
+					else if (tmp2 [0].StartsWith("Kicked")) {
+						string[] tmp3 = tmp2 [0].Split ('.');
+						KickedOrNotValue kov = new KickedOrNotValue (int.Parse (tmp3 [1]), int.Parse (tmp3 [2]));
+						value = kov;
+						break;
+					}else
 						cc.CardsToCount = Target.ParseTargets (tmp2 [0]);
+					
 					if (div.Count() == 2) {
 						tmp2 = div [1].Split ('.');
 						int v = 0;
@@ -74,7 +80,7 @@ namespace Magic3D
 				Debug.WriteLine (ex.Message);
 				return false;
 			}
-		}
+ 		}
 		public static bool TryToSetValue(string _id, object _value)
 		{
 			if (!UnresolvedSVars.ContainsKey (_id))

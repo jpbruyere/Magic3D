@@ -271,5 +271,6 @@ namespace Magic3D
 		{
 			return TypeOfMana;
 		}
-    }
+    		
+	}
 }

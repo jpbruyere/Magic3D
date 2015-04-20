@@ -33,7 +33,15 @@ namespace Magic3D
 
 		public static Rsvg.Handle hSVGsymbols;
 
-
+		public static MultiformAttribut<ManaTypes> ParseMultipleColors(string strColors)
+		{
+			MultiformAttribut<ManaTypes> result = new MultiformAttribut<ManaTypes> (AttributeType.Composite);
+			string[] tmp = strColors.Split (',');
+			foreach (string s in tmp) {
+				result += (ManaTypes)Enum.Parse (typeof(ManaTypes), s);	
+			}
+			return result;
+		}
 		public static void InitCardModel()
 		{
 			if (!Directory.Exists (cardsArtPath))
@@ -114,16 +122,16 @@ namespace Magic3D
 		public static string cardsArtPath = 
 			System.IO.Path.Combine(
 				Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), 
-				@".cache/forge/pics/cards");
-
+				@".cache/forge/pics");
+		
 		const int maxCard = 1000;
 
-		static Dictionary<string, MagicCard> cardDatabase = new Dictionary<string, MagicCard>(StringComparer.OrdinalIgnoreCase);
+		public static Dictionary<string, MagicCard> CardsDatabase = new Dictionary<string, MagicCard>(StringComparer.OrdinalIgnoreCase);
 
 
 		public static bool TryGetCardFromZip(string name, ref MagicCard c){
-			if (cardDatabase.ContainsKey (name)) {
-				c = cardDatabase [name];
+			if (CardsDatabase.ContainsKey (name)) {
+				c = CardsDatabase [name];
 				return true;
 			}
 			string cfn = name.Substring(0,1).ToLower() + "/" + name.Trim ().Replace (' ', '_').Replace("\'",string.Empty).ToLower () + ".txt";
@@ -139,7 +147,7 @@ namespace Magic3D
 			ms.Seek(0,SeekOrigin.Begin);
 			LoadCardData(ms);
 			cardStream.Seek(0,SeekOrigin.Begin);
-			c = cardDatabase [name];
+			c = CardsDatabase [name];
 			c.Stream = cardStream;
 			#else
 			LoadCardData(cardStream);
@@ -340,10 +348,10 @@ namespace Magic3D
 			{
 				if (c.Name == "Circle of Protection" || c.Name == "Rune of Protection")
 				{
-					cardDatabase.Add(c.Name + ": " + c.colorComponentInPicName, c);
+					CardsDatabase.Add(c.Name + ": " + c.colorComponentInPicName, c);
 				}
 				else
-					cardDatabase.Add(c.Name, c);
+					CardsDatabase.Add(c.Name, c);
 			}
 			catch (Exception e)
 			{

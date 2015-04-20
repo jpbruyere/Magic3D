@@ -31,10 +31,28 @@ namespace Magic3D
 		public override int GetValue (CardInstance _source, object _target = null)
 		{
 			int sum = 0;
+
 			foreach (CardTarget ct in CardsToCount.Values.OfType<CardTarget>()) {
 				sum += ct.GetValidTargetsInPlay (_source).Count();
 			}
 			return sum * Multiplier;
+		}
+		#endregion
+	}
+	public class KickedOrNotValue : IntegerValue
+	{
+		int kickedValue = 0;
+		int unkickedValue = 0;
+
+		public KickedOrNotValue(int _kicked, int _unkicked)
+		{
+			kickedValue = _kicked;
+			unkickedValue = _unkicked;
+		}
+		#region implemented abstract members of IntegerValue
+		public override int GetValue (CardInstance _source, object _target = null)
+		{
+			return _source.Kicked ? kickedValue : unkickedValue;
 		}
 		#endregion
 	}

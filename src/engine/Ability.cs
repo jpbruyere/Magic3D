@@ -176,8 +176,17 @@ namespace Magic3D
 			return ta;
 		}
 
-		static List<string> stringList = new List<string> ();
-
+//		static List<string> stringList = new List<string> ();
+//		if (stringList.Contains (value))
+//			break;
+//		stringList.Add (value);
+//		using(Stream s = new FileStream(@"/mnt/data2/tokenOwner.txt",FileMode.Append)){
+//			using (StreamWriter sw = new StreamWriter(s)){
+//				sw.WriteLine ("case \"" + value + "\":");
+//				sw.WriteLine ("\tbreak;");
+//			}
+//		}
+//
 		public static void Parse (string strAbility, ref Ability a)
 		{			
 			string[] tmp = strAbility.Split (new char[] { '|' });
@@ -704,7 +713,7 @@ namespace Magic3D
 					if (int.TryParse (value, out v))
 						tokEff.Amount = v;
 					else
-						SVarToResolve.RegisterSVar(value, tokEff, a.GetType().GetField("Amount"));					
+						SVarToResolve.RegisterSVar(value, tokEff, tokEff.GetType().GetField("Amount"));					
 					break;
 				case AbilityFieldsEnum.TokenName:
 					a.Effects.OfType<TokenEffect> ().LastOrDefault ().Name = value;
@@ -725,22 +734,32 @@ namespace Magic3D
 						}
 					}
 					break;
-				case AbilityFieldsEnum.TokenOwner:
-					if (stringList.Contains (value))
-						break;
-					stringList.Add (value);
-					using(Stream s = new FileStream(@"/mnt/data2/tokenOwner.txt",FileMode.Append)){
-						using (StreamWriter sw = new StreamWriter(s)){
-							sw.WriteLine (value);
-						}
-						
-					}
+				case AbilityFieldsEnum.TokenOwner:					
+					a.Effects.OfType<TokenEffect> ().LastOrDefault ().Owner = TokenEffect.ParseTokenOWnew (value);
 					break;
 				case AbilityFieldsEnum.TokenColors:
+					if (value != "ChosenColor")
+						a.Effects.OfType<TokenEffect> ().LastOrDefault ().Colors = MagicData.ParseMultipleColors(value);
+					//else chose color
 					break;
 				case AbilityFieldsEnum.TokenPower:
+					tokEff = a.Effects.OfType<TokenEffect> ().LastOrDefault ();
+					if (int.TryParse (value, out v))
+						tokEff.Power = v;
+					else
+						SVarToResolve.RegisterSVar(value, tokEff, a.GetType().GetField("Power"));					
 					break;
 				case AbilityFieldsEnum.TokenToughness:
+					tokEff = a.Effects.OfType<TokenEffect> ().LastOrDefault ();
+					if (int.TryParse (value, out v))
+						tokEff.Toughness = v;
+					else
+						SVarToResolve.RegisterSVar(value, tokEff, a.GetType().GetField("Toughness"));					
+					break;
+				case AbilityFieldsEnum.TokenImage:
+					a.Effects.OfType<TokenEffect> ().LastOrDefault ().Image = value;
+					break;
+				case AbilityFieldsEnum.TokenKeywords:
 					break;
 				case AbilityFieldsEnum.ChangeType:
 					a.ValidTargets = Target.ParseTargets (value);
@@ -765,10 +784,6 @@ namespace Magic3D
 				case AbilityFieldsEnum.RepeatOptional:
 					break;
 				case AbilityFieldsEnum.Keywords:
-					break;
-				case AbilityFieldsEnum.TokenImage:
-					break;
-				case AbilityFieldsEnum.TokenKeywords:
 					break;
 				case AbilityFieldsEnum.DigNum:
 					break;

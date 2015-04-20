@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Collections;
 using System.Diagnostics;
+using GGL;
 
 namespace Magic3D
 {
@@ -58,6 +59,8 @@ namespace Magic3D
 
 		protected virtual void ApplySingle(CardInstance _source, object _target = null)
 		{			
+			MagicEngine engine = MagicEngine.CurrentEngine;
+
 			Player player = _target as Player;
 			CardInstance ci = _target as CardInstance;
 			if (ci == null)
@@ -125,6 +128,52 @@ namespace Magic3D
 			case EffectType.RepeatEach:
 				break;
 			case EffectType.Token:
+				TokenEffect tkEff = this as TokenEffect;
+				MagicCard tk = new MagicCard () {
+					Name = tkEff.Name,
+					Power = tkEff.Power.GetValue (_source, _target),
+					Toughness = tkEff.Toughness.GetValue (_source, _target),
+					Colors = tkEff.Colors,
+					Types = tkEff.Types,
+				};
+				string picPath = System.IO.Path.Combine (MagicData.cardsArtPath, "tokens");
+				if (string.IsNullOrEmpty (tkEff.Image))
+					picPath = System.IO.Path.Combine (picPath,
+						new Mana(tkEff.Colors.Values.FirstOrDefault()).ToString ().ToLower() + "_" + tk.Power.ToString () + "_" + tk.Toughness.ToString() +
+						tk.Types.Values.Where(tkt=>tkt != CardTypes.Creature).
+						Aggregate<CardTypes,string> (String.Empty,(a, b) => a.ToString().ToLower() + '_' + b.ToString().ToLower())+".jpg");
+				else
+					picPath = System.IO.Path.Combine (picPath, tkEff.Image + ".jpg");
+
+				tk.Texture = new Texture (picPath);
+
+				Player[] players;
+
+				switch (tkEff.Owner) {
+				case ControlerType.All:
+					players = engine.Players;
+					break;
+				case ControlerType.You:
+					players = new Player[] { _source.Controler};
+					break;
+				case ControlerType.Opponent:
+					players = new Player[] { _source.Controler.Opponent};
+					break;
+				case ControlerType.Targeted:
+					players = new Player[] { _target as Player };
+					break;
+				default:
+					players = new Player[] { _source.Controler};
+					break;
+				}
+
+				foreach (Player p in players) {
+					for (int i = 0; i < tkEff.Amount.GetValue (_source, _target); i++) {
+						p.InPlay.AddCard (new CardInstance (tk) { Controler = p });
+					}
+					p.InPlay.UpdateLayout ();
+				}					
+
 				break;
 			case EffectType.GainControl:
 				break;

@@ -25,7 +25,17 @@ namespace Magic3D
     {
         All,
         You,
-        Opponent
+        Opponent,
+		Targeted,
+		ChosenAndYou,
+		TargetedController,
+		TriggeredCardController,
+		TriggeredTargetController,
+		TriggeredSourceController,
+		TriggeredAttackingPlayer,
+		TriggeredActivator,
+		TriggeredPlayer,
+		IsNotRemembered,
     }
     public enum CombatImplication
     {
@@ -260,4 +270,5 @@ namespace Magic3D
             return TypeOfTarget.ToString();
         }
     }
+			
 }

@@ -74,6 +74,20 @@ namespace Magic3D
         public int Texture
         {
             get { return texture == null ? 0 : texture[_selectedTexture]; }
+			set {
+				if (value == null) {
+					if (texture == null)
+						return;
+					try {
+						GL.DeleteTextures (texture.Count(), texture);					
+					} catch (Exception ex) { }
+				}
+
+				if (texture == null)
+					texture = new int[1];
+				
+				texture [0] = value;
+			}
         }
 			
 
@@ -105,7 +119,7 @@ namespace Magic3D
 
             texture = new int[nbrImg];
 
-            string[] subPath = { "", "4E", "5E", "10E" };
+			string[] subPath = { "cards", "cards/4E", "cards/5E", "cards/10E" };
 
             foreach (string sb in subPath)
             {
