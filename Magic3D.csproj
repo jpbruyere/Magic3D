@@ -226,10 +226,6 @@
       <LogicalName>
       </LogicalName>
     </Compile>
-    <Compile Include="src\engine\Effect.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
     <Compile Include="src\Magic.cs">
       <LogicalName>
       </LogicalName>
@@ -338,19 +334,11 @@
       <LogicalName>
       </LogicalName>
     </Compile>
-    <Compile Include="src\engine\EffectGroup.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
     <Compile Include="src\SVarToResolve.cs">
       <LogicalName>
       </LogicalName>
     </Compile>
     <Compile Include="src\engine\CardTarget.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\EffectInstance.cs">
       <LogicalName>
       </LogicalName>
     </Compile>
@@ -390,15 +378,27 @@
       <LogicalName>
       </LogicalName>
     </Compile>
-    <Compile Include="src\engine\NumericEffect.cs">
+    <Compile Include="src\engine\Effects\AbilityEffect.cs">
       <LogicalName>
       </LogicalName>
     </Compile>
-    <Compile Include="src\engine\AbilityEffect.cs">
+    <Compile Include="src\engine\Effects\Effect.cs">
       <LogicalName>
       </LogicalName>
     </Compile>
-    <Compile Include="src\engine\ManaEffect.cs">
+    <Compile Include="src\engine\Effects\EffectGroup.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Effects\EffectInstance.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Effects\ManaEffect.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\Effects\NumericEffect.cs">
       <LogicalName>
       </LogicalName>
     </Compile>
@@ -456,6 +456,10 @@
       </LogicalName>
     </Folder>
     <Folder Include="src\LayoutsAndGroups\">
+      <LogicalName>
+      </LogicalName>
+    </Folder>
+    <Folder Include="src\engine\Effects\">
       <LogicalName>
       </LogicalName>
     </Folder>
