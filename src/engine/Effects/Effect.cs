@@ -139,11 +139,11 @@ namespace Magic3D
 				string picPath = System.IO.Path.Combine (MagicData.cardsArtPath, "tokens");
 				if (string.IsNullOrEmpty (tkEff.Image))
 					picPath = System.IO.Path.Combine (picPath,
-						new Mana(tkEff.Colors.Values.FirstOrDefault()).ToString ().ToLower() + "_" + tk.Power.ToString () + "_" + tk.Toughness.ToString() +
-						tk.Types.Values.Where(tkt=>tkt != CardTypes.Creature).
-						Aggregate<CardTypes,string> (String.Empty,(a, b) => a.ToString().ToLower() + '_' + b.ToString().ToLower())+".jpg");
-				else
-					picPath = System.IO.Path.Combine (picPath, tkEff.Image + ".jpg");
+						new Mana (tkEff.Colors.Values.FirstOrDefault ()).ToString ().ToLower () + "_" + tk.Power.ToString () + "_" + tk.Toughness.ToString () +
+						tk.Types.Values.Where (tkt => tkt != CardTypes.Creature).
+						Aggregate<CardTypes,string> (String.Empty, (a, b) => a.ToString ().ToLower () + '_' + b.ToString ().ToLower ()) + ".jpg");
+				else 
+					picPath = System.IO.Path.Combine (picPath, tkEff.Image + ".jpg").Replace(' ','_').ToLower();				
 
 				tk.Texture = new Texture (picPath);
 

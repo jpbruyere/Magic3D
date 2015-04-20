@@ -437,7 +437,7 @@ namespace Magic3D
         {
             if (c.CostType == CostTypes.Composite)
             {
-                Costs composite = c.Clone() as Costs;
+                Costs composite = c as Costs;
                 Cost result = this.Clone();
                 for (int i = 0; i < composite.CostList.Count; i++)
                 {

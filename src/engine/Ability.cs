@@ -19,6 +19,7 @@ namespace Magic3D
 		public Ability (AbilityEnum a)
 		{
 			AbilityType = a;
+			Category = AbilityCategory.Spell;
 		}
 		public Ability (EffectType et)
 		{
@@ -1527,7 +1528,7 @@ namespace Magic3D
 				a = new Ability (AbilityEnum.Horsemanship);
 				break;
 			case "Lifelink":
-				a = new Ability (AbilityEnum.Flying);
+				a = new Ability (AbilityEnum.Likelink);
 				break;
 			case "Haunt":
 				a = new Ability (AbilityEnum.Haunt);
@@ -1783,7 +1784,7 @@ namespace Magic3D
 			foreach (Effect e in Effects) {
 				tmp += e.ToString() + ", ";
 			}
-			return tmp.Substring (0, tmp.Length - 2);
+			return string.IsNullOrEmpty(tmp) ? AbilityType.ToString() : tmp.Substring (0, tmp.Length - 2);
 		}
 	}
 

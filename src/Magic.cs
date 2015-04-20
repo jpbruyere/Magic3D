@@ -281,8 +281,8 @@ namespace Magic3D
 			uiMainMenu.Visible = false;
 			Players = new Player[] 
 			{ 
-				new Player("player 1","Kor Armory.dck"), 
-				new AiPlayer("player 2","Lightforce.dck")
+				new Player("player 1","Lightforce.dck"), 
+				new AiPlayer("player 2","Kor Armory.dck")
 			};
 			this.AddWidget (Players [0].playerPanel);
 			this.AddWidget (Players [1].playerPanel);

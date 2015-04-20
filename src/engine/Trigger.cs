@@ -41,7 +41,9 @@ namespace Magic3D
 		public string Description;
 
 		bool targetIsValid(object target, CardInstance source)
-		{			
+		{	
+			if (ValidTarget == null)
+				return false;
 			foreach (Target ct in ValidTarget.Values) {
 				if (ct.Accept (target, source))
 					return true;
