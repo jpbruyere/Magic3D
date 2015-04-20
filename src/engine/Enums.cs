@@ -470,8 +470,9 @@ namespace Magic3D
 		ReorderZone,
 		ChoosePlayer,
 		EndTurn,
-		MultiplePiles
+		MultiplePiles,
 
+		ProduceMana
 	}
 	public enum AbilityFieldsEnum
 	{

@@ -46,8 +46,7 @@ namespace Magic3D
 
         Instant,
         Interrupt,
-
-        Mana,
+		        
 		Pump,
 
 		Kicker,

@@ -511,11 +511,12 @@ namespace Magic3D
 
             foreach (CardInstance c in InPlay.Cards.Where(crd => !crd.IsTapped))
             {
-				foreach (ManaAbility a in c.Model.Abilities.OfType<ManaAbility>())
+				foreach (Ability a in c.Model.Abilities.Where(a => a.ContainsEffect(EffectType.ProduceMana)))
                 {
+					ManaEffect me = a.Effects.OfType<ManaEffect> ().FirstOrDefault ();
                     if (a.ActivationCost.Contains(CostTypes.Tap))
                     {
-                        if (ma.remainingCost.Contains(a.ProducedMana))
+                        if (ma.remainingCost.Contains(me.ProducedMana))
                         {
 							MagicEngine.CurrentEngine.PushOnStack(new AbilityActivation(c,a));
                             return;
@@ -533,10 +534,11 @@ namespace Magic3D
                 foreach (CardInstance c in InPlay.Cards.Where(crd => !crd.IsTapped))
                 {
                     ManaChoice mc = new ManaChoice();
-                    foreach (ManaAbility ma in c.Model.Abilities.OfType<ManaAbility>())
+					foreach (Ability a in c.Model.Abilities.Where(a => a.ContainsEffect(EffectType.ProduceMana)))
                     {
-                        if (ma.ActivationCost.Contains(CostTypes.Tap))
-                            mc += ma.ProducedMana.Clone() as Mana;
+						ManaEffect me = a.Effects.OfType<ManaEffect> ().FirstOrDefault ();
+                        if (a.ActivationCost.Contains(CostTypes.Tap))
+                            mc += me.ProducedMana.Clone() as Mana;
                     }
                     if (mc.Manas.Count == 0)
                         continue;

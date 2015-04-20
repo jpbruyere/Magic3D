@@ -79,6 +79,10 @@ namespace Magic3D
 				break;
 			case EffectType.Unset:
 				break;
+			case EffectType.ProduceMana:				
+				player.ManaPool += (this as ManaEffect).ProducedMana.Clone();
+				player.UpdateUi ();
+				break;
 			case EffectType.Loose:
 				break;
 			case EffectType.LooseAllAbilities:
@@ -313,7 +317,8 @@ namespace Magic3D
 		{
 			return TypeOfEffect.ToString ();
 		}
-        void Effect_MagicEvent(MagicEventArg arg)
+        
+		void Effect_MagicEvent(MagicEventArg arg)
         {
 //            if (TrigStart.Type != MagicEventType.Unset)
 //            {
@@ -340,29 +345,8 @@ namespace Magic3D
         public Player Controler;
     }
 
-    [Serializable]
-    public class NumericEffect : Effect
-    {
-		public int Multiplier = 1;
-        public IntegerValue Amount;
+   
 
-		public NumericEffect() : base() {}
-		public NumericEffect(EffectType et) : base(et){}
-		public NumericEffect(EffectType et, IntegerValue amount) : base(et)
-		{
-			Amount = amount;
-		}
-    }
-    [Serializable]
-    public class AbilityEffect : Effect
-    {
-        public Ability Ability;
-		public AbilityEffect(Ability _ability)
-		{
-			this.TypeOfEffect = EffectType.Gain;
-			Ability = _ability;
-		}
-    }
 //	public class LifeEffect : Effect
 //	{		
 //		public int Amount;

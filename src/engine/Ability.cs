@@ -6,15 +6,15 @@ using System.Diagnostics;
 
 namespace Magic3D
 {
-	public class ManaAbility : Ability
-	{
-		public ManaAbility ()
-		{
-			AbilityType = AbilityEnum.Mana;
-		}
-
-		public Cost ProducedMana;
-	}
+//	public class ManaAbility : Ability
+//	{
+//		public ManaAbility ()
+//		{
+//			AbilityType = AbilityEnum.Mana;
+//		}
+//
+//		public Cost ProducedMana;
+//	}
 
 	public class ChangeZoneAbility : Ability
 	{
@@ -70,6 +70,11 @@ namespace Magic3D
 			AbilityType = AbilityEnum.Unset;
 			Trigger = trig;
 		}
+		public Ability (Effect effect)
+		{
+			AbilityType = AbilityEnum.Unset;
+			this.Effects.Add (effect);
+		}
 		#endregion
 
 		int _requiredTargetCount = -1;
@@ -103,6 +108,10 @@ namespace Magic3D
 
 		public bool HasContinuousMode {
 			get { return Effects == null ? false : Effects.Mode == Effect.ModeEnum.Continuous; }
+		}
+		public bool ContainsEffect(EffectType et)
+		{
+			return Effects.Where (e => e.TypeOfEffect == et).Count () > 0;
 		}
 		/// <summary>
 		/// return MinimumTargetCount if set or _requiredTargetCount
@@ -247,10 +256,9 @@ namespace Magic3D
 					case "Discard":
 						break;
 					case "Mana":
-						a = new ManaAbility ();
+						a.Effects.Add(new ManaEffect());
 						break;
-					case "Pump":
-						
+					case "Pump":						
 						a.AbilityType = AbilityEnum.Pump;
 						a.Effects.TrigEnd = new Trigger(MagicEventType.EndTurn);
 						break;
@@ -492,7 +500,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.SpellDescription:
 					break;
 				case AbilityFieldsEnum.Produced:
-					(a as ManaAbility).ProducedMana = Mana.Parse (value);
+					a.Effects.OfType<ManaEffect>().LastOrDefault().ProducedMana = Mana.Parse (value);
 					break;
 				case AbilityFieldsEnum.AILogic:
 					#region AIlogic 

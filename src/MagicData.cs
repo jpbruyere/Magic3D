@@ -326,7 +326,10 @@ namespace Magic3D
 						break;
 					}
 					if (m != null)
-						c.Abilities.Add(new ManaAbility { ProducedMana = m, ActivationCost = CostTypes.Tap });
+						c.Abilities.Add(
+							new Ability(new ManaEffect(m)) { 
+								ActivationCost = CostTypes.Tap 
+							});
 				}
 			}
 			#endregion

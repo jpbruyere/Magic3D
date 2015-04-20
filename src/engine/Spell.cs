@@ -159,12 +159,6 @@ namespace Magic3D
 				break;
 			case AbilityEnum.Interrupt:
 				break;
-			case AbilityEnum.Mana:
-				ManaAbility ma = Source as ManaAbility;
-				Player p = CardSource.Controler;
-				p.ManaPool += ma.ProducedMana.Clone();
-				p.UpdateUi ();
-				break;
 			case AbilityEnum.Kicker:
 				CardSource.Kicked = true;
 				break;

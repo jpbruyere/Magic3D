@@ -390,6 +390,18 @@
       <LogicalName>
       </LogicalName>
     </Compile>
+    <Compile Include="src\engine\NumericEffect.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\AbilityEffect.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\ManaEffect.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">

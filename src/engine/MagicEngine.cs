@@ -734,13 +734,16 @@ namespace Magic3D
 					Magic.AddLog ("Not enough mana available");
 					CancelLastActionOnStack ();
 					return;
-				} else if (pp.ManaPool != null && ma.RemainingCost != null)
+				} else if (pp.ManaPool != null && ma.RemainingCost != null) {
 					ma.PayCost (ref pp.ManaPool);
+					pp.UpdateUi ();
+				}
 				
-				if (ma.IsComplete && ma.GoesOnStack)
-					GivePriorityToNextPlayer ();				
+//				if (ma.IsComplete && ma.GoesOnStack)
+//					GivePriorityToNextPlayer ();				
 				
-			}else{
+			}
+			if (ma.IsComplete){
 				if (ma.GoesOnStack) {
 					//should show spell to player...
 					UpdateStackLayouting();
