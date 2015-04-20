@@ -273,7 +273,7 @@ namespace Magic3D
 						a.Effects.Add (new ChangeZoneEffect());
 						break;
 					case "ChangeZoneAll":
-						a.Effects.Add (new ChangeZoneEffect());
+						a.Effects.Add (new ChangeZoneEffect() { TypeOfEffect = EffectType.ChangeZoneAll });
 						break;
 					case "Draw":
 						break;
@@ -368,6 +368,7 @@ namespace Magic3D
 					case "ChooseType":
 						break;
 					case "Shuffle":
+						a.Effects.Add(new Effect(EffectType.Shuffle));
 						break;
 					case "NameCard":
 						break;

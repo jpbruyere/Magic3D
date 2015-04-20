@@ -191,6 +191,18 @@ namespace Magic3D
 			case EffectType.RemoveCounterAll:
 				break;
 			case EffectType.ChangeZoneAll:
+				CardGroup orig = ci.Controler.allGroups.Where (ag => ag.GroupName == (this as ChangeZoneEffect).Origin).FirstOrDefault ();
+				while (orig.Cards.Count > 0) {
+					CardInstance cc = orig.Cards.FirstOrDefault ();
+					cc.Reset ();
+					cc.ChangeZone ((this as ChangeZoneEffect).Destination);
+					if ((this as ChangeZoneEffect).Tapped)
+						cc.tappedWithoutEvent = true;
+					else
+						cc.tappedWithoutEvent = false;
+				}
+				orig.UpdateLayout ();
+				ci.Controler.allGroups.Where (ag => ag.GroupName == (this as ChangeZoneEffect).Destination).FirstOrDefault ().UpdateLayout ();
 				break;
 			case EffectType.DamageAll:
 				break;

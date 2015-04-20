@@ -17,7 +17,7 @@ namespace Magic3D
 		/// <summary>NOR</summary>
         Exclude
     }
-	public class MultiformAttribut<T>
+	public class MultiformAttribut<T> : IComparable
     {
         public List<T> Values = new List<T>();
         public AttributeType attributeType;
@@ -217,5 +217,14 @@ namespace Magic3D
             }
             return tmp.Substring(0, tmp.Length - 1);
         }
+
+		#region IComparable implementation
+
+		public int CompareTo (object obj)
+		{
+			return string.Compare (this.ToString (), obj.ToString ());
+		}
+
+		#endregion
     }
 }

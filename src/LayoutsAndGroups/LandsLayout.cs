@@ -68,7 +68,7 @@ namespace Magic3D
 
 			hSpace += (groupBy - 1) * 0.1f;
 
-			foreach (CardInstance c in Cards){ //untapped) {
+			foreach (CardInstance c in Cards.OrderBy(cc=>cc.Model.Types)){ //untapped) {
 				int subI = i % groupBy;
 				Animation.StartAnimation (new FloatAnimation (c, "x", cX + subI * 0.1f, 0.3f));
 				Animation.StartAnimation (new FloatAnimation (c, "y", cY - subI * 0.2f, 0.2f));
