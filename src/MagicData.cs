@@ -39,6 +39,8 @@ namespace Magic3D
 			if (!Directory.Exists (cardsArtPath))
 				Directory.CreateDirectory (cardsArtPath);
 
+			//LoadAllCardsInZip ();
+
 			hSVGsymbols = loadRessourceSvg ("Magic3D.image2.abilities.svg");
 
 			CardBack = new Texture(@"images/card_back.jpg");
@@ -181,7 +183,7 @@ namespace Magic3D
 								continue;
 							string tt = t.Replace('\'', '_');
 							tt = tt.Replace('-', '_');
-							c.Types.Value = (CardTypes)Enum.Parse(typeof(CardTypes), tt, true);
+							c.Types += (CardTypes)Enum.Parse(typeof(CardTypes), tt, true);
 						}
 						break;
 					case "a":
@@ -293,7 +295,7 @@ namespace Magic3D
 						break;
 					}
 				}
-
+				SVarToResolve.UnresolvedSVars.Clear ();
 			}
 
 			#region add mana ability to basic lands
@@ -349,7 +351,29 @@ namespace Magic3D
 			}
 			return c;
 		}
+		public static void LoadAllCardsInZip()
+		{
+			ZipFile zf = null;
+			MemoryStream ms = new MemoryStream ();
+			try {
+				FileStream fs = File.OpenRead ("Datas/cardsfolder.zip");
+				zf = new ZipFile (fs);
+				//	ZipEntry zipEntry = zf.FindEntry(cardPath,true);
+				//zf.GetInputStream(
+				foreach (ZipEntry ze in zf) {
+					if (!ze.IsFile)
+						continue;
+					Stream s = zf.GetInputStream (ze);
+					LoadCardData(s);
+					s.Dispose();
+				}
 
+			} finally {
+				if (zf != null) {
+					zf.Close (); 
+				}
+			}
+		}
 		public static Stream GetCardDataStream(string cardPath) {
 			ZipFile zf = null;
 			MemoryStream ms = new MemoryStream ();

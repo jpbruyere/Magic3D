@@ -3,41 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 
 namespace Magic3D
 {
-
-	public class ChangeZoneAbility : Ability
-	{
-		public CardGroupEnum Origin;
-		public CardGroupEnum Destination;
-		public bool Tapped = false;
-
-		public ChangeZoneAbility()
-		{
-			AbilityType = AbilityEnum.Unset;
-			Effects.Add (new Effect(EffectType.ChangeZone));
-		}
-	}
-
-	public class TokeAbility : Ability
-	{
-		public IntegerValue Amount;
-		public IntegerValue Power;
-		public IntegerValue Toughness;
-		public string Name;
-		public MultiformAttribut<CardTypes> Types = new MultiformAttribut<CardTypes>();
-		public ControlerType Owner;
-		public MultiformAttribut<ManaTypes> Colors = new MultiformAttribut<ManaTypes>();
-
-		public TokeAbility()
-		{
-			AbilityType = AbilityEnum.Unset;
-			Effects.Add (new Effect (EffectType.Token));
-		}
-	}
-
-
 	public enum AbilityCategory{		
 		Acivated,
 		Spell,
@@ -206,6 +175,9 @@ namespace Magic3D
 			ta.Trigger = _trig;
 			return ta;
 		}
+
+		static List<string> stringList = new List<string> ();
+
 		public static void Parse (string strAbility, ref Ability a)
 		{			
 			string[] tmp = strAbility.Split (new char[] { '|' });
@@ -213,6 +185,7 @@ namespace Magic3D
 			AbilityCategory Category = AbilityCategory.Acivated;
 			bool mandatory = false;
 			NumericEffect numEff = null;
+			TokenEffect tokEff = null;
 			//example: for destroy, only inplay cards can be targeted
 			CardGroupEnum validCardTargetZoneFix = CardGroupEnum.Any;
 
@@ -261,6 +234,7 @@ namespace Magic3D
 					case "Effect":
 						break;
 					case "Counter":
+						a.Effects.Add(new ChangeZoneEffect());
 						break;
 					case "Destroy":
 						a.Effects.Add(new Effect(EffectType.Destroy));
@@ -276,6 +250,7 @@ namespace Magic3D
 						a.Effects.Add (new NumericEffect(EffectType.LoseLife));
 						break;
 					case "GainLife":						
+					case "Gainlife":
 						a.Effects.Add (new NumericEffect(EffectType.GainLife));
 						break;
 					case "PreventDamage":
@@ -297,6 +272,7 @@ namespace Magic3D
 					case "RepeatEach":
 						break;
 					case "Token":
+						a.Effects.Add(new TokenEffect());
 						break;
 					case "GainControl":
 						break;
@@ -332,6 +308,7 @@ namespace Magic3D
 					case "Untap":
 						break;
 					case "Mill":
+						a.Effects.Add (new ChangeZoneEffect());
 						break;
 					case "Fog":
 						break;
@@ -372,6 +349,7 @@ namespace Magic3D
 					case "ManaReflected":
 						break;
 					case "SetLife":
+						a.Effects.Add (new NumericEffect(EffectType.SetLife));
 						break;
 					case "DebuffAll":
 						break;
@@ -722,12 +700,41 @@ namespace Magic3D
 				case AbilityFieldsEnum.StackDescription:
 					break;
 				case AbilityFieldsEnum.TokenAmount:
+					tokEff = a.Effects.OfType<TokenEffect> ().LastOrDefault ();
+					if (int.TryParse (value, out v))
+						tokEff.Amount = v;
+					else
+						SVarToResolve.RegisterSVar(value, tokEff, a.GetType().GetField("Amount"));					
 					break;
 				case AbilityFieldsEnum.TokenName:
+					a.Effects.OfType<TokenEffect> ().LastOrDefault ().Name = value;
 					break;
 				case AbilityFieldsEnum.TokenTypes:
+					tokEff = a.Effects.OfType<TokenEffect> ().LastOrDefault ();
+					string[] types = value.Split(new char[] { ',' });
+					foreach (string t in types)
+					{
+						if (string.IsNullOrEmpty(t))
+							continue;
+						string tt = t.Replace('\'', '_');
+						tt = tt.Replace('-', '_');
+						try {
+							tokEff.Types += (CardTypes)Enum.Parse(typeof(CardTypes), tt, true);
+						} catch (Exception ex) {
+							Debug.WriteLine (ex.Message);
+						}
+					}
 					break;
 				case AbilityFieldsEnum.TokenOwner:
+					if (stringList.Contains (value))
+						break;
+					stringList.Add (value);
+					using(Stream s = new FileStream(@"/mnt/data2/tokenOwner.txt",FileMode.Append)){
+						using (StreamWriter sw = new StreamWriter(s)){
+							sw.WriteLine (value);
+						}
+						
+					}
 					break;
 				case AbilityFieldsEnum.TokenColors:
 					break;

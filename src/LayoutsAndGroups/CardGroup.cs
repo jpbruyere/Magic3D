@@ -18,7 +18,11 @@ namespace Magic3D
         Graveyard,
         Exhiled,
         Attackers,
-        Blockers
+        Blockers,
+
+		Stack,
+		Sideboard,
+		Command,
     }
 		
     public class CardGroup : CardLayout
@@ -32,13 +36,23 @@ namespace Magic3D
 
 		public static CardGroupEnum ParseZoneName(string zone)
 		{
-			switch (zone) {
+			string[] tmp = zone.Split (',');
+			if (tmp.Count () > 1)
+				Debug.WriteLine ("unhandled multiple zone");
+			
+			switch (tmp[0]) {
 //			case "Any":
 //				return CardGroupEnum.Any;
 			case "Battlefield":
 				return CardGroupEnum.InPlay;
 			case "Exile":
 				return CardGroupEnum.Exhiled;
+			case "Ante":
+				return CardGroupEnum.Hand;
+			case "All":
+				return CardGroupEnum.Any;
+			case "TopOfLibrary":
+				return CardGroupEnum.Library;
 //			case "Library":
 //				return CardGroupEnum.Library;
 //			case "Hand":				
@@ -46,9 +60,12 @@ namespace Magic3D
 //			case "Graveyard":
 //				return CardGroupEnum.Graveyard;
 			default:
-				return (CardGroupEnum) Enum.Parse (typeof(CardGroupEnum), zone);
-//				Debug.WriteLine ("Unknow zone: " + zone);
-//				return CardGroupEnum.Any;					
+				try {
+					return (CardGroupEnum) Enum.Parse (typeof(CardGroupEnum), tmp[0]);
+				} catch (Exception ex) {
+					Debug.WriteLine ("Unknow zone: " + tmp[0]);
+					return CardGroupEnum.Any;					
+				}
 			}
 		}
 		public CardGroupEnum GroupName;

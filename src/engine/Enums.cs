@@ -359,7 +359,23 @@ namespace Magic3D
 		Vraska,
 		Sponge,
 		Berseker,
-		Xenagos
+		Xenagos,
+
+		Saproling,
+		Graveborn,
+		Conspiracy,
+
+		Dack,
+		Daretti,
+		Prism,
+		Sand,
+		Freyalise,
+		Camarid,
+		Naga,
+		Nahiri,
+		Nixilis,
+		Teferi,
+		Lamia,
 	}
 	public enum EffectType
 	{

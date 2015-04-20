@@ -34,9 +34,15 @@ namespace Magic3D
 			Continuous,
 			RaiseCost,
 			ReduceCost,
+			SetCost,
 			CantBeCast,
+			CantBeActivated,
 			CantPlayLand,
 			CantAttack,
+			CantBlockUnless,
+			CantAttackUnless,
+			CantTarget,
+			PreventDamage,
 			ETBTapped
 		}
 			

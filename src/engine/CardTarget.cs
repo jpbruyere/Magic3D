@@ -39,7 +39,7 @@ namespace Magic3D
 			
 			if (TypeOfTarget == TargetType.Self && _target != _source)
 				return false;
-			if (TypeOfTarget == TargetType.Kicked && !(_source.Kicked && _target == _source))
+			if (TypeOfTarget == TargetType.Kicked && !c.Kicked)
 				return false;
 			if (TypeOfTarget == TargetType.Permanent && c.CurrentGroup.GroupName != CardGroupEnum.InPlay)
 				return false;

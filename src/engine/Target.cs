@@ -88,15 +88,7 @@ namespace Magic3D
         public static MultiformAttribut<Target> ParseTargets(string str)
         {
             MultiformAttribut<Target> result = new MultiformAttribut<Target>(AttributeType.Choice);
-//			using (Stream stream = new FileStream(@"/mnt/data/effects.txt", FileMode.Append)){
-//				using (StreamWriter tw = new StreamWriter (stream)) {
-//					
-//					if (!list.Contains (str)) {
-//						list.Add (str);
-//						tw.WriteLine (str);
-//					}
-//				}
-//			}
+
 			string[] tmp = str.Trim().Split(new char[] { ',' });
 			foreach (string t in tmp)
 			{
@@ -156,8 +148,6 @@ namespace Magic3D
 							ctar.HavingAttachedCards += CardTypes.Equipment;
 							break;
 						case "kicked":
-							if (ctar.TypeOfTarget != TargetType.Self)
-								Debugger.Break();
 							ctar.TypeOfTarget = TargetType.Kicked;
 							break;
 						case "Attached":

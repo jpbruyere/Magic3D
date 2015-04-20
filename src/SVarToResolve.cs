@@ -68,8 +68,12 @@ namespace Magic3D
 					break;
 				}
 			}
-
-			return TryToSetValue (_id, value);
+			try {
+				return TryToSetValue (_id, value);
+			} catch (Exception ex) {
+				Debug.WriteLine (ex.Message);
+				return false;
+			}
 		}
 		public static bool TryToSetValue(string _id, object _value)
 		{

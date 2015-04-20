@@ -31,7 +31,7 @@ namespace Magic3D
 			CreatureLayout.MaxHorizontalSpace = 8f;
 
 			OtherLayout.x = 4f; 
-			OtherLayout.y = -3.7f;
+			OtherLayout.y = -1.5f;
 			OtherLayout.HorizontalSpacing = 1.5f;
 			OtherLayout.VerticalSpacing = 0.01f;
 			OtherLayout.MaxHorizontalSpace = 4f;

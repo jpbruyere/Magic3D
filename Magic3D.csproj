@@ -406,6 +406,10 @@
       <LogicalName>
       </LogicalName>
     </Compile>
+    <Compile Include="src\engine\Effects\TokenEffect.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">
