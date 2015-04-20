@@ -382,6 +382,14 @@
       <LogicalName>
       </LogicalName>
     </Compile>
+    <Compile Include="src\engine\CardCounter.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
+    <Compile Include="src\engine\IntegerValue.cs">
+      <LogicalName>
+      </LogicalName>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">
