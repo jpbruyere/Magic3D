@@ -112,6 +112,7 @@ namespace Magic3D
 			case EffectType.Charm:
 				break;
 			case EffectType.DealDamage:
+				engine.MagicStack.Push (new Damage (_target as IDamagable, _source, (this as NumericEffect).Amount.GetValue(_source))); 
 				break;
 			case EffectType.ChangeZone:
 				ci.Reset ();

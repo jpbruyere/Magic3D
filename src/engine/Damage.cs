@@ -16,7 +16,7 @@ namespace Magic3D
         public CardInstance Source;
         public int Amount;
 
-        public Damage(CardInstance _target, CardInstance _source, int _amount)
+        public Damage(IDamagable _target, CardInstance _source, int _amount)
         {
             Target = _target;
             Source = _source;

@@ -79,7 +79,7 @@ namespace Magic3D
 			Hand.xAngle = MathHelper.Pi - Vector3.CalculateAngle (Magic.vLook, Vector3.UnitZ);
 			Hand.HorizontalSpacing = 0.5f;
 			Hand.VerticalSpacing = -0.02f;
-			Hand.Scale = 0.6f;
+			Hand.Scale = 0.7f;
 			//Hand.DepthTest = false;
 
 			Graveyard = new CardGroup(CardGroupEnum.Graveyard);

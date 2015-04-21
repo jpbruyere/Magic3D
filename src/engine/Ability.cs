@@ -196,6 +196,7 @@ namespace Magic3D
 			bool mandatory = false;
 			NumericEffect numEff = null;
 			TokenEffect tokEff = null;
+
 			//example: for destroy, only inplay cards can be targeted
 			CardGroupEnum validCardTargetZoneFix = CardGroupEnum.Any;
 
@@ -268,6 +269,7 @@ namespace Magic3D
 					case "Charm":
 						break;
 					case "DealDamage":
+						a.Effects.Add(new NumericEffect(EffectType.DealDamage));
 						break;
 					case "ChangeZone":
 						a.Effects.Add (new ChangeZoneEffect());
@@ -652,6 +654,11 @@ namespace Magic3D
 				case AbilityFieldsEnum.Choices:
 					break;
 				case AbilityFieldsEnum.NumDmg:
+					numEff = a.Effects.OfType<NumericEffect> ().LastOrDefault ();
+					if (int.TryParse (value, out v))
+						numEff.Amount = v;
+					else
+						SVarToResolve.RegisterSVar(value, numEff, numEff.GetType().GetField("Amount"));
 					break;
 				case AbilityFieldsEnum.Origin:
 					a.Effects.OfType<ChangeZoneEffect>().LastOrDefault().Origin = CardGroup.ParseZoneName (value);
