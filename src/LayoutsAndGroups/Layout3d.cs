@@ -13,6 +13,7 @@ namespace Magic3D
 		public float xAngle = 0.0f;
 		public float yAngle = 0.0f;
 		public float zAngle = 0.0f;
+		public float Scale = 1.0f;
 
 		public float HorizontalSpacing = 0f;
 		public float VerticalSpacing = 0f;

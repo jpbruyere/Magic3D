@@ -74,16 +74,18 @@ namespace Magic3D
 			Library = new Library();
 
 			Hand = new CardGroup(CardGroupEnum.Hand);
-			Hand.y = -7.5f;
-			Hand.z = 3.3f;
+			Hand.y = -7.0f;
+			Hand.z = 4.5f;
 			Hand.xAngle = MathHelper.Pi - Vector3.CalculateAngle (Magic.vLook, Vector3.UnitZ);
-			Hand.HorizontalSpacing = 0.7f;
-			Hand.VerticalSpacing = -0.01f;
+			Hand.HorizontalSpacing = 0.5f;
+			Hand.VerticalSpacing = -0.02f;
+			Hand.Scale = 0.6f;
+			//Hand.DepthTest = false;
 
 			Graveyard = new CardGroup(CardGroupEnum.Graveyard);
 			Graveyard.x = -5.5f;
 			Graveyard.y = -2.8f;
-			Graveyard.VerticalSpacing = 0.01f;
+			Graveyard.VerticalSpacing = 0.02f;
 
 			InPlay = new InPlayGroup();
 

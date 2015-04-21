@@ -11,7 +11,7 @@ namespace Magic3D
 			x = -6;
 			y = -1.0f;
 			xAngle = MathHelper.Pi;
-			VerticalSpacing = 0.01f;
+			VerticalSpacing = 0.02f;
 		}
 	}
 }

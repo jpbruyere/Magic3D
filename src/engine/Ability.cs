@@ -1529,7 +1529,7 @@ namespace Magic3D
 				a = new Ability (AbilityEnum.Horsemanship);
 				break;
 			case "Lifelink":
-				a = new Ability (AbilityEnum.Likelink);
+				a = new Ability (AbilityEnum.Lifelink);
 				break;
 			case "Haunt":
 				a = new Ability (AbilityEnum.Haunt);
@@ -1622,6 +1622,7 @@ namespace Magic3D
 			case "Modular":
 				break;
 			case "Fear":
+				
 				break;
 			case "Sunburst":
 				break;
@@ -1636,6 +1637,7 @@ namespace Magic3D
 			case "Annihilator":
 				break;
 			case "Hexproof":
+				a = new Ability (AbilityEnum.Hexproof);
 				break;
 			case "Storm":
 				break;
@@ -1644,6 +1646,7 @@ namespace Magic3D
 			case "Creatures":
 				break;
 			case "Indestructible":
+				a = new Ability (AbilityEnum.Indestructible);
 				break;
 			case "Vanishing":
 				break;

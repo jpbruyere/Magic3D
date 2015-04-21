@@ -455,6 +455,10 @@ namespace Magic3D
                         return null;
 
                 }
+				if ((result as Costs) != null) {
+					if ((result as Costs).CostList.Count == 0)
+						return null;
+				}
                 return result;
             }
             else

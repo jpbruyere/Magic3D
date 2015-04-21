@@ -28,7 +28,7 @@ namespace Magic3D
         Unblockable,
         Indestructible,
         Defender,
-        Likelink,
+        Lifelink,
         Haste,
         Fear,
         Swampwalk,
@@ -37,6 +37,7 @@ namespace Magic3D
         Mountainwalk,
         Islandwalk,
         Protection,
+		Hexproof,
         
         Regenerate,
 

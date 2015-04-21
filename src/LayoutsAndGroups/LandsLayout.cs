@@ -79,6 +79,7 @@ namespace Magic3D
 					Animation.StartAnimation (new FloatAnimation (c, "zAngle", -MathHelper.PiOver2, MathHelper.Pi * 0.1f));
 				else
 					Animation.StartAnimation (new FloatAnimation (c, "zAngle", 0, MathHelper.Pi * 0.1f));
+				Animation.StartAnimation (new FloatAnimation (c, "Scale", this.Scale, 0.05f));
 
 				i++;
 

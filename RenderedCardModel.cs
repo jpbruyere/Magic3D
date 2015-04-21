@@ -11,6 +11,7 @@ namespace Magic3D
 		protected float _xAngle = 0.0f;
 		protected float _yAngle = 0.0f;
 		protected float _zAngle = 0.0f;
+		protected float _scale = 1.0f;
 
 		public MagicCard Model;
 
@@ -95,7 +96,7 @@ namespace Magic3D
 					Matrix4.CreateRotationZ (zAngle);
 
 				//Matrix4 Rot = Matrix4.CreateRotationZ(zAngle);
-				transformation = Rot * Matrix4.CreateTranslation(x, y, z);
+				transformation = Matrix4.CreateScale(Scale) *  Rot * Matrix4.CreateTranslation(x, y, z);
 
 				return transformation;
 			}
@@ -106,6 +107,16 @@ namespace Magic3D
 
 
 		#endregion
+
+
+		public virtual float Scale {
+			get {
+				return _scale;
+			}
+			set {
+				_scale = value;
+			}
+		}
 	}
 }
 

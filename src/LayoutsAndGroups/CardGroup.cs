@@ -72,6 +72,7 @@ namespace Magic3D
 
         public bool IsVisible = true;
 		public bool IsSelected = false;
+		public bool DepthTest = true;
 
 		public virtual void AddCard(CardInstance c, bool anim = true)
         {
@@ -140,27 +141,31 @@ namespace Magic3D
 		}
 		public override void Render ()
 		{
-			if (IsSelected) {
-
-				Magic.glowShader.Enable ();
-
-				Magic.glowShader.ProjectionMatrix = Magic.projection;
-				Magic.glowShader.ModelViewMatrix = Magic.modelview;
-				Magic.glowShader.ModelMatrix = Matrix4.CreateScale(1.2f) * Transformations;
-				Magic.glowShader.Color = go.Color.Red;
-				Magic.glowShader.BorderWidth = 0.05f;
-
-				GL.BindTexture (TextureTarget.Texture2D, Magic.abstractTex);
-
-				GL.Disable(EnableCap.CullFace);
-
-				MagicData.CardMesh.Render (PrimitiveType.TriangleStrip);
-
-				GL.Enable(EnableCap.CullFace);
-
-				Magic.texturedShader.Enable ();
-			}
-
+//			if (IsSelected) {
+//
+//				Magic.glowShader.Enable ();
+//
+//				Magic.glowShader.ProjectionMatrix = Magic.projection;
+//				Magic.glowShader.ModelViewMatrix = Magic.modelview;
+//				Magic.glowShader.ModelMatrix = Matrix4.CreateScale(1.2f) * Transformations;
+//				Magic.glowShader.Color = go.Color.Red;
+//				Magic.glowShader.BorderWidth = 0.05f;
+//
+//				GL.BindTexture (TextureTarget.Texture2D, Magic.abstractTex);
+//
+//				GL.Disable(EnableCap.CullFace);
+//
+//				MagicData.CardMesh.Render (PrimitiveType.TriangleStrip);
+//
+//				GL.Enable(EnableCap.CullFace);
+//
+//				Magic.texturedShader.Enable ();
+//			}
+//			if (DepthTest)
+//				GL.Enable (EnableCap.DepthTest);
+//			else
+//				GL.Disable (EnableCap.DepthTest);
+			
 			base.Render ();
 		}
 	}

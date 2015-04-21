@@ -54,9 +54,9 @@ namespace Magic3D
 		public static int[] viewport = new int[4];
 
 		//public static Vector3 vEye = new Vector3(150.0f, 50.0f, 1.5f);    // Camera Position
-		public static Vector3 vEye = new Vector3(0.0f, -10.0f, 10.0f);    // Camera Position
+		public static Vector3 vEye = new Vector3(0.0f, -8.5f, 11.5f);    // Camera Position
 		public static Vector3 vEyeTarget;// = new Vector3(40f, 50f, 0.1f);
-		public static Vector3 vLook = new Vector3(0f, 1f, -1.3f);  // Camera vLook Vector
+		public static Vector3 vLook = new Vector3(0f, 1f, -1.7f);  // Camera vLook Vector
 		public static Vector4 vLight = new Vector4 (0.0f, -15.0f, 15.0f, 0.0f);
 		public static Vector3 vMouse = Vector3.Zero;
 
@@ -148,7 +148,7 @@ namespace Magic3D
 			tableTexture = new Texture(@"images/marble1.jpg");
 
 			const float _width = 16f;
-			const float _height = 16f;
+			const float _height = 14f;
 			const float texTileX = 1f;
 			const float texTileY = 2f;
 			const float z = -0.1f;
@@ -281,8 +281,8 @@ namespace Magic3D
 			uiMainMenu.Visible = false;
 			Players = new Player[] 
 			{ 
-				new Player("player 1","Lightforce.dck"), 
-				new AiPlayer("player 2","Kor Armory.dck")
+				new Player("player 1","Mystical Might.dck"), //"Kor Armory.dck"
+				new AiPlayer("player 2","Lightforce.dck")
 			};
 			this.AddWidget (Players [0].playerPanel);
 			this.AddWidget (Players [1].playerPanel);
@@ -462,23 +462,44 @@ namespace Magic3D
 				i++;
 			}
 				
-			if (Keyboard[Key.ControlLeft])
-			{
+			if (Keyboard [Key.ControlLeft]) {
 				//light movment
 				if (Keyboard [Key.Up])
-					vLight += new Vector4(MoveSpeed * vLookDirOnXYPlane,0);
-				else if (Keyboard[Key.Down])
-					vLight -= new Vector4(MoveSpeed * vLookDirOnXYPlane,0);
-				else if (Keyboard[Key.Left])
-					vLight -= new Vector4(MoveSpeed * vLookPerpendicularOnXYPlane,0);
-				else if (Keyboard[Key.Right])
-					vLight += new Vector4(MoveSpeed * vLookPerpendicularOnXYPlane,0);
-				else if (Keyboard[Key.PageUp])
+					vLight += new Vector4 (MoveSpeed * vLookDirOnXYPlane, 0);
+				else if (Keyboard [Key.Down])
+					vLight -= new Vector4 (MoveSpeed * vLookDirOnXYPlane, 0);
+				else if (Keyboard [Key.Left])
+					vLight -= new Vector4 (MoveSpeed * vLookPerpendicularOnXYPlane, 0);
+				else if (Keyboard [Key.Right])
+					vLight += new Vector4 (MoveSpeed * vLookPerpendicularOnXYPlane, 0);
+				else if (Keyboard [Key.PageUp])
 					vLight.Z += MoveSpeed * .5f;
-				else if (Keyboard[Key.PageDown])
+				else if (Keyboard [Key.PageDown])
 					vLight.Z -= MoveSpeed * .5f;
 
 				texturedShader.LightPos = vLight;
+			} else if (Keyboard [Key.ShiftLeft]) {
+				if (Keyboard [Key.Up])
+					vEye.Y += MoveSpeed * .5f;
+				else if (Keyboard [Key.Down])
+					vEye.Y -= MoveSpeed * .5f;
+				else if (Keyboard [Key.PageUp])
+					vEye.Z += MoveSpeed * .5f;
+				else if (Keyboard [Key.PageDown])
+					vEye.Z -= MoveSpeed * .5f;
+				
+				UpdateViewMatrix ();
+			} else if (Keyboard [Key.AltLeft]) {
+				if (Keyboard [Key.Up])
+					engine.ip.Hand.y += MoveSpeed * .5f;
+				else if (Keyboard [Key.Down])
+					engine.ip.Hand.y -= MoveSpeed * .5f;
+				else if (Keyboard [Key.PageUp])
+					engine.ip.Hand.z += MoveSpeed * .5f;
+				else if (Keyboard [Key.PageDown])
+					engine.ip.Hand.z -= MoveSpeed * .5f;
+
+				engine.ip.Hand.UpdateLayout ();
 			}
 
 

@@ -63,13 +63,15 @@ namespace Magic3D
 					if (c.CurrentGroup.GroupName == CardGroupEnum.InPlay && c.HasAbility (AbilityEnum.Flying))
 						Animation.StartAnimation (new ShakeAnimation (c, "z", 0.5f, 0.6f));
 					else
-						Animation.StartAnimation (new FloatAnimation (c, "z", aZ, 0.2f));
-					Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.3f));
+						Animation.StartAnimation (new FloatAnimation (c, "z", aZ, 0.1f));
+					Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.1f),200);
 					Animation.StartAnimation (new AngleAnimation (c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
 					if (c.IsTapped)
 						Animation.StartAnimation (new FloatAnimation (c, "zAngle", -MathHelper.PiOver2, MathHelper.Pi * 0.1f));
 					else
 						Animation.StartAnimation (new FloatAnimation (c, "zAngle", 0f, MathHelper.Pi * 0.1f));
+
+					Animation.StartAnimation (new FloatAnimation (c, "Scale", this.Scale, 0.05f));
 
 					cX += hSpace;
 					cZ += VerticalSpacing;

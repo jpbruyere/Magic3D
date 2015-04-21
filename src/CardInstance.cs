@@ -492,6 +492,14 @@ namespace Magic3D
             get { return _zAngle; }
             set { _zAngle = value; }
         }
+		public override float Scale {
+			get {
+				return _scale;
+			}
+			set {
+				_scale = value;
+			}
+		}
 
         public float saved_x = 0.0f;
         public float saved_y = 0.0f;
@@ -499,6 +507,7 @@ namespace Magic3D
         public float saved_xAngle = 0.0f;
         public float saved_yAngle = 0.0f;
         public float saved_zAngle = 0.0f;
+		public float saved_scale = 0.0f;
 
 
        	public void SwitchFocus()
@@ -523,6 +532,7 @@ namespace Magic3D
 				Animation.StartAnimation(new AngleAnimation(this, "xAngle", aCam, MathHelper.Pi * 0.1f));
                 //Animation.StartAnimation(new AngleAnimation(this, "yAngle", -Controler.Value.zAngle, MathHelper.Pi * 0.03f));
                 Animation.StartAnimation(new AngleAnimation(this, "zAngle", -Controler.zAngle, MathHelper.Pi * 0.3f));
+				Animation.StartAnimation (new FloatAnimation (this, "Scale", 1.0f, 0.05f));
 
 
                 focusedCard = this;
@@ -542,6 +552,7 @@ namespace Magic3D
             saved_yAngle = yAngle;
             saved_z = z;
             saved_zAngle = zAngle;
+			saved_scale = Scale;
         }
         public void RestoreSavedPosition()
         {
@@ -551,6 +562,7 @@ namespace Magic3D
             Animation.StartAnimation(new AngleAnimation(this, "xAngle", saved_xAngle, 0.5f));
             Animation.StartAnimation(new AngleAnimation(this, "yAngle", saved_yAngle, 0.5f));
             Animation.StartAnimation(new AngleAnimation(this, "zAngle", saved_zAngle, 0.5f));
+			Animation.StartAnimation (new FloatAnimation (this, "Scale", saved_scale, 0.05f));
         }
         
 		public Rectangle<float> getProjectedBounds()
@@ -789,10 +801,6 @@ namespace Magic3D
 					gr.MoveTo(xt, yt);
 					gr.ShowText(text);
 
-					//tests
-					gr.MoveTo(0,0);
-					gr.Scale (0.3, 0.3);
-					MagicData.hSVGsymbols.RenderCairoSub (gr,"path8");
 					draw.Flush();
 				}
 				//draw.WriteToPng(@"d:/test.png");

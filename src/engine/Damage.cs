@@ -25,7 +25,7 @@ namespace Magic3D
 
         public void Deal()
         {
-			if (Source.HasAbility(AbilityEnum.Likelink)){
+			if (Source.HasAbility(AbilityEnum.Lifelink)){
 				Source.Controler.LifePoints += Amount;
 			}
             if (Source.HasAbility(AbilityEnum.Trample) && Target is CardInstance)
