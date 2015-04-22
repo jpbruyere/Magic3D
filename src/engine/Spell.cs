@@ -171,7 +171,7 @@ namespace Magic3D
 				break;
 			}
 			MagicEngine.CurrentEngine.RaiseMagicEvent (new ActivatedAbilityEventArg (Source, CardSource));	
-			MagicEngine.CurrentEngine.UpdateOverlays ();
+			//MagicEngine.CurrentEngine.UpdateOverlays ();
 		}
 	}
 
@@ -299,7 +299,7 @@ namespace Magic3D
 			CardSource.ChangeZone (dest);
 
 			MagicEngine.CurrentEngine.RaiseMagicEvent (new SpellEventArg (this));
-			MagicEngine.CurrentEngine.UpdateOverlays ();
+			//MagicEngine.CurrentEngine.UpdateOverlays ();
 		}			
 		public override void Validate ()
 		{

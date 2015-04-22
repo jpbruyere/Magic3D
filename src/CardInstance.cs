@@ -81,7 +81,6 @@ namespace Magic3D
 			AttachedCards.Add (c);
 
 			updateArrows ();
-			UpdateOverlay ();
 
 			Controler.InPlay.UpdateLayout ();
 		}
@@ -91,7 +90,6 @@ namespace Magic3D
 			AttachedCards.Remove (c);
 
 			updateArrows ();
-			UpdateOverlay ();
 
 			Controler.InPlay.UpdateLayout ();
 
@@ -307,6 +305,60 @@ namespace Magic3D
 //            if (e == null)
                 tappedWithoutEvent = false;
         }
+		public void UpdatePowerAndToughness()
+		{
+			_power = int.MinValue;
+			_toughness = int.MinValue;
+
+			foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingEffects) {
+				bool valid = false;
+				foreach (EffectGroup eg in ci.Effects) {						
+					foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
+						if (!ct.Accept (this, ci)) {
+							valid = false;
+							break;
+						} else
+							valid = true;
+					}
+					if (!valid)
+						continue;
+					foreach (NumericEffect e in  eg.OfType<NumericEffect>()) {
+						switch (e.TypeOfEffect) {
+						case EffectType.AddPower:
+							if (_power == int.MinValue)
+								_power = Model.Power;
+							_power += e.Amount.GetValue(ci) * e.Multiplier;
+							break;
+						case EffectType.SetPower:
+							if (_power == int.MinValue)
+								_power = Model.Power;
+							_power = e.Amount.GetValue(ci) * e.Multiplier;
+							break;
+						case EffectType.AddTouchness:
+							if (_toughness == int.MinValue)
+								_toughness = Model.Toughness;
+							_toughness += e.Amount.GetValue (ci);
+							break;
+						case EffectType.SetTouchness:
+							if (_toughness == int.MinValue)
+								_toughness = Model.Toughness;
+							_toughness = e.Amount.GetValue (ci);
+							break;
+						}
+					}						
+				}
+			}
+			int damages = 0;
+			foreach (Damage d in Damages)
+				damages += d.Amount;
+
+			if (damages == 0)
+				return;
+
+			if (_toughness == int.MinValue)
+				_toughness = Model.Toughness;
+			_toughness -= damages;
+		}
 		public bool UpdateControler()
 		{
 			_controler = null;
@@ -341,83 +393,20 @@ namespace Magic3D
 			}
 			set { _originalControler = value; }
 		}
-
+		int _power = int.MinValue;
+		int _toughness = int.MinValue;
 		public int 	Power
         {
             get
             {
-                int tmp = Model.Power;
-				List<Effect> activeEffects = new List<Effect> ();
-				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingEffects) {
-					bool valid = false;
-					foreach (EffectGroup eg in ci.Effects) {						
-						foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
-							if (!ct.Accept (this, ci)) {
-								valid = false;
-								break;
-							} else
-								valid = true;
-						}
-						if (!valid)
-							continue;
-						foreach (NumericEffect e in  eg.OfType<NumericEffect>()) {
-							switch (e.TypeOfEffect) {
-							case EffectType.AddPower:
-								tmp += e.Amount.GetValue(ci) * e.Multiplier;
-								break;
-							case EffectType.SetPower:
-								tmp = e.Amount.GetValue(ci) * e.Multiplier;
-								break;
-							}
-						}						
-					}
-				}
-                return tmp;
+				return _power == int.MinValue ? Model.Power : _power;
             }
         }
         public int Toughness
         {
             get
             {
-                int tmp = Model.Toughness;
-
-				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingEffects) {
-					bool valid = false;
-					foreach (EffectGroup eg in ci.Effects) {
-						foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
-							if (!ct.Accept (this, ci)) {
-								valid = false;
-								break;
-							} else
-								valid = true;
-						}
-						if (!valid)
-							continue;
-					
-						foreach (NumericEffect e in  eg.OfType<NumericEffect>()) {
-							switch (e.TypeOfEffect) {
-							case EffectType.AddTouchness:
-								tmp += e.Amount.GetValue (ci);
-								break;
-							case EffectType.SetTouchness:
-								tmp = e.Amount.GetValue (ci);
-								break;
-							}
-						}
-					}
-				}
-//				foreach (CardInstance c in AttachedCards) {
-//					foreach (Ability a in c.getAbilitiesByType(AbilityEnum.Attach)) {
-//						foreach (NumericEffect e in a.Effects.OfType<NumericEffect>().
-//							Where(ef=>ef.TypeOfEffect == EffectType.AddTouchness)) {
-//							tmp += e.Amount;
-//						}
-//					}
-//				}
-                foreach (Damage d in Damages)
-                    tmp -= d.Amount;
-
-                return tmp;
+				return _toughness == int.MinValue ? Model.Toughness : _toughness;
             }
         }
 

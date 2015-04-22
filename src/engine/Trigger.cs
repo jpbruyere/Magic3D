@@ -116,6 +116,7 @@ namespace Magic3D
 						t.Type = MagicEventType.BeginPhase;
 						break;
 					case "Attacks":
+						t.Type = MagicEventType.Attack;
 						break;
 					case "SpellCast":
 						t.Type = MagicEventType.CastSpell;

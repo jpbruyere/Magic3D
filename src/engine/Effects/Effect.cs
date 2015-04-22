@@ -173,13 +173,11 @@ namespace Magic3D
 						p.InPlay.AddCard (new CardInstance (tk) { Controler = p, IsToken = true, HasSummoningSickness = true });
 					}
 					p.InPlay.UpdateLayout ();
-					engine.UpdateOverlays ();
+					//engine.UpdateOverlays ();
 				}					
 
 				break;
-			case EffectType.GainControl:
-
-
+			case EffectType.GainControl:				
 				break;
 			case EffectType.Repeat:
 				break;

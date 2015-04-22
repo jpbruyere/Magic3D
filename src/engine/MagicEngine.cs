@@ -339,6 +339,7 @@ namespace Magic3D
 			}
 
 			UpdateCardsControler ();
+			UpdateCardsPowerAndToughness ();
 
 			foreach (Player p in Players)
 				p.InPlay.UpdateLayout ();			
@@ -444,7 +445,6 @@ namespace Magic3D
 					foreach (CardInstance ac in p.InPlay.Cards) {
 						if (ac.Damages.Count > 0) {
 							ac.Damages.Clear ();
-							ac.UpdateOverlay ();
 						}
 					}
 				}
@@ -486,8 +486,10 @@ namespace Magic3D
 					break;
 				}
 				foreach (CardInstance c in pea.Player.AttackingCreature) {					
-					if (!c.IsTapped && !c.HasAbility(AbilityEnum.Vigilance))
+					if (!c.IsTapped && !c.HasAbility (AbilityEnum.Vigilance)) {
 						c.Tap ();
+						RaiseMagicEvent(new MagicEventArg(MagicEventType.Attack,c));
+					}
 				}
 				break;
 			case GamePhases.DeclareBlocker:				
@@ -891,6 +893,13 @@ namespace Magic3D
 				ci.UpdateControler ();
 			}			
 		}	
+		public void UpdateCardsPowerAndToughness()
+		{
+			foreach (CardInstance ci in Players.SelectMany(p => p.InPlay.Cards.Where(c => c.HasType(CardTypes.Creature)))) {
+				ci.UpdatePowerAndToughness ();
+				ci.UpdateOverlay ();
+			}			
+		}
 		public void processRendering()
 		{
 			if (!decksLoaded)
