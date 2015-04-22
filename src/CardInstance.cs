@@ -53,6 +53,8 @@ namespace Magic3D
 		bool _isTapped = false;
 		bool _combating;
 		Player _controler;
+
+		Player _originalControler;
 		        
         public CardGroup CurrentGroup;
 		public bool HasFocus = false;
@@ -133,6 +135,9 @@ namespace Magic3D
 		}
         public void PutIntoGraveyard()
         {
+			while (AttachedCards.Count > 0)
+				this.DetacheCard (AttachedCards.First());			
+
             Reset();
 			ChangeZone (CardGroupEnum.Graveyard);			
         }
@@ -153,9 +158,9 @@ namespace Magic3D
             }
             tappedWithoutEvent = false;
 			HasSummoningSickness = false;
-			if (!IsAttached)
-				return;
-			AttachedTo.DetacheCard (this);
+
+			if (IsAttached)				
+				AttachedTo.DetacheCard (this);
         }
 
 		public IEnumerable<Ability> getAllAbilities()
@@ -302,37 +307,39 @@ namespace Magic3D
 //            if (e == null)
                 tappedWithoutEvent = false;
         }
-
+		public bool UpdateControler()
+		{
+			_controler = null;
+			foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingEffect(EffectType.GainControl)) {
+				bool valid = false;
+				foreach (EffectGroup eg in ci.Effects) {						
+					foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
+						if (!ct.Accept (this, ci)) {
+							valid = false;
+							break;
+						} else
+							valid = true;
+					}
+					if (!valid)
+						continue;
+					foreach (Effect e in  eg) {
+						switch (e.TypeOfEffect) {
+						case EffectType.GainControl:
+							_controler = ci.Controler;
+							break;
+						}
+					}						
+				}
+			}
+			return _controler != null;
+		}
 		public Player Controler
 		{
 			get
 			{
-				Player tmp = _controler;
-				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingEffect(EffectType.GainControl)) {
-					bool valid = false;
-					foreach (EffectGroup eg in ci.Effects) {						
-						foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
-							if (!ct.Accept (this, ci)) {
-								valid = false;
-								break;
-							} else
-								valid = true;
-						}
-						if (!valid)
-							continue;
-						foreach (Effect e in  eg) {
-							switch (e.TypeOfEffect) {
-							case EffectType.GainControl:
-								tmp = ci.Controler;
-								break;
-							}
-						}						
-					}
-				}
-
-				return tmp;
+				return _controler ?? _originalControler;
 			}
-			set { _controler = value; }
+			set { _originalControler = value; }
 		}
 
 		public int 	Power

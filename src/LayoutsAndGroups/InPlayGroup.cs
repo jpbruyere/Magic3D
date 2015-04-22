@@ -56,7 +56,6 @@ namespace Magic3D
 				Cards.Remove (uc);
 				uc.Controler.InPlay.Cards.Add (uc);
 				uc.CurrentGroup = uc.Controler.InPlay;
-				uc.Controler.InPlay.UpdateLayout ();
 			}
 
 			LandsLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Land && !(c.IsAttached || c.Combating)).ToList();

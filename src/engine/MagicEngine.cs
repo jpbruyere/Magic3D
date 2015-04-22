@@ -337,6 +337,11 @@ namespace Magic3D
 			default:
 				break;
 			}
+
+			UpdateCardsControler ();
+
+			foreach (Player p in Players)
+				p.InPlay.UpdateLayout ();			
 		}
 
 		void processPhaseBegin (PhaseEventArg pea)
@@ -880,7 +885,12 @@ namespace Magic3D
 				}
 			}			
 		}
-	
+		public void UpdateCardsControler()
+		{
+			foreach (CardInstance ci in Players.SelectMany(p => p.InPlay.Cards)) {
+				ci.UpdateControler ();
+			}			
+		}	
 		public void processRendering()
 		{
 			if (!decksLoaded)
