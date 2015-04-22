@@ -28,10 +28,17 @@ namespace Magic3D
 		}
 		#endregion
 
+		public MagicAction BindedAction = null;
+
 		#region CTOR
 		public CardInstance(MagicCard mc = null)
 		{
 			Model = mc;
+		}
+		public CardInstance(MagicAction _bindedAction = null)
+		{
+			BindedAction = _bindedAction;
+			Model = _bindedAction.CardSource.Model;
 		}
 		#endregion
 

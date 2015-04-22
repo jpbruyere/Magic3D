@@ -194,6 +194,7 @@ namespace Magic3D
 
 			AbilityCategory Category = AbilityCategory.Acivated;
 			bool mandatory = false;
+			TargetType stackTargets = TargetType.Card;
 			NumericEffect numEff = null;
 			TokenEffect tokEff = null;
 
@@ -245,7 +246,7 @@ namespace Magic3D
 					case "Effect":
 						break;
 					case "Counter":
-						a.Effects.Add(new ChangeZoneEffect());
+						a.Effects.Add(new CounterEffect());
 						break;
 					case "Destroy":
 						a.Effects.Add(new Effect(EffectType.Destroy));
@@ -620,6 +621,17 @@ namespace Magic3D
 					SVarToResolve.RegisterSVar(value, a, a.GetType().GetField("SubAbility"));
 					break;
 				case AbilityFieldsEnum.TargetType:
+					switch (value) {
+					case "Spell":
+						stackTargets = TargetType.Spell;
+						break;
+					case "Activated":
+						stackTargets = TargetType.Activated;
+						break;
+					case "Triggered":
+						stackTargets = TargetType.Triggered;
+						break;		
+					}
 					break;
 				case AbilityFieldsEnum.TgtPrompt:
 					a.targetPrompt = value;
@@ -1453,6 +1465,17 @@ namespace Magic3D
 			}
 			a.Category = Category;
 			a.Mandatory = mandatory;
+
+			//fix for stack targeting
+			if (stackTargets != TargetType.Card) {
+				if (a.ValidTargets == null)
+					a.ValidTargets += stackTargets;
+				else {
+					foreach (CardTarget trg in a.ValidTargets.Values.OfType<CardTarget>()) {
+						trg.TypeOfTarget = stackTargets;
+					}
+				}
+			}
 		}
 
 

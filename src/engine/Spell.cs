@@ -124,17 +124,24 @@ namespace Magic3D
 			if (!WaitForTarget)
 				return false;
 
+			object target = c;
+			if (target is CardInstance) {
+				CardInstance ci = target as CardInstance;
+				if (ci.BindedAction != null)
+					target = ci.BindedAction;
+			}
+
 			//other target group are possible, should change
 			foreach (Target ct in ValidTargets.Values)
 			{
-				if (ct.Accept(c,CardSource)){
-					SelectedTargets.Add(c);
+				if (ct.Accept(target, CardSource)){
+					SelectedTargets.Add(target);
 					PrintNextMessage ();					
 					return true;
 				}
 			}
 
-			Magic.AddLog ("Invalid target: " + c.ToString());
+			Magic.AddLog ("Invalid target: " + target.ToString());
 			PrintNextMessage ();
 			return false;
 		}
@@ -142,6 +149,9 @@ namespace Magic3D
 		public override void Resolve ()
 		{
 			Magic.btOk.Visible = false;
+
+			if (IsCountered)
+				return;
 
 			switch (Source.AbilityType) {
 			case AbilityEnum.Attach:
@@ -180,6 +190,7 @@ namespace Magic3D
 		#region CTOR
 		public Spell(CardInstance _cardInstance) : base(_cardInstance)
 		{            
+			_cardInstance.BindedAction = this;
 
 			if (_cardInstance.Model.Cost != null) {
 				remainingCost = _cardInstance.Model.Cost.Clone ();
@@ -280,7 +291,14 @@ namespace Magic3D
 		}
         
 		public override void Resolve ()
-		{
+		{			
+			CardSource.BindedAction = null;
+
+			if (IsCountered) {
+				CardSource.PutIntoGraveyard ();
+				return;
+			}
+
 			foreach (AbilityActivation aa in spellAbilities.Where(sa => sa.IsComplete)) {
 				aa.Resolve ();
 			}
@@ -295,7 +313,7 @@ namespace Magic3D
 			if (CardSource.HasType (CardTypes.Instant) ||
 				CardSource.HasType (CardTypes.Sorcery))
 				dest = CardGroupEnum.Graveyard;
-			
+
 			CardSource.ChangeZone (dest);
 
 			MagicEngine.CurrentEngine.RaiseMagicEvent (new SpellEventArg (this));
@@ -353,6 +371,7 @@ namespace Magic3D
 
 	public abstract class MagicAction
 	{
+		public bool IsCountered = false;
 		public CardInstance CardSource;
 		public Cost remainingCost;
 

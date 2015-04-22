@@ -96,6 +96,7 @@ namespace Magic3D
 			case EffectType.Effect:
 				break;
 			case EffectType.Counter:
+				(_target as MagicAction).IsCountered = true;
 				break;
 			case EffectType.Destroy:
 				ci.PutIntoGraveyard ();

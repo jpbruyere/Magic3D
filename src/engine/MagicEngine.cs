@@ -684,14 +684,16 @@ namespace Magic3D
 			MagicAction ma = NextActionOnStack;
 			if (ma == null)
 				return true;
+			if (ma.CardSource.Controler != pp) {
+				Debug.Print ("Nothing to cancel");
+				return true;
+			}
 			if (ma.IsComplete)
 				Debug.Print ("Canceling completed action");
 			if (ma.IsMandatory) {
 				Debug.Print ("Unable to cancel mandatory action");
 				return false;
 			}
-			if (ma.CardSource.Controler != pp)
-				Debug.Print ("Canceling action of another player");
 
 			MagicStack.Pop ();
 			return true;
@@ -914,7 +916,13 @@ namespace Magic3D
 
 		public void UpdateStackLayouting()
 		{
-			SpellStackLayout.Cards = MagicStack.OfType<Spell> ().Select (sp => sp.CardSource).ToList ();
+			SpellStackLayout.Cards.Clear ();
+			foreach (MagicAction ma in MagicStack.OfType<MagicAction>()) {
+				if (ma is Spell)
+					SpellStackLayout.Cards.Add ((ma as Spell).CardSource);
+				else if (ma is AbilityActivation)
+					SpellStackLayout.Cards.Add (new CardInstance(ma));
+			}
 			SpellStackLayout.UpdateLayout ();			
 		}
 	}

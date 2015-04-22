@@ -60,10 +60,16 @@ namespace Magic3D
 
 					Animation.StartAnimation (new FloatAnimation (c, "x", aX, 0.2f));
 					Animation.StartAnimation (new FloatAnimation (c, "y", aY, 0.2f));
-					if (c.CurrentGroup.GroupName == CardGroupEnum.InPlay && c.HasAbility (AbilityEnum.Flying))
-						Animation.StartAnimation (new ShakeAnimation (c, "z", 0.5f, 0.6f));
-					else
+
+					try {
+						if (c.CurrentGroup.GroupName == CardGroupEnum.InPlay && c.HasAbility (AbilityEnum.Flying))
+							Animation.StartAnimation (new ShakeAnimation (c, "z", 0.5f, 0.6f));
+						else
+							Animation.StartAnimation (new FloatAnimation (c, "z", aZ, 0.1f));						
+					} catch (Exception ex) {
 						Animation.StartAnimation (new FloatAnimation (c, "z", aZ, 0.1f));
+					}
+
 					Animation.StartAnimation (new AngleAnimation (c, "xAngle", xAngle, MathHelper.Pi * 0.1f),70);
 					Animation.StartAnimation (new AngleAnimation (c, "yAngle", yAngle, MathHelper.Pi * 0.3f));
 					if (c.IsTapped)

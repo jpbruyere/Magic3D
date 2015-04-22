@@ -34,9 +34,28 @@ namespace Magic3D
 		public override bool Accept (object _target, CardInstance _source)
 		{
 			CardInstance c = _target as CardInstance;
-			if (c == null)				
-				return base.Accept(_target,_source);		
-			
+
+			if (c == null) {
+				if (_target is MagicAction)
+					c = (_target as MagicAction).CardSource;
+				else
+					return base.Accept (_target, _source);
+			}
+			if (TypeOfTarget == TargetType.Spell && !(_target is Spell))
+				return false;
+			if (TypeOfTarget == TargetType.Activated) {
+				if (!(_target is AbilityActivation))
+					return false;
+				if (!(_target as AbilityActivation).Source.IsActivatedAbility)
+					return false;
+			}
+			if (TypeOfTarget == TargetType.Triggered) {
+				if (!(_target is AbilityActivation))
+					return false;
+				if (!(_target as AbilityActivation).Source.IsTriggeredAbility)
+					return false;
+			}
+
 			if (TypeOfTarget == TargetType.Self && _target != _source)
 				return false;
 			if (TypeOfTarget == TargetType.Kicked && !c.Kicked)

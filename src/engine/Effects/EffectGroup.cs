@@ -36,29 +36,6 @@ namespace Magic3D
 			foreach (CardTarget ct in Affected.Values.OfType<CardTarget>()) {
 				foreach (CardInstance ci in ct.GetValidTargetsInPlay (_source))
 					temp.Add(ci);
-//				switch (ct.TypeOfTarget) {
-//				case TargetType.Self:
-//					yield return _source;
-//					break;
-//				case TargetType.EnchantedBy:
-//					if (_source.IsAttached)
-//						yield return _source.AttachedTo;
-//					break;
-//				case TargetType.Card:
-//					if (ct.Controler == ControlerType.All)
-//						cards = engine.Players.SelectMany (p => p.InPlay.Cards);
-//					else if (ct.Controler == ControlerType.You)
-//						cards = _source.Controler.InPlay.Cards;
-//					else
-//						cards = _source.Controler.Opponent.InPlay.Cards;
-//
-//					foreach (CardInstance ci in cards) {
-//						if (ct.Accept (ci, _source))
-//							yield return ci;	
-//					}
-//
-//					break;
-//				}
 			}	
 			return temp.Count > 0 ? temp : null;
 		}

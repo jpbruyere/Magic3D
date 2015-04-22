@@ -20,6 +20,9 @@ namespace Magic3D
 		EquipedBy,
 		Attached,
 		Kicked,
+		Spell,
+		Activated,
+		Triggered
     }
     public enum ControlerType
     {
@@ -66,6 +69,14 @@ namespace Magic3D
 
 		public virtual bool Accept(object _target, CardInstance _source){
 			switch (TypeOfTarget) {
+			case TargetType.Spell:
+				return _target is Spell;
+			case TargetType.Activated:
+				AbilityActivation aa = _target as AbilityActivation;
+				return aa == null ? false : aa.Source.IsActivatedAbility;
+			case TargetType.Triggered:
+				AbilityActivation aaa = _target as AbilityActivation;
+				return aaa == null ? false : aaa.Source.IsTriggeredAbility;
 			case TargetType.Opponent:
 				Player p = _target as Player;
 				if (p == null)

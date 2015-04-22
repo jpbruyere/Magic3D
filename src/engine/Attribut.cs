@@ -79,6 +79,7 @@ namespace Magic3D
 		{
 			return new MultiformAttribut<T> (a);
 		}
+
 		public static MultiformAttribut<T> operator +(MultiformAttribut<T> ma, T a)
         {
 			if (ma == null)
@@ -92,9 +93,8 @@ namespace Magic3D
 			else
 				return null;
 
-//			return new MultiformAttribut<MultiformAttribut<T>>
-//				(ma.Clone, new MultiformAttribut<T> (a));
         }
+
 //		public static MultiformAttribut<T> operator +(T a, MultiformAttribut<T> ma)
 //		{
 //			if (ma == null)
