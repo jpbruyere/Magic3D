@@ -48,6 +48,7 @@ namespace Magic3D
 			: base(1024, 800)
 		{}
 
+		public static Magic CurrentGameWin;
 		#region  scene matrix and vectors
 		public static Matrix4 modelview;
 		public static Matrix4 projection;
@@ -221,6 +222,11 @@ namespace Magic3D
 			this.MouseButtonDown += new EventHandler<MouseButtonEventArgs>(Mouse_Down);;
 		}
 
+		void onButExit_MouseClick (object sender, MouseButtonEventArgs e)
+		{
+			Exit ();			
+		}
+
 		static go.Container uiLogs;
 		public static go.Button btOk;
 
@@ -275,6 +281,14 @@ namespace Magic3D
 			syncLogUi ();
 		}
 		#endregion
+		void CloseCurrentGame(){
+			engine = null;
+			foreach (Player p in Players) {
+				this.DeleteWidget (p.playerPanel);
+			}
+			Players = null;
+			uiMainMenu.Visible = true;
+		}
 
 		void onStartNewGame(Object sender, MouseButtonEventArgs e)
 		{
@@ -284,8 +298,6 @@ namespace Magic3D
 				new Player("player 1","Mystical Might.dck"), //"Kor Armory.dck"
 				new AiPlayer("player 2","Lightforce.dck")
 			};
-			this.AddWidget (Players [0].playerPanel);
-			this.AddWidget (Players [1].playerPanel);
 
 			Players [1].playerPanel.HorizontalAlignment = HorizontalAlignment.Right;
 			Players[1].zAngle = MathHelper.Pi;
@@ -358,6 +370,9 @@ namespace Magic3D
 
 			switch (arg.Type)
 			{
+			case MagicEventType.PlayerHasLost:
+				CloseCurrentGame ();
+				break;
 			case MagicEventType.Unset:
 				break;
 			case MagicEventType.BeginPhase:
@@ -391,6 +406,8 @@ namespace Magic3D
 		protected override void OnLoad (EventArgs e)
 		{			
 			base.OnLoad (e);
+
+			CurrentGameWin = this;
 
 			initInterface ();
 
@@ -541,7 +558,7 @@ namespace Magic3D
 					engine.GivePriorityToNextPlayer ();
 				break;
 			case Key.Escape:
-				this.CursorVisible = true;
+				CloseCurrentGame ();
 				break;
 			case Key.H:				
 				if (wCardText.Visible) {

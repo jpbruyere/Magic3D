@@ -77,7 +77,11 @@ namespace Magic3D
 				return Players.SelectMany (p => p.InPlay.Cards.Where (c => c.Effects.Count() > 0)).ToList();
 			}
 		}
-
+		public IList<CardInstance> CardsInPlayHavingEffect(EffectType et)
+		{
+			return Players.SelectMany (p => p.InPlay.Cards.Where 
+				(c => c.Effects.SelectMany (e => e.Where (ee => ee.TypeOfEffect == et)).Count () > 0)).ToList ();
+		}
 		public IList<CardInstance> CardsInPlayHavingTriggers
 		{
 			get {
@@ -316,8 +320,6 @@ namespace Magic3D
 			case MagicEventType.EndPhase:
 				processPhaseEnd (arg as PhaseEventArg);
 				break;
-			//Land and mana abililies don't go on the stack, so
-			//there are resolved here
 			case MagicEventType.PlayLand:
 				break;
 			case MagicEventType.ActivateAbility:

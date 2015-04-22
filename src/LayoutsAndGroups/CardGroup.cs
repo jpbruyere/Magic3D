@@ -26,7 +26,7 @@ namespace Magic3D
     }
 		
     public class CardGroup : CardLayout
-    {                
+    {       		
 		#region CTOR
 		public CardGroup(CardGroupEnum groupName)         
 		{
@@ -167,6 +167,10 @@ namespace Magic3D
 //				GL.Disable (EnableCap.DepthTest);
 			
 			base.Render ();
+		}
+		public override string ToString ()
+		{
+			return GroupName.ToString();
 		}
 	}
 }

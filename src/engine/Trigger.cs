@@ -39,6 +39,7 @@ namespace Magic3D
 		//public CardInstance Source;
 		public Ability Exec;
 		public string Description;
+		public bool InhibStacking; //prevent triggered ability to goes on the stack (ex card enter tapped)
 
 		bool targetIsValid(object target, CardInstance source)
 		{	
@@ -59,14 +60,17 @@ namespace Magic3D
 			switch (Type) {
 			case MagicEventType.ChangeZone:
 				
- 				if (!targetIsValid (arg.Source, triggerSource))
+				if (!targetIsValid (arg.Source, triggerSource))
 					return false;
 				
 				ChangeZoneEventArg czea = arg as ChangeZoneEventArg;
 				if ((czea.Origine == Origine || Origine == CardGroupEnum.Any)
-				    && (czea.Destination == Destination || Destination == CardGroupEnum.Any))
-					MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (arg.Source, Exec));
-				else
+				    && (czea.Destination == Destination || Destination == CardGroupEnum.Any)) {
+					if (InhibStacking)
+						MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (arg.Source, Exec) { GoesOnStack = false });
+					else
+						MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (arg.Source, Exec));
+				}else
 					return false;
 				return true;
 			case MagicEventType.CastSpell:								
@@ -77,11 +81,13 @@ namespace Magic3D
 					return false;
 				return true;						
 			default:
-				Debug.WriteLine ("default trigger handler: " + this.ToString());
-				if (targetIsValid (arg.Source, triggerSource))
-					MagicEngine.CurrentEngine.PushOnStack 
-						(new AbilityActivation (arg.Source, Exec));
-				else
+				Debug.WriteLine ("default trigger handler: " + this.ToString ());
+				if (targetIsValid (arg.Source, triggerSource)) {
+					if (InhibStacking)
+						MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (arg.Source, Exec) { GoesOnStack = false });
+					else
+						MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (arg.Source, Exec));
+				}else
 					return false;
 				return true;
 			}

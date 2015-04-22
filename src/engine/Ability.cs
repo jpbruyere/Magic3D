@@ -1461,11 +1461,14 @@ namespace Magic3D
 			Ability a = null;
 
 			if (str == "CARDNAME enters the battlefield tapped.") {
-				mc.Triggers.Add (
-					new Trigger (
-						MagicEventType.PlayLand, 
-						new CardTarget (TargetType.Self),
-						new Ability (EffectType.Tap)));
+				Trigger trig = new Trigger (
+					               MagicEventType.ChangeZone, 
+					               new CardTarget (TargetType.Self),
+					new Ability (EffectType.Tap) { });
+				trig.Origine = CardGroupEnum.Any;
+				trig.Destination = CardGroupEnum.InPlay;
+				trig.InhibStacking = true;
+				mc.Triggers.Add (trig);
 				return null;
 			}
 

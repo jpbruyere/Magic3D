@@ -22,6 +22,7 @@ namespace Magic3D
 	public enum MagicEventType
 	{
 		PlayerIsReady,
+		PlayerHasLost,
 		Unset,
 		BeginPhase,
 		EndPhase,
@@ -33,6 +34,7 @@ namespace Magic3D
 		Destroy,
 		Exill,
 		ChangeZone,
+		Attack,
 		TapCard,
 		Damage,
 	}

@@ -1,19 +1,24 @@
 ﻿using System;
 using System.Linq;
 using OpenTK;
+using System.Collections.Generic;
 
 namespace Magic3D
 {
 	public class InPlayGroup : CardGroup
 	{
+		public Player Controler;
+
 		public CardLayout LandsLayout = new Magic3D.LandsLayout();
 		public CardLayout CreatureLayout = new CardLayout();
 		public CardLayout OtherLayout = new CardLayout();
 		public CardLayout CombatingCreature = new CardLayout();
 
-		public InPlayGroup()
+		public InPlayGroup(Player _controler)
 			: base(CardGroupEnum.InPlay)
 		{
+			Controler = _controler;
+
 			y = -4.5f;
 			HorizontalSpacing = 1.5f;
 			MaxHorizontalSpace = 7f;
@@ -46,6 +51,14 @@ namespace Magic3D
 
 		public override void UpdateLayout(bool anim = true)
 		{
+			IList<CardInstance> uncontroledCards = Cards.Where (c => c.Controler != this.Controler).ToList();
+			foreach (CardInstance uc in uncontroledCards) {
+				Cards.Remove (uc);
+				uc.Controler.InPlay.Cards.Add (uc);
+				uc.CurrentGroup = uc.Controler.InPlay;
+				uc.Controler.InPlay.UpdateLayout ();
+			}
+
 			LandsLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Land && !(c.IsAttached || c.Combating)).ToList();
 			CreatureLayout.Cards = Cards.Where(c => c.Model.Types == CardTypes.Creature && !(c.IsAttached || c.Combating)).ToList();
 			OtherLayout.Cards = Cards.Where(c => c.Model.Types != CardTypes.Land && c.Model.Types != CardTypes.Creature

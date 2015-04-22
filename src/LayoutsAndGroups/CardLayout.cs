@@ -101,7 +101,7 @@ namespace Magic3D
 				Vector3 v = Magic.vGroupedFocusedPoint;
 				float aCam = Magic.FocusAngle;
 
-				float horizontalLimit = 5f;
+				float horizontalLimit = 8f;
 
 				float cX = v.X;
 				float cZ = v.Z;

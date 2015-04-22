@@ -87,7 +87,7 @@ namespace Magic3D
 			Graveyard.y = -2.8f;
 			Graveyard.VerticalSpacing = 0.02f;
 
-			InPlay = new InPlayGroup();
+			InPlay = new InPlayGroup(this);
 
 			Exhiled = new CardGroup(CardGroupEnum.Exhiled);
 			Exhiled.IsVisible = false;
@@ -99,6 +99,7 @@ namespace Magic3D
 			allGroups[4] = Library;
 
 		}
+
 		#endregion
 		   
      
@@ -131,6 +132,9 @@ namespace Magic3D
 					return;
 
                 _lifePoints = value;
+
+				if (_lifePoints < 1)
+					MagicEngine.CurrentEngine.RaiseMagicEvent (new MagicEventArg (MagicEventType.PlayerHasLost, this));				
 
                 if (labPts != null)
                     labPts.Text = _lifePoints.ToString();
@@ -233,6 +237,8 @@ namespace Magic3D
 			pgBar = playerPanel.FindByName ("pgBar") as ProgressBar;
 			playerPanel.Background = InactiveColor;
 			playerPanel.MouseClick += PlayerPanel_MouseClick;
+
+			Magic.CurrentGameWin.AddWidget (playerPanel);
         }
 
 		void PlayerPanel_MouseClick (object sender, MouseButtonEventArgs e)
@@ -359,6 +365,10 @@ namespace Magic3D
 		}
  		public void DrawOneCard()
         {
+			if (Library.Cards.Count == 0) {
+				MagicEngine.CurrentEngine.RaiseMagicEvent (new MagicEventArg (MagicEventType.PlayerHasLost, this));
+				return;
+			}
             CardInstance c = Library.TakeTopOfStack;
             Hand.AddCard(c);
 			MagicEngine.CurrentEngine.RaiseMagicEvent (
@@ -475,6 +485,7 @@ namespace Magic3D
 				if (e.MagicStack.Count == 0)
 					return false;
 				MagicAction ma = e.MagicStack.Peek () as MagicAction;
+
 				return ma == null ? false : (ma.IsComplete || ma.CardSource.Controler != this) ? false : true;				
 			}
 		}

@@ -91,6 +91,8 @@ namespace Magic3D
 			updateArrows ();
 			UpdateOverlay ();
 
+			Controler.InPlay.UpdateLayout ();
+
 			if (!c.HasType (CardTypes.Equipment))
 				c.PutIntoGraveyard ();			
 		}
@@ -281,7 +283,11 @@ namespace Magic3D
 
                 _isTapped = value;
 
-				this.Controler.InPlay.UpdateLayout ();
+				if (_isTapped)
+					Animation.StartAnimation(new FloatAnimation(this, "zAngle", -MathHelper.PiOver2, MathHelper.Pi * 0.1f));
+				else
+					Animation.StartAnimation(new FloatAnimation(this, "zAngle", 0f, MathHelper.Pi * 0.1f));
+				
             }
         }
         public void Tap()
@@ -301,9 +307,30 @@ namespace Magic3D
 		{
 			get
 			{
-//				ControlEffect ce = Effects.OfType<ControlEffect>().LastOrDefault();
-//				return ce == null ? _controler : ce.Controler;
-				return _controler;
+				Player tmp = _controler;
+				foreach (CardInstance ci in MagicEngine.CurrentEngine.CardsInPlayHavingEffect(EffectType.GainControl)) {
+					bool valid = false;
+					foreach (EffectGroup eg in ci.Effects) {						
+						foreach (CardTarget ct in eg.Affected.Values.OfType<CardTarget>()) {
+							if (!ct.Accept (this, ci)) {
+								valid = false;
+								break;
+							} else
+								valid = true;
+						}
+						if (!valid)
+							continue;
+						foreach (Effect e in  eg) {
+							switch (e.TypeOfEffect) {
+							case EffectType.GainControl:
+								tmp = ci.Controler;
+								break;
+							}
+						}						
+					}
+				}
+
+				return tmp;
 			}
 			set { _controler = value; }
 		}

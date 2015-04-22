@@ -86,6 +86,7 @@ namespace Magic3D
 					effects.Affected = Target.ParseTargets (value);
 					break;
 				case "GainControl":
+					effects.Add (new Effect(EffectType.GainControl));
 					break;
 				case "Description":
 					break;

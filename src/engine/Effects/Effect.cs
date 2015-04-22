@@ -178,6 +178,8 @@ namespace Magic3D
 
 				break;
 			case EffectType.GainControl:
+
+
 				break;
 			case EffectType.Repeat:
 				break;
