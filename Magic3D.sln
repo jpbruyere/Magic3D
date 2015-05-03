@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magic3D", "Magic3D.csproj", "{9F17A2A7-87CF-4175-9014-BFA7344D935B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGL", "..\..\..\data2\devel\GGL\GGL.csproj", "{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GOLib", "..\..\..\data2\devel\GOLib\GOLib.csproj", "{C2980F9B-4798-4C05-99E2-E174810F7C7B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTK", "OpenTK\Source\OpenTK\OpenTK.csproj", "{A37A7E14-0000-0000-0000-000000000000}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiscUtil", "MiscUtil\MiscUtil.csproj", "{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGL", "GGL\GGL.csproj", "{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,8 +58,8 @@ Global
 		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|Linux_x86.Build.0 = Release|Linux_x86
 		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|Win_x86.ActiveCfg = Release|Win_x86
 		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|Win_x86.Build.0 = Release|Win_x86
-		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|x86.ActiveCfg = Release|Linux_x86
-		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|x86.Build.0 = Release|Linux_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|x86.ActiveCfg = Release|Win_x86
+		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Release|x86.Build.0 = Release|Win_x86
 		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Debug|Linux_x86.ActiveCfg = Debug|x86
 		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Debug|Linux_x86.Build.0 = Debug|x86
 		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Debug|Win_x86.ActiveCfg = Debug|x86

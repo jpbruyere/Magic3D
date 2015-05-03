@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -230,7 +231,7 @@ namespace Magic3D
 
 		public virtual void initInterface()
         {
-			GraphicObject.Load ("ui/player.xml", out playerPanel, this);
+			Interface.Load ("ui/player.xml", out playerPanel, this);
 			labName = playerPanel.FindByName ("labName") as Label;
 			labPts = playerPanel.FindByName ("labPts") as Label;
 			labCpts = playerPanel.FindByName ("labCpts") as Label;

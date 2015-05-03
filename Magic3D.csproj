@@ -484,10 +484,6 @@
       <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
       <Name>GOLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\data2\devel\GGL\GGL.csproj">
-      <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
-      <Name>GGL</Name>
-    </ProjectReference>
     <ProjectReference Include="OpenTK\Source\OpenTK\OpenTK.csproj">
       <Project>{A37A7E14-0000-0000-0000-000000000000}</Project>
       <Name>OpenTK</Name>
@@ -495,6 +491,10 @@
     <ProjectReference Include="MiscUtil\MiscUtil.csproj">
       <Project>{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}</Project>
       <Name>MiscUtil</Name>
+    </ProjectReference>
+    <ProjectReference Include="GGL\GGL.csproj">
+      <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
+      <Name>GGL</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

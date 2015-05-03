@@ -204,16 +204,16 @@ namespace Magic3D
 		void initInterface(){
 			LoadInterface("ui/mainMenu.xml", out uiMainMenu);
 			InitLogPanel ();
-			LoadInterface("ui/test4.xml", out g);
+			//LoadInterface("ui/test4.xml", out g);
 			LoadInterface("ui/phases.xml", out uiPhases);
 			LoadInterface ("ui/text.goml", out wCardText);
 			txtCard = wCardText.FindByName ("txtCard") as Label;
 			wCardText.Visible = false;
 
-			labFps = g.FindByName ("labFps") as Label;
-			labFpsMin = g.FindByName ("labFpsMin") as Label;
-			labFpsMax = g.FindByName ("labFpsMax") as Label;
-			labUpdate = g.FindByName ("labUpdate") as Label;
+//			labFps = g.FindByName ("labFps") as Label;
+//			labFpsMin = g.FindByName ("labFpsMin") as Label;
+//			labFpsMax = g.FindByName ("labFpsMax") as Label;
+//			labUpdate = g.FindByName ("labUpdate") as Label;
 
 			//special event handlers fired only if mouse not in interface objects
 			//for scene mouse handling
@@ -461,16 +461,16 @@ namespace Magic3D
 
 			fps = (int)RenderFrequency;
 
-			labFps.Text = fps.ToString();
-			labUpdate.Text = this.updateTime.ElapsedMilliseconds.ToString() + " ms";
-			if (frameCpt > 200) {
-				labFpsMin.Text = fpsMin.ToString();
-				labFpsMax.Text = fpsMax.ToString();
-				resetFps ();
-				frameCpt = 0;
-
-			}
-			frameCpt++;
+//			labFps.Text = fps.ToString();
+//			labUpdate.Text = this.updateTime.ElapsedMilliseconds.ToString() + " ms";
+//			if (frameCpt > 200) {
+//				labFpsMin.Text = fpsMin.ToString();
+//				labFpsMax.Text = fpsMax.ToString();
+//				resetFps ();
+//				frameCpt = 0;
+//
+//			}
+//			frameCpt++;
 
 			int i = 0;
 			while(i < Animatables.Count)
@@ -506,18 +506,19 @@ namespace Magic3D
 					vEye.Z -= MoveSpeed * .5f;
 				
 				UpdateViewMatrix ();
-			} else if (Keyboard [Key.AltLeft]) {
-				if (Keyboard [Key.Up])
-					engine.ip.Hand.y += MoveSpeed * .5f;
-				else if (Keyboard [Key.Down])
-					engine.ip.Hand.y -= MoveSpeed * .5f;
-				else if (Keyboard [Key.PageUp])
-					engine.ip.Hand.z += MoveSpeed * .5f;
-				else if (Keyboard [Key.PageDown])
-					engine.ip.Hand.z -= MoveSpeed * .5f;
-
-				engine.ip.Hand.UpdateLayout ();
-			}
+			} 
+//			else if (Keyboard [Key.AltLeft]) {
+//				if (Keyboard [Key.Up])
+//					engine.ip.Hand.y += MoveSpeed * .5f;
+//				else if (Keyboard [Key.Down])
+//					engine.ip.Hand.y -= MoveSpeed * .5f;
+//				else if (Keyboard [Key.PageUp])
+//					engine.ip.Hand.z += MoveSpeed * .5f;
+//				else if (Keyboard [Key.PageDown])
+//					engine.ip.Hand.z -= MoveSpeed * .5f;
+//
+//				engine.ip.Hand.UpdateLayout ();
+//			}
 
 
 			if (engine == null)
