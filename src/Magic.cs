@@ -379,13 +379,13 @@ namespace Magic3D
 				b = uiPhases.FindByName 
 					((arg as PhaseEventArg).Phase.ToString ()) as Container;
 				if (b!=null)
-					b.child.Background = Color.White;				
+					b.Child.Background = Color.White;				
 				break;
 			case MagicEventType.EndPhase:
 				b = uiPhases.FindByName 
 					((arg as PhaseEventArg).Phase.ToString ()) as Container;
 				if (b!=null)
-					b.child.Background = Color.Transparent;
+					b.Child.Background = Color.Transparent;
 				break;
 			case MagicEventType.PlayLand:
 				break;

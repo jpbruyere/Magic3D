@@ -16,7 +16,7 @@ namespace Magic3D
 			Height = 100;
 			//BorderColor = Color.BlueCrayola;
 			Background = new Color (0.6, 0.6, 0.6, 0.6);
-			Group vs = this.setChild (new Group ());
+			Group vs = this.SetChild (new Group ());
 			Label label = vs.addChild (new Label (text));
 			label.VerticalAlignment = VerticalAlignment.Center;
 			label.HorizontalAlignment = HorizontalAlignment.Center;
