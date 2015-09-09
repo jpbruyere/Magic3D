@@ -45,381 +45,114 @@
       <Package>glib-sharp-2.0</Package>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib" />
+    <Reference Include="OpenTK">
+      <HintPath>..\opentk\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="golib">
+      <HintPath>..\GOLib\bin\Release\golib.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\card_back.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
     <None Include="meshes\d20-s2.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
     <None Include="images\d20.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
     <None Include="images\abstract1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
     <None Include="images\abstract2.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="ui\test4.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_cleanup.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_combat_attackers.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_combat_blockers.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_combat_damage.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_combat_end.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_combat_start.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_draw.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_main1.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_main2.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_nextturn.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_untap.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="image2\icon_phase_upkeep.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
     <None Include="image2\Mana.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="ui\phases.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="ui\player.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
     <None Include="image2\normal.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
     <None Include="image2\PhaseOverlay.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
     <None Include="ui\log.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
     <None Include="image2\HAL9000.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="ui\mainMenu.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
     <None Include="ui\text.goml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
     <None Include="images\abstrait3.jpg">
-      <LogicalName>
-      </LogicalName>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="images\abstrait4.jpg">
-      <LogicalName>
-      </LogicalName>
-    </None>
+    <None Include="images\abstrait4.jpg" />
     <None Include="Datas\cardsfolder.zip">
-      <LogicalName>
-      </LogicalName>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="meshes\coin.obj">
-      <LogicalName>
-      </LogicalName>
-    </None>
-    <None Include="meshes\dollar.jpg">
-      <LogicalName>
-      </LogicalName>
-    </None>
+    <None Include="meshes\coin.obj" />
+    <None Include="meshes\dollar.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\engine\Abilities.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Ability.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Attribut.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Cost.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Damage.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\Magic.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\MagicEngine.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Mana.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Spell.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Target.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\Player.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\MagicCard.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\Edition.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\Deck.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\CardInstance.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Trigger.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\ExtentionMethods.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\glHelper.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\Geo2D\Rectangle.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\Geo2D\Point.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\Geo2D\Size.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Enums.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\MagicEventArgs.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\MessageBoxYesNo.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\divers\Coin.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\divers\IRenderable.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\divers\IAnimatable.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\Animation.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\AiPlayer.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\NewCost.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\MagicData.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="RenderedCardModel.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\SVarToResolve.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\CardTarget.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\LayoutsAndGroups\CardLayout.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\LayoutsAndGroups\LandsLayout.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\LayoutsAndGroups\Layout3d.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\LayoutsAndGroups\CardGroup.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\LayoutsAndGroups\InPlayGroup.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\LayoutsAndGroups\Library.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\LayoutsAndGroups\MagicStackLayout.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\CardCounter.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\IntegerValue.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Effects\AbilityEffect.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Effects\Effect.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Effects\EffectGroup.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Effects\EffectInstance.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Effects\ManaEffect.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Effects\NumericEffect.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Effects\ChangeZoneEffect.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Effects\TokenEffect.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
-    <Compile Include="src\engine\Effects\CounterEffect.cs">
-      <LogicalName>
-      </LogicalName>
-    </Compile>
+    <Compile Include="src\engine\Abilities.cs" />
+    <Compile Include="src\engine\Ability.cs" />
+    <Compile Include="src\engine\Attribut.cs" />
+    <Compile Include="src\engine\Cost.cs" />
+    <Compile Include="src\engine\Damage.cs" />
+    <Compile Include="src\Magic.cs" />
+    <Compile Include="src\engine\MagicEngine.cs" />
+    <Compile Include="src\engine\Mana.cs" />
+    <Compile Include="src\engine\Spell.cs" />
+    <Compile Include="src\engine\Target.cs" />
+    <Compile Include="src\Player.cs" />
+    <Compile Include="src\MagicCard.cs" />
+    <Compile Include="src\Edition.cs" />
+    <Compile Include="src\Deck.cs" />
+    <Compile Include="src\CardInstance.cs" />
+    <Compile Include="src\engine\Trigger.cs" />
+    <Compile Include="src\ExtentionMethods.cs" />
+    <Compile Include="src\glHelper.cs" />
+    <Compile Include="src\Geo2D\Rectangle.cs" />
+    <Compile Include="src\Geo2D\Point.cs" />
+    <Compile Include="src\Geo2D\Size.cs" />
+    <Compile Include="src\engine\Enums.cs" />
+    <Compile Include="src\engine\MagicEventArgs.cs" />
+    <Compile Include="src\MessageBoxYesNo.cs" />
+    <Compile Include="src\divers\Coin.cs" />
+    <Compile Include="src\divers\IRenderable.cs" />
+    <Compile Include="src\divers\IAnimatable.cs" />
+    <Compile Include="src\Animation.cs" />
+    <Compile Include="src\AiPlayer.cs" />
+    <Compile Include="src\engine\NewCost.cs" />
+    <Compile Include="src\MagicData.cs" />
+    <Compile Include="RenderedCardModel.cs" />
+    <Compile Include="src\SVarToResolve.cs" />
+    <Compile Include="src\engine\CardTarget.cs" />
+    <Compile Include="src\LayoutsAndGroups\CardLayout.cs" />
+    <Compile Include="src\LayoutsAndGroups\LandsLayout.cs" />
+    <Compile Include="src\LayoutsAndGroups\Layout3d.cs" />
+    <Compile Include="src\LayoutsAndGroups\CardGroup.cs" />
+    <Compile Include="src\LayoutsAndGroups\InPlayGroup.cs" />
+    <Compile Include="src\LayoutsAndGroups\Library.cs" />
+    <Compile Include="src\LayoutsAndGroups\MagicStackLayout.cs" />
+    <Compile Include="src\engine\CardCounter.cs" />
+    <Compile Include="src\engine\IntegerValue.cs" />
+    <Compile Include="src\engine\Effects\AbilityEffect.cs" />
+    <Compile Include="src\engine\Effects\Effect.cs" />
+    <Compile Include="src\engine\Effects\EffectGroup.cs" />
+    <Compile Include="src\engine\Effects\EffectInstance.cs" />
+    <Compile Include="src\engine\Effects\ManaEffect.cs" />
+    <Compile Include="src\engine\Effects\NumericEffect.cs" />
+    <Compile Include="src\engine\Effects\ChangeZoneEffect.cs" />
+    <Compile Include="src\engine\Effects\TokenEffect.cs" />
+    <Compile Include="src\engine\Effects\CounterEffect.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <LogicalName>
-      </LogicalName>
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -431,63 +164,38 @@
   </Target>
   -->
   <ItemGroup>
-    <Folder Include="meshes\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
-    <Folder Include="src\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
-    <Folder Include="src\engine\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
-    <Folder Include="src\render\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
-    <Folder Include="ui\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
-    <Folder Include="src\Geo2D\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
-    <Folder Include="image2\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
-    <Folder Include="src\divers\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
-    <Folder Include="Datas\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
-    <Folder Include="src\LayoutsAndGroups\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
-    <Folder Include="src\engine\Effects\">
-      <LogicalName>
-      </LogicalName>
-    </Folder>
+    <Folder Include="meshes\" />
+    <Folder Include="src\" />
+    <Folder Include="src\engine\" />
+    <Folder Include="src\render\" />
+    <Folder Include="ui\" />
+    <Folder Include="src\Geo2D\" />
+    <Folder Include="image2\" />
+    <Folder Include="src\divers\" />
+    <Folder Include="Datas\" />
+    <Folder Include="src\LayoutsAndGroups\" />
+    <Folder Include="src\engine\Effects\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="image2\abilities.svg" />
+    <EmbeddedResource Include="ui\fps.goml" />
+    <EmbeddedResource Include="ui\player.goml" />
+    <EmbeddedResource Include="ui\phases.goml" />
+    <EmbeddedResource Include="ui\mainMenu.goml" />
+    <EmbeddedResource Include="image2\icon_phase_cleanup.svg" />
+    <EmbeddedResource Include="image2\icon_phase_combat_attackers.svg" />
+    <EmbeddedResource Include="image2\icon_phase_combat_blockers.svg" />
+    <EmbeddedResource Include="image2\icon_phase_combat_damage.svg" />
+    <EmbeddedResource Include="image2\icon_phase_combat_end.svg" />
+    <EmbeddedResource Include="image2\icon_phase_combat_start.svg" />
+    <EmbeddedResource Include="image2\icon_phase_draw.svg" />
+    <EmbeddedResource Include="image2\icon_phase_main1.svg" />
+    <EmbeddedResource Include="image2\icon_phase_main2.svg" />
+    <EmbeddedResource Include="image2\icon_phase_nextturn.svg" />
+    <EmbeddedResource Include="image2\icon_phase_untap.svg" />
+    <EmbeddedResource Include="image2\icon_phase_upkeep.svg" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\data2\devel\GOLib\GOLib.csproj">
-      <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
-      <Name>GOLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="OpenTK\Source\OpenTK\OpenTK.csproj">
-      <Project>{A37A7E14-0000-0000-0000-000000000000}</Project>
-      <Name>OpenTK</Name>
-    </ProjectReference>
     <ProjectReference Include="MiscUtil\MiscUtil.csproj">
       <Project>{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}</Project>
       <Name>MiscUtil</Name>

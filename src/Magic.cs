@@ -16,33 +16,51 @@ using System.Linq;
 
 namespace Magic3D
 {
-	class Magic : OpenTKGameWindow
+	class Magic : OpenTKGameWindow, IValueChange
 	{
-		#region FPS
-		static int _fps = 0;
+		#region IValueChange implementation
 
-		public static int fps {
+		public event EventHandler<ValueChangeEventArgs> ValueChanged;
+
+		#endregion
+
+		#region FPS
+		int _fps = 0;
+
+		public int fps {
 			get { return _fps; }
 			set {
-				_fps = value;
-				if (_fps > fpsMax)
-					fpsMax = _fps;
-				else if (_fps < fpsMin)
-					fpsMin = _fps;
-			}
+				if (_fps == value)
+					return;
 
+				_fps = value;
+
+				if (_fps > fpsMax) {
+					fpsMax = _fps;
+					ValueChanged.Raise(this, new ValueChangeEventArgs ("fpsMax", fpsMax));
+				} else if (_fps < fpsMin) {
+					fpsMin = _fps;
+					ValueChanged.Raise(this, new ValueChangeEventArgs ("fpsMin", fpsMin));
+				}
+
+				ValueChanged.Raise(this, new ValueChangeEventArgs ("fps", _fps));
+				ValueChanged.Raise (this, new ValueChangeEventArgs ("update",
+					this.updateTime.ElapsedMilliseconds.ToString () + " ms"));
+			}
 		}
 
-		public static int fpsMin = int.MaxValue;
-		public static int fpsMax = 0;
+		public int fpsMin = int.MaxValue;
+		public int fpsMax = 0;
 
-		static void resetFps ()
+		void resetFps ()
 		{
 			fpsMin = int.MaxValue;
 			fpsMax = 0;
 			_fps = 0;
 		}
+		public string update = "";
 		#endregion
+
 
 		public Magic ()
 			: base(1024, 800)
@@ -55,9 +73,9 @@ namespace Magic3D
 		public static int[] viewport = new int[4];
 
 		//public static Vector3 vEye = new Vector3(150.0f, 50.0f, 1.5f);    // Camera Position
-		public static Vector3 vEye = new Vector3(0.0f, -8.5f, 11.5f);    // Camera Position
+		public static Vector3 vEye = new Vector3(0.0f, -11.0f, 5.5f);    // Camera Position
 		public static Vector3 vEyeTarget;// = new Vector3(40f, 50f, 0.1f);
-		public static Vector3 vLook = new Vector3(0f, 1f, -1.7f);  // Camera vLook Vector
+		public static Vector3 vLook = new Vector3(0f, 1f, -0.7f);  // Camera vLook Vector
 		public static Vector4 vLight = new Vector4 (0.0f, -15.0f, 15.0f, 0.0f);
 		public static Vector3 vMouse = Vector3.Zero;
 
@@ -193,27 +211,20 @@ namespace Magic3D
 		public Player[] Players;
 		MagicEngine engine;
 		go.Container g;
-		go.Container uiPhases;
-		go.Container uiMainMenu;
+		GraphicObject uiPhases, wCardText, uiMainMenu;
 		MessageBoxYesNo msgBox;
-		go.Container wCardText;
 		go.Label txtCard;
 
 		Label labFps, labFpsMin, labFpsMax, labUpdate;
 
 		void initInterface(){
-			LoadInterface("ui/mainMenu.xml", out uiMainMenu);
+			uiMainMenu = LoadInterface("#Magic3D.ui.mainMenu.goml");
 			InitLogPanel ();
-			//LoadInterface("ui/test4.xml", out g);
-			LoadInterface("ui/phases.xml", out uiPhases);
-			LoadInterface ("ui/text.goml", out wCardText);
+			LoadInterface("#Magic3D.ui.fps.goml");
+			uiPhases = LoadInterface("#Magic3D.ui.phases.goml");
+			wCardText = LoadInterface ("ui/text.goml");
 			txtCard = wCardText.FindByName ("txtCard") as Label;
 			wCardText.Visible = false;
-
-//			labFps = g.FindByName ("labFps") as Label;
-//			labFpsMin = g.FindByName ("labFpsMin") as Label;
-//			labFpsMax = g.FindByName ("labFpsMax") as Label;
-//			labUpdate = g.FindByName ("labUpdate") as Label;
 
 			//special event handlers fired only if mouse not in interface objects
 			//for scene mouse handling
@@ -227,7 +238,7 @@ namespace Magic3D
 			Exit ();			
 		}
 
-		static go.Container uiLogs;
+		static GraphicObject uiLogs;
 		public static go.Button btOk;
 
 		static Label[] llogs = new Label[4];
@@ -236,7 +247,7 @@ namespace Magic3D
 
 		public void InitLogPanel()
 		{
-			LoadInterface("ui/log.xml", out uiLogs);
+			uiLogs = LoadInterface("ui/log.xml");
 			uiLogs.MouseWheelChanged += onLogsWheel ;
 			for (int i = 0; i < 4; i++) {
 				llogs [i] = uiLogs.FindByName ("line" + (i + 1)) as Label;
@@ -298,7 +309,7 @@ namespace Magic3D
 				new Player("player 1","Mystical Might.dck"), //"Kor Armory.dck"
 				new AiPlayer("player 2","Lightforce.dck")
 			};
-
+			Players [0].playerPanel.HorizontalAlignment = HorizontalAlignment.Left;
 			Players [1].playerPanel.HorizontalAlignment = HorizontalAlignment.Right;
 			Players[1].zAngle = MathHelper.Pi;
 
@@ -364,7 +375,7 @@ namespace Magic3D
 			
 		void MagicEngine_MagicEvent(MagicEventArg arg)
 		{
-			Container b;
+			Border b;
 
 			AddLog (arg.ToString ());
 
@@ -377,15 +388,15 @@ namespace Magic3D
 				break;
 			case MagicEventType.BeginPhase:
 				b = uiPhases.FindByName 
-					((arg as PhaseEventArg).Phase.ToString ()) as Container;
+					((arg as PhaseEventArg).Phase.ToString ()) as Border;
 				if (b!=null)
-					b.Child.Background = Color.White;				
+					b.BorderColor = Color.White;				
 				break;
 			case MagicEventType.EndPhase:
 				b = uiPhases.FindByName 
-					((arg as PhaseEventArg).Phase.ToString ()) as Container;
+					((arg as PhaseEventArg).Phase.ToString ()) as Border;
 				if (b!=null)
-					b.Child.Background = Color.Transparent;
+					b.BorderColor = Color.Transparent;
 				break;
 			case MagicEventType.PlayLand:
 				break;
@@ -460,17 +471,11 @@ namespace Magic3D
 			base.OnUpdateFrame (e);
 
 			fps = (int)RenderFrequency;
-
-//			labFps.Text = fps.ToString();
-//			labUpdate.Text = this.updateTime.ElapsedMilliseconds.ToString() + " ms";
-//			if (frameCpt > 200) {
-//				labFpsMin.Text = fpsMin.ToString();
-//				labFpsMax.Text = fpsMax.ToString();
-//				resetFps ();
-//				frameCpt = 0;
-//
-//			}
-//			frameCpt++;
+			if (frameCpt > 200) {
+				resetFps ();
+				frameCpt = 0;
+			}
+			frameCpt++;
 
 			int i = 0;
 			while(i < Animatables.Count)
@@ -532,14 +537,13 @@ namespace Magic3D
 			Rectangle r = this.ClientRectangle;
 			GL.Viewport( r.X, r.Y, r.Width, r.Height);
 		}
-		protected override void OnRenderFrame (FrameEventArgs e)
+		public override void OnRender (FrameEventArgs e)
+		{
+			drawScene();
+		}
+		public override void GLClear ()
 		{
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-			drawScene();
-
-			base.OnRenderFrame (e);
-			SwapBuffers ();
 		}
 
 		protected override void OnResize (EventArgs e)

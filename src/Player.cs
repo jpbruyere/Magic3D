@@ -14,8 +14,14 @@ namespace Magic3D
 {
 
 
-    public class Player : IDamagable
+	public class Player : IDamagable, IValueChange
     {
+		#region IValueChange implementation
+
+		public event EventHandler<ValueChangeEventArgs> ValueChanged;
+
+		#endregion
+
 		/// <summary>
 		/// Overall game status
 		/// </summary>
@@ -76,7 +82,7 @@ namespace Magic3D
 
 			Hand = new CardGroup(CardGroupEnum.Hand);
 			Hand.y = -7.0f;
-			Hand.z = 4.5f;
+			Hand.z = 0.1f;
 			Hand.xAngle = MathHelper.Pi - Vector3.CalculateAngle (Magic.vLook, Vector3.UnitZ);
 			Hand.HorizontalSpacing = 0.5f;
 			Hand.VerticalSpacing = -0.02f;
@@ -110,9 +116,7 @@ namespace Magic3D
             set
             {
                 _name = value;
-
-                if (labName != null)
-                    labName.Text = _name;
+				ValueChanged.Raise(this, new ValueChangeEventArgs ("Name", _name));
             }
         }
 		public Deck Deck
@@ -122,6 +126,7 @@ namespace Magic3D
 			{
 				_deck = value;
 				_deck.Player = this;
+				ValueChanged.Raise(this, new ValueChangeEventArgs ("Deck", _deck));
 			}
 		}
         public int LifePoints
@@ -137,8 +142,7 @@ namespace Magic3D
 				if (_lifePoints < 1)
 					MagicEngine.CurrentEngine.RaiseMagicEvent (new MagicEventArg (MagicEventType.PlayerHasLost, this));				
 
-                if (labPts != null)
-                    labPts.Text = _lifePoints.ToString();
+				ValueChanged.Raise(this, new ValueChangeEventArgs ("LifePoints", _lifePoints));
             }
         }
 		public int AllowedLandsToBePlayed {
@@ -219,10 +223,8 @@ namespace Magic3D
 
 		#region interface
 		//public Panel playerPanel;
-		public Container playerPanel;
-		public Label labPts;
-		public Label labCpts;
-        Label labName;
+		public GraphicObject playerPanel;
+		public Label labCpts;        
 		MessageBoxYesNo msgBox;
 		public ProgressBar pgBar;
 
@@ -231,12 +233,10 @@ namespace Magic3D
 
 		public virtual void initInterface()
         {
-			Interface.Load ("ui/player.xml", out playerPanel, this);
-			labName = playerPanel.FindByName ("labName") as Label;
-			labPts = playerPanel.FindByName ("labPts") as Label;
+			playerPanel = Interface.Load ("#Magic3D.ui.player.goml", this);
 			labCpts = playerPanel.FindByName ("labCpts") as Label;
 			pgBar = playerPanel.FindByName ("pgBar") as ProgressBar;
-			playerPanel.Background = InactiveColor;
+			//playerPanel.Background = InactiveColor;
 			playerPanel.MouseClick += PlayerPanel_MouseClick;
 
 			Magic.CurrentGameWin.AddWidget (playerPanel);
@@ -259,12 +259,11 @@ namespace Magic3D
 				labCpts.Text = "-";
 			else
 				labCpts.Text = ManaPool.ToString();
-			labPts.Text = LifePoints.ToString ();
 
-			if (MagicEngine.CurrentEngine.cp == this)
-				playerPanel.Background = ActiveColor;
-			else
-				playerPanel.Background = InactiveColor;
+//			if (MagicEngine.CurrentEngine.cp == this)
+//				playerPanel.Background = ActiveColor;
+//			else
+//				playerPanel.Background = InactiveColor;
 
 			if (MagicEngine.CurrentEngine.pp == this)
 				pgBar.Visible = true;
