@@ -194,6 +194,8 @@
     <EmbeddedResource Include="image2\icon_phase_nextturn.svg" />
     <EmbeddedResource Include="image2\icon_phase_untap.svg" />
     <EmbeddedResource Include="image2\icon_phase_upkeep.svg" />
+    <EmbeddedResource Include="ui\decks.goml" />
+    <EmbeddedResource Include="ui\DeckTemplate.goml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="MiscUtil\MiscUtil.csproj">

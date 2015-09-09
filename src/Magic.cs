@@ -21,7 +21,10 @@ namespace Magic3D
 		#region IValueChange implementation
 
 		public event EventHandler<ValueChangeEventArgs> ValueChanged;
-
+		void notifyValueChange(string propName, object newValue)
+		{
+			ValueChanged.Raise(this, new ValueChangeEventArgs (propName, newValue));
+		}
 		#endregion
 
 		#region FPS
@@ -67,16 +70,17 @@ namespace Magic3D
 		{}
 
 		public static Magic CurrentGameWin;
+
 		#region  scene matrix and vectors
 		public static Matrix4 modelview;
 		public static Matrix4 projection;
 		public static int[] viewport = new int[4];
 
 		//public static Vector3 vEye = new Vector3(150.0f, 50.0f, 1.5f);    // Camera Position
-		public static Vector3 vEye = new Vector3(0.0f, -11.0f, 5.5f);    // Camera Position
+		public static Vector3 vEye = new Vector3(0.0f, -13.0f, 7.5f);    // Camera Position
 		public static Vector3 vEyeTarget;// = new Vector3(40f, 50f, 0.1f);
 		public static Vector3 vLook = new Vector3(0f, 1f, -0.7f);  // Camera vLook Vector
-		public static Vector4 vLight = new Vector4 (0.0f, -15.0f, 15.0f, 0.0f);
+		public static Vector4 vLight = new Vector4 (0.0f, -15.0f, 25.0f, 0.0f);
 		public static Vector3 vMouse = Vector3.Zero;
 
 		float _zFar = 1280.0f;
@@ -111,6 +115,18 @@ namespace Magic3D
 		public static string dataPath = "/mnt/data2/downloads/forge-gui-desktop-1.5.31/res/";
 		public static string deckPath = dataPath + "quest/precons/";
 
+		public Deck[] deckList;
+
+		public Deck[] DeckList {
+			get {
+				return deckList;
+			}
+			set {
+				deckList = value;
+				notifyValueChange ("DeckList", deckList);
+			}
+		}
+		
 		public static GameLib.SingleLightSimpleShader texturedShader;
 		public static GameLib.GlowShader glowShader;
 		public static GameLib.EffectShader wirlpoolShader;
@@ -236,6 +252,10 @@ namespace Magic3D
 		void onButExit_MouseClick (object sender, MouseButtonEventArgs e)
 		{
 			Exit ();			
+		}
+		void onShowDecks (object sender, MouseButtonEventArgs e)
+		{			
+			LoadInterface ("#Magic3D.ui.decks.goml");
 		}
 
 		static GraphicObject uiLogs;
@@ -420,6 +440,9 @@ namespace Magic3D
 
 			CurrentGameWin = this;
 
+			loadPreconstructedDecks ();
+
+
 			initInterface ();
 
 			#region init GL
@@ -463,7 +486,23 @@ namespace Magic3D
 			//this.AddWidget (new MessageBox ("Play first?"));
 			//this.CursorVisible = false;
 		}
-			
+
+		void loadPreconstructedDecks()
+		{
+			string[] editions = Directory.GetFiles(Magic.deckPath, "*.dck");
+			            
+			List<Deck> tmpList = new List<Deck> ();
+			int i = 0;
+            foreach (string f in editions)
+            {
+				tmpList.Add(Deck.PreLoadDeck (f));
+				i++;
+				if (i > 50)
+					break;
+            }
+			deckList = tmpList.ToArray ();
+		}
+
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
 			time += (float)e.Time;

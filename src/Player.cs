@@ -81,8 +81,8 @@ namespace Magic3D
 			Library = new Library();
 
 			Hand = new CardGroup(CardGroupEnum.Hand);
-			Hand.y = -7.0f;
-			Hand.z = 0.1f;
+			Hand.y = -9.0f;
+			Hand.z = 2.2f;
 			Hand.xAngle = MathHelper.Pi - Vector3.CalculateAngle (Magic.vLook, Vector3.UnitZ);
 			Hand.HorizontalSpacing = 0.5f;
 			Hand.VerticalSpacing = -0.02f;

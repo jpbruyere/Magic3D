@@ -5,7 +5,8 @@
 		<VerticalStack WidgetSpacing="10" Width="0">
 			<Button Margin = "10" Text="Start New Game" Height="-1" Width="0" 
 				MouseClick="onStartNewGame"/>
-			<Button Margin = "10" Text="Start New Game" Height="-1" Width="0"/>
+			<Button Margin = "10" Text="Decks" Height="-1" Width="0"
+				MouseClick="onShowDecks"/>
 			<Button Margin = "10" Text="Start New Game" Height="-1" Width="0"/>
 			<Button Margin = "10" Text="Exit" Height="-1" Width="0"
 				MouseClick="onButExit_MouseClick" />

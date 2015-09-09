@@ -5,22 +5,34 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 
+using go;
+
 namespace Magic3D
 {
     [Serializable]
-    public class Deck
+	public class Deck : IValueChange
     {
+		#region IValueChange implementation
+
+		public event EventHandler<ValueChangeEventArgs> ValueChanged;
+		void notifyValueChange(string propName, object newValue)
+		{
+			ValueChanged.Raise(this, new ValueChangeEventArgs (propName, newValue));
+		}
+
+		#endregion
+
         public static Dictionary<string, Deck> PreconstructedDecks = new Dictionary<string, Deck>(StringComparer.OrdinalIgnoreCase);
-		static string preconstructedDecksPath = @"/mnt/data2/downloads/forge-gui-desktop-1.5.31/res/quest/precons/";
         
         //metadata
-        public string Name = "unamed";
-        public string DeckType = "";
-        public string Description = "";
-        public string Set = "";
-        public string Image = "";
-       
+		public string Name = "unamed";
+		public string DeckType = "";
+		public string Description = "";
+		public string Set = "";
+		public string Image = "";
 
+
+			
         //shop
         public int Credits = 0;
         public int MinDifficulty = 0;
@@ -167,7 +179,10 @@ namespace Magic3D
 //            }
 //
 //        }
-
+		public override string ToString ()
+		{
+			return Name;
+		}
     }
 	class MainLine
 	{

@@ -18,7 +18,6 @@ namespace Magic3D
 			: base(CardGroupEnum.InPlay)
 		{
 			Controler = _controler;
-
 			y = -4.5f;
 			HorizontalSpacing = 1.5f;
 			MaxHorizontalSpace = 7f;
