@@ -6,6 +6,7 @@ using System.IO;
 using System.Diagnostics;
 
 using go;
+using System.Collections;
 
 namespace Magic3D
 {
@@ -77,6 +78,9 @@ namespace Magic3D
 		}
 		public int CardCount {
 			get { return cardLines == null ? Cards.Count : cardLines.Count; }
+		}
+		public IList CardEntries {
+			get { return cardLines.ToList ();}
 		}
 		Queue<MainLine> cardLines;
 		public static Deck PreLoadDeck(string path)
@@ -193,5 +197,8 @@ namespace Magic3D
 		public int count = 0;
 		public string name = "unamed";
 		public string code = "";
+		public string ExpansionImg {
+			get { return "#Magic3D.images.expansions." + code + ".svg"; }
+		}
 	}
 }

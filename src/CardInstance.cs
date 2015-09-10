@@ -42,6 +42,10 @@ namespace Magic3D
 		}
 		#endregion
 
+		public String Name {
+			get { return Model.Name; }
+		}
+
         #region selection
 		/// <summary>
 		/// The focused card zoomed in the middle of screen

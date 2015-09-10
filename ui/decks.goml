@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Window Width="600" Height="400" Focusable="True" Title="Decks">	
-
-		<ListBox Width="300" Background="0,5;0,5;0,5;0,5"
-			Data="{DeckList}" HorizontalAlignment="Left"
-			ItemTemplate="#Magic3D.ui.DeckTemplate.goml">
+	<HorizontalStack  Width="0" Height="0">
+		<ListBox Width="150" Background="0,5;0,5;0,5;0,5" Name="deckList"
+			Data="{DeckList}" HorizontalAlignment="Left" ValueChanged="onDeckListValueChange"
+			ItemTemplate="#Magic3D.ui.DeckItemTemplate.goml">
 			<Template>
 				<Border BorderWidth="1" Margin="1" MinimumSize="0;100" >
 					<HorizontalStack Width="0" Height="0">
 						<Scroller  Name="scroller1"  
-						 Margin="10" VerticalScrolling="true" ScrollY="{../scrollbar1.Scroll}">
+						 Margin="1" VerticalScrolling="true" ScrollY="{../scrollbar1.Scroll}">
 							<VerticalStack Width="0" Height="-1" Name="List" Margin="0" VerticalAlignment="Top"/>
 						</Scroller>
 						<Scrollbar Name="scrollbar1" Scroll="{../scroller1.ScrollY}" MaximumScroll="{../scroller1.MaximumScroll}"
@@ -17,5 +17,9 @@
 				</Border>
 			</Template>
 		</ListBox>
+		<VerticalStack Width="0" Height="0" Background="DimGray" Name="vsDeck">
+			
+		</VerticalStack>
+	</HorizontalStack>
 </Window>
 

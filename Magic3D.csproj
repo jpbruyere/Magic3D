@@ -196,7 +196,6 @@
     <EmbeddedResource Include="image2\icon_phase_untap.svg" />
     <EmbeddedResource Include="image2\icon_phase_upkeep.svg" />
     <EmbeddedResource Include="ui\decks.goml" />
-    <EmbeddedResource Include="ui\DeckTemplate.goml" />
     <EmbeddedResource Include="images\expansions\4ED.svg" />
     <EmbeddedResource Include="images\expansions\5ED.svg" />
     <EmbeddedResource Include="images\expansions\6ED.svg" />
@@ -256,6 +255,9 @@
     <EmbeddedResource Include="images\expansions\NMS.svg" />
     <EmbeddedResource Include="images\expansions\TMP.svg" />
     <EmbeddedResource Include="images\expansions\CFX.svg" />
+    <EmbeddedResource Include="ui\DeckItemTemplate.goml" />
+    <EmbeddedResource Include="ui\DeckDetails.goml" />
+    <EmbeddedResource Include="ui\CardItemTemplate.goml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="MiscUtil\MiscUtil.csproj">

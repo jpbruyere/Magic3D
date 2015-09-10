@@ -253,11 +253,18 @@ namespace Magic3D
 		{
 			Exit ();			
 		}
+		Group vsDeck;
 		void onShowDecks (object sender, MouseButtonEventArgs e)
 		{			
-			LoadInterface ("#Magic3D.ui.decks.goml");
+			vsDeck = LoadInterface ("#Magic3D.ui.decks.goml").FindByName("vsDeck") as Group;
 		}
-
+		void onDeckListValueChange (object sender, ValueChangeEventArgs e)
+		{			
+			if (e.MemberName != "SelectedItem")
+				return;
+			vsDeck.Children.Clear ();
+			vsDeck.addChild(Interface.Load ("#Magic3D.ui.DeckDetails.goml", e.NewValue));
+		}
 		static GraphicObject uiLogs;
 		public static go.Button btOk;
 
@@ -496,9 +503,9 @@ namespace Magic3D
             foreach (string f in editions)
             {
 				tmpList.Add(Deck.PreLoadDeck (f));
-//				i++;
-//				if (i > 100)
-//					break;
+				i++;
+				if (i > 50)
+					break;
             }
 			deckList = tmpList.ToArray ();
 		}
