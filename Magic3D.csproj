@@ -102,7 +102,6 @@
     <Compile Include="src\engine\Attribut.cs" />
     <Compile Include="src\engine\Cost.cs" />
     <Compile Include="src\engine\Damage.cs" />
-    <Compile Include="src\Magic.cs" />
     <Compile Include="src\engine\MagicEngine.cs" />
     <Compile Include="src\engine\Mana.cs" />
     <Compile Include="src\engine\Spell.cs" />
@@ -149,6 +148,7 @@
     <Compile Include="src\engine\Effects\ChangeZoneEffect.cs" />
     <Compile Include="src\engine\Effects\TokenEffect.cs" />
     <Compile Include="src\engine\Effects\CounterEffect.cs" />
+    <Compile Include="src\Magic.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">
@@ -175,6 +175,7 @@
     <Folder Include="Datas\" />
     <Folder Include="src\LayoutsAndGroups\" />
     <Folder Include="src\engine\Effects\" />
+    <Folder Include="images\expansions\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="image2\abilities.svg" />
@@ -196,6 +197,65 @@
     <EmbeddedResource Include="image2\icon_phase_upkeep.svg" />
     <EmbeddedResource Include="ui\decks.goml" />
     <EmbeddedResource Include="ui\DeckTemplate.goml" />
+    <EmbeddedResource Include="images\expansions\4ED.svg" />
+    <EmbeddedResource Include="images\expansions\5ED.svg" />
+    <EmbeddedResource Include="images\expansions\6ED.svg" />
+    <EmbeddedResource Include="images\expansions\7ED.svg" />
+    <EmbeddedResource Include="images\expansions\8ED.svg" />
+    <EmbeddedResource Include="images\expansions\9ED.svg" />
+    <EmbeddedResource Include="images\expansions\10E.svg" />
+    <EmbeddedResource Include="images\expansions\ALA.svg" />
+    <EmbeddedResource Include="images\expansions\AVR.svg" />
+    <EmbeddedResource Include="images\expansions\JUD.svg" />
+    <EmbeddedResource Include="images\expansions\M10.svg" />
+    <EmbeddedResource Include="images\expansions\M11.svg" />
+    <EmbeddedResource Include="images\expansions\M12.svg" />
+    <EmbeddedResource Include="images\expansions\M13.svg" />
+    <EmbeddedResource Include="images\expansions\M14.svg" />
+    <EmbeddedResource Include="images\expansions\M15.svg" />
+    <EmbeddedResource Include="images\expansions\THS.svg" />
+    <EmbeddedResource Include="images\expansions\SHM.svg" />
+    <EmbeddedResource Include="images\expansions\EVE.svg" />
+    <EmbeddedResource Include="images\expansions\UDS.svg" />
+    <EmbeddedResource Include="images\expansions\RTR.svg" />
+    <EmbeddedResource Include="images\expansions\ULG.svg" />
+    <EmbeddedResource Include="images\expansions\DIS.svg" />
+    <EmbeddedResource Include="images\expansions\MRD.svg" />
+    <EmbeddedResource Include="images\expansions\MBS.svg" />
+    <EmbeddedResource Include="images\expansions\MOR.svg" />
+    <EmbeddedResource Include="images\expansions\LRW.svg" />
+    <EmbeddedResource Include="images\expansions\GTC.svg" />
+    <EmbeddedResource Include="images\expansions\WWK.svg" />
+    <EmbeddedResource Include="images\expansions\ISD.svg" />
+    <EmbeddedResource Include="images\expansions\GPT.svg" />
+    <EmbeddedResource Include="images\expansions\SOK.svg" />
+    <EmbeddedResource Include="images\expansions\DKA.svg" />
+    <EmbeddedResource Include="images\expansions\ARB.svg" />
+    <EmbeddedResource Include="images\expansions\SOM.svg" />
+    <EmbeddedResource Include="images\expansions\BNG.svg" />
+    <EmbeddedResource Include="images\expansions\NPH.svg" />
+    <EmbeddedResource Include="images\expansions\MMQ.svg" />
+    <EmbeddedResource Include="images\expansions\ROE.svg" />
+    <EmbeddedResource Include="images\expansions\LGN.svg" />
+    <EmbeddedResource Include="images\expansions\FUT.svg" />
+    <EmbeddedResource Include="images\expansions\JOU.svg" />
+    <EmbeddedResource Include="images\expansions\ZEN.svg" />
+    <EmbeddedResource Include="images\expansions\ODY.svg" />
+    <EmbeddedResource Include="images\expansions\USG.svg" />
+    <EmbeddedResource Include="images\expansions\STH.svg" />
+    <EmbeddedResource Include="images\expansions\5DN.svg" />
+    <EmbeddedResource Include="images\expansions\BOK.svg" />
+    <EmbeddedResource Include="images\expansions\CSP.svg" />
+    <EmbeddedResource Include="images\expansions\RAV.svg" />
+    <EmbeddedResource Include="images\expansions\PLC.svg" />
+    <EmbeddedResource Include="images\expansions\PCY.svg" />
+    <EmbeddedResource Include="images\expansions\DST.svg" />
+    <EmbeddedResource Include="images\expansions\CHK.svg" />
+    <EmbeddedResource Include="images\expansions\EXO.svg" />
+    <EmbeddedResource Include="images\expansions\TOR.svg" />
+    <EmbeddedResource Include="images\expansions\NMS.svg" />
+    <EmbeddedResource Include="images\expansions\TMP.svg" />
+    <EmbeddedResource Include="images\expansions\CFX.svg" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="MiscUtil\MiscUtil.csproj">

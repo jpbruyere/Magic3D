@@ -1,13 +1,14 @@
 ﻿<?xml version="1.0"?>
 <HorizontalStack Width="0" Height="-1" Focusable="true"
-			MouseEnter="{Background=Red}"
+			MouseEnter="{Background=BlueCrayola}"
 			MouseLeave="{Background=Transparent}">
-<!--		<Image Width="8" Height="8" Path="#go.Images.Icons.member.svg"/>-->
+		<Image Width="16" Height="16" Path="{ImgSetPath}"/>
 		<Label Text="{Name}" Width="0"/>
 		<Label Text="{DeckType}"/>
 <!--		<Popper Width="50">
 			<Label Text="{Description}"/>
 		</Popper>-->
+
 		<Label Text="{Set}"/>
 
 </HorizontalStack>

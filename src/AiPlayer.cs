@@ -15,7 +15,7 @@ namespace Magic3D
 		public override void initInterface ()
 		{
 			base.initInterface ();
-			(playerPanel.FindByName ("pic") as Image).ImagePath = "image2/HAL9000.svg";
+			(playerPanel.FindByName ("pic") as Image).Path = "image2/HAL9000.svg";
 		}
 
 		public override void Process ()

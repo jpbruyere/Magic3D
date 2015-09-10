@@ -496,9 +496,9 @@ namespace Magic3D
             foreach (string f in editions)
             {
 				tmpList.Add(Deck.PreLoadDeck (f));
-				i++;
-				if (i > 50)
-					break;
+//				i++;
+//				if (i > 100)
+//					break;
             }
 			deckList = tmpList.ToArray ();
 		}

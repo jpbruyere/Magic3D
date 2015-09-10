@@ -31,7 +31,11 @@ namespace Magic3D
 		public string Set = "";
 		public string Image = "";
 
-
+		public string ImgSetPath {
+			get {
+				return "#Magic3D.images.expansions." + Set + ".svg";
+			}
+		}
 			
         //shop
         public int Credits = 0;
