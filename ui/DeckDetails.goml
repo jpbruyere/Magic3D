@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Border BorderWidth="1" Margin="1" MinimumSize="0;100" >
+<Border Width="200" BorderWidth="1" Margin="1" MinimumSize="0;100" >
 	<VerticalStack Width="0" Height="0" Margin="0" >
 		<HorizontalStack Width="0" Height="-1" Margin="5">
 			<Image Width="32" Height="32" Path="{ImgSetPath}"/>

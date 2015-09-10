@@ -258,6 +258,7 @@
     <EmbeddedResource Include="ui\DeckItemTemplate.goml" />
     <EmbeddedResource Include="ui\DeckDetails.goml" />
     <EmbeddedResource Include="ui\CardItemTemplate.goml" />
+    <EmbeddedResource Include="ui\CardDetails.goml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="MiscUtil\MiscUtil.csproj">

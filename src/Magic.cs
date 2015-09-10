@@ -253,17 +253,25 @@ namespace Magic3D
 		{
 			Exit ();			
 		}
-		Group vsDeck;
+		Group hsDeck;
 		void onShowDecks (object sender, MouseButtonEventArgs e)
 		{			
-			vsDeck = LoadInterface ("#Magic3D.ui.decks.goml").FindByName("vsDeck") as Group;
+			hsDeck = LoadInterface ("#Magic3D.ui.decks.goml").FindByName("hsDeck") as Group;
 		}
 		void onDeckListValueChange (object sender, ValueChangeEventArgs e)
 		{			
 			if (e.MemberName != "SelectedItem")
 				return;
-			vsDeck.Children.Clear ();
-			vsDeck.addChild(Interface.Load ("#Magic3D.ui.DeckDetails.goml", e.NewValue));
+			hsDeck.Children.Clear ();
+			hsDeck.addChild(Interface.Load ("#Magic3D.ui.DeckDetails.goml", e.NewValue));
+		}
+		void onCardListValueChange (object sender, ValueChangeEventArgs e)
+		{
+			MagicCard c = null;
+			MagicData.TryGetCardFromZip ((e.NewValue as MainLine).name, ref c);
+			if (hsDeck.Children.Count > 1)
+				hsDeck.Children.RemoveAt (hsDeck.Children.Count - 1);
+			hsDeck.addChild(Interface.Load ("#Magic3D.ui.CardDetails.goml", c));
 		}
 		static GraphicObject uiLogs;
 		public static go.Button btOk;

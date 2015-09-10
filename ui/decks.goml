@@ -17,9 +17,8 @@
 				</Border>
 			</Template>
 		</ListBox>
-		<VerticalStack Width="0" Height="0" Background="DimGray" Name="vsDeck">
-			
-		</VerticalStack>
+		<HorizontalStack Width="0" Height="0" Background="DimGray" Name="hsDeck"/>
+
 	</HorizontalStack>
 </Window>
 

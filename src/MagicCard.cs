@@ -112,6 +112,14 @@ namespace Magic3D
 
         public bool DownloadingTextureInProgress = false;
         public int DownloadingTryCount = 0;
+		public string GetImagePath
+		{
+			get {
+				return 
+					Directory.GetFiles (System.IO.Path.Combine (MagicData.cardsArtPath, "cards"),
+					Name + "*.full.jpg", SearchOption.AllDirectories).FirstOrDefault ();
+			}
+		}
         void loadTexture()
         {
             if (DownloadingTextureInProgress || DownloadingTryCount > 3)
