@@ -481,6 +481,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.References:
 					break;
 				case AbilityFieldsEnum.SpellDescription:
+					a.Description = value.Trim ();
 					break;
 				case AbilityFieldsEnum.Produced:
 					a.Effects.OfType<ManaEffect>().LastOrDefault().ProducedMana = Mana.Parse (value);
@@ -1822,6 +1823,16 @@ namespace Magic3D
 				tmp += e.ToString() + ", ";
 			}
 			return string.IsNullOrEmpty(tmp) ? AbilityType.ToString() : tmp.Substring (0, tmp.Length - 2);
+		}
+		public String[] CostElements
+		{
+			get{
+				if (ActivationCost == null)
+					return null;
+				string tmp = ActivationCost.ToString ();
+				return tmp.ToCharArray ().Where(cc => cc != ' ').
+					Select(c => new string(c,1)).ToArray ();
+			}
 		}
 	}
 

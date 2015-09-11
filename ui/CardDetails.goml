@@ -4,18 +4,16 @@
 		<HorizontalStack Width="0">			
 			<Label Text="{Name}" Font="MagicMedieval bold, 16" Width="0"/>
 			<ListBox Data="{CostElements}" Fit="true" 
-					ItemTemplate="#Magic3D.ui.CostItemTemplate.goml">
-				<Template>
-					<Border BorderWidth="0" Margin="1" MinimumSize="10;10" >
-						<HorizontalStack Name="List"/>
-					</Border>
-				</Template>
-			</ListBox>
+					ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
+					Template="#Magic3D.ui.CostTemplate.goml"/>			
 			<GraphicObject Width="5"/>
 		</HorizontalStack>
-		<Border Width="182" Height="140" Margin="0">
+<!--		<Border Width="182" Height="140" Margin="0">
 			<Image Top="-24" Width="-1" Height="-1" Path="{GetImagePath}"/>
-		</Border>
+		</Border>-->
+
+		<Image Width="-1" Height="300" Path="{GetImagePath}"/>
+		
 		<HorizontalStack Width="0">
 			<Label Text="{Types}" Font="droid, 12" Width="0"/>
 			<Border BorderWidth="2" CornerRadius="5" Margin="1" 
@@ -28,9 +26,19 @@
 			</Border>
 			<GraphicObject Width="5"/>
 		</HorizontalStack>
-		<Label Text="{Cost}" Width="0"/>
+<!--		<Label Text="{Cost}" Width="0"/>
 		<Label Text="{Oracle}" Width="0" Multiline="true"/>
-		<Label Text="{Abilities}" Width="0"/>
+		<Label Text="{Abilities}" />-->
+
+		<ListBox Data="{Abilities}" Width="0" Height="-1"
+				ItemTemplate="#Magic3D.ui.AbilityItemTemplate.goml">
+			<Template>
+				<Border BorderWidth="1" Margin="1" MinimumSize="10;10" >
+					<VerticalStack Name="List" Width="0"/>
+				</Border>
+			</Template>
+		</ListBox>
+		<Label Text="{RawCardData}" Multiline="true" Width="0"/>
 	</VerticalStack>
 </Border>
 

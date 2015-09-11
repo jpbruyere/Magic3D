@@ -261,6 +261,8 @@
     <EmbeddedResource Include="ui\CardDetails.goml" />
     <EmbeddedResource Include="ui\CostItemTemplate.goml" />
     <EmbeddedResource Include="images\Mana2.svg" />
+    <EmbeddedResource Include="ui\AbilityItemTemplate.goml" />
+    <EmbeddedResource Include="ui\CostTemplate.goml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="MiscUtil\MiscUtil.csproj">

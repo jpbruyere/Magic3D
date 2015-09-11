@@ -26,6 +26,7 @@ namespace Magic3D
                 
 		#if DEBUG
 		public Stream Stream;
+		public string RawCardData;
 		#endif
 
 		public bool IsCreature {

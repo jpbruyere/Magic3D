@@ -148,7 +148,9 @@ namespace Magic3D
 			LoadCardData(ms);
 			cardStream.Seek(0,SeekOrigin.Begin);
 			c = CardsDatabase [name];
-			c.Stream = cardStream;
+			using (StreamReader tr = new StreamReader(cardStream)){
+				c.RawCardData = tr.ReadToEnd();
+			}
 			#else
 			LoadCardData(cardStream);
 			c = cardDatabase [name];

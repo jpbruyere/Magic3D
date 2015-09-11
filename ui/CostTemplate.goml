@@ -1,0 +1,4 @@
+﻿<?xml version="1.0"?>
+<Border BorderWidth="0" Margin="1" MinimumSize="10;10" >
+	<HorizontalStack Name="List"/>
+</Border>
