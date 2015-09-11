@@ -5,4 +5,3 @@
 		<Image Width="16" Height="16" Path="{ImgSetPath}"/>
 		<Label Text="{Name}" Width="0"/>
 </HorizontalStack>
-

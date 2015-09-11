@@ -28,6 +28,26 @@ namespace Magic3D
 		public Stream Stream;
 		#endif
 
+		public bool IsCreature {
+			get { return Types == CardTypes.Creature; }
+		}
+//		public GraphicObject GoCosts
+//		{
+//			get{ 
+//				HorizontalStack hs = new HorizontalStack ();
+//				hs.addChild (new go.Image ("") { Width = 16, Height = 16 , SvgSub = "w"});
+//			}
+//		}
+		public String[] CostElements
+		{
+			get{
+				if (Cost == null)
+					return null;
+				string tmp = Cost.ToString ();
+				return tmp.ToCharArray ().Where(cc => cc != ' ').
+					Select(c => new string(c,1)).ToArray ();
+			}
+		}
 		public string FilePath;
         public string Name;
         public Cost Cost;

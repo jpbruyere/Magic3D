@@ -231,8 +231,6 @@ namespace Magic3D
 		MessageBoxYesNo msgBox;
 		go.Label txtCard;
 
-		Label labFps, labFpsMin, labFpsMax, labUpdate;
-
 		void initInterface(){
 			uiMainMenu = LoadInterface("#Magic3D.ui.mainMenu.goml");
 			InitLogPanel ();
@@ -255,7 +253,7 @@ namespace Magic3D
 		}
 		Group hsDeck;
 		void onShowDecks (object sender, MouseButtonEventArgs e)
-		{			
+		{						
 			hsDeck = LoadInterface ("#Magic3D.ui.decks.goml").FindByName("hsDeck") as Group;
 		}
 		void onDeckListValueChange (object sender, ValueChangeEventArgs e)
