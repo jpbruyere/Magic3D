@@ -1,10 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Container HorizontalAlignment="Center" VerticalAlignment="Top"
-	Margin="2"
-	Width="600" Height="-1">
+	Margin="2" Width="600" Height="-1">
 	<Border Margin="2" BorderWidth="1" Background="0,6;0,6;0,6;0,6">
-		<Group Width="0" Name="logs">
-			<VerticalStack Width="0" Focusable="False">
+		<Group Height="-1" Name="logs">
+			<VerticalStack Height="-1" Focusable="False">
 				<Label Name="line1" Width="0" Text="Line1" Margin="0"/>
 				<Label Name="line2" Width="0" Text="Line2" Margin="0"/>
 				<Label Name="line3" Width="0" Text="Line3" Margin="0"/>

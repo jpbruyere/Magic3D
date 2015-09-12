@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiscUtil", "MiscUtil\MiscUt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGL", "GGL\GGL.csproj", "{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GOLib", "..\GOLib\GOLib.csproj", "{C2980F9B-4798-4C05-99E2-E174810F7C7B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -74,5 +76,31 @@ Global
 		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Release|Win_x86.Build.0 = Release|x86
 		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Release|x86.ActiveCfg = Release|x86
 		{9F17A2A7-87CF-4175-9014-BFA7344D935B}.Release|x86.Build.0 = Release|x86
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Linux_x86.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Linux_x86.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Win_x86.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Win_x86.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|x86.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Documentation|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Documentation|Any CPU.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Nsis|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Nsis|Any CPU.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release 2.0|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release 2.0|Any CPU.Build.0 = Debug|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Linux_x86.ActiveCfg = Release|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Linux_x86.Build.0 = Release|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Win_x86.ActiveCfg = Release|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Win_x86.Build.0 = Release|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|x86.ActiveCfg = Release|Any CPU
+		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.VersionControlPolicy = $1
+		$1.CommitMessageStyle = $2
+		$2.FileSeparator = ", "
+		$2.LastFilePostfix = "@:\n  "
+		$1.inheritsSet = Mono
 	EndGlobalSection
 EndGlobal

@@ -1,5 +1,3 @@
 ﻿<?xml version="1.0"?>
-<HorizontalStack>
-	<Image Width="14" Height="14" Path="#Magic3D.images.Mana2.svg" SvgSub="{}"/>
-</HorizontalStack>
+<Image Width="14" Height="14" Path="#Magic3D.images.Mana2.svg" SvgSub="{}"/>
 

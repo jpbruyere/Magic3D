@@ -48,9 +48,6 @@
     <Reference Include="OpenTK">
       <HintPath>..\opentk\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
     </Reference>
-    <Reference Include="golib">
-      <HintPath>..\GOLib\bin\Release\golib.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\card_back.jpg">
@@ -263,6 +260,7 @@
     <EmbeddedResource Include="images\Mana2.svg" />
     <EmbeddedResource Include="ui\AbilityItemTemplate.goml" />
     <EmbeddedResource Include="ui\CostTemplate.goml" />
+    <EmbeddedResource Include="ui\Cards.goml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="MiscUtil\MiscUtil.csproj">
@@ -272,6 +270,10 @@
     <ProjectReference Include="GGL\GGL.csproj">
       <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
       <Name>GGL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GOLib\GOLib.csproj">
+      <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
+      <Name>GOLib</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

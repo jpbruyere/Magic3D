@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0"?>
-<HorizontalStack Width="0" Height="-1">
+<HorizontalStack Height="-1">
 	<ListBox Data="{CostElements}" Fit="true" 
 			ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
 			Template="#Magic3D.ui.CostTemplate.goml"/>
-	<Label Text="{}" Width="0"/>
+	<Label Text="{}"/>
 	<Label Text="{ActivationCost}" />
 	<Label Text="{Description}" />
 	<Label Text="{Message}" />
