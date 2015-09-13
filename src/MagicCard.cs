@@ -26,29 +26,9 @@ namespace Magic3D
                 
 		#if DEBUG
 		public Stream Stream;
-		public string RawCardData;
 		#endif
+		public string RawCardData;
 
-		public bool IsCreature {
-			get { return Types == CardTypes.Creature; }
-		}
-//		public GraphicObject GoCosts
-//		{
-//			get{ 
-//				HorizontalStack hs = new HorizontalStack ();
-//				hs.addChild (new go.Image ("") { Width = 16, Height = 16 , SvgSub = "w"});
-//			}
-//		}
-		public String[] CostElements
-		{
-			get{
-				if (Cost == null)
-					return null;
-				string tmp = Cost.ToString ();
-				return tmp.ToCharArray ().Where(cc => cc != ' ').
-					Select(c => new string(c,1)).ToArray ();
-			}
-		}
 		public string FilePath;
         public string Name;
         public Cost Cost;
@@ -133,14 +113,6 @@ namespace Magic3D
 
         public bool DownloadingTextureInProgress = false;
         public int DownloadingTryCount = 0;
-		public string GetImagePath
-		{
-			get {
-				return 
-					Directory.GetFiles (System.IO.Path.Combine (MagicData.cardsArtPath, "cards"),
-					Name + "*.full.jpg", SearchOption.AllDirectories).FirstOrDefault ();
-			}
-		}
         void loadTexture()
         {
             if (DownloadingTextureInProgress || DownloadingTryCount > 3)

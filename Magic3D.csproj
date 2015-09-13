@@ -146,6 +146,7 @@
     <Compile Include="src\engine\Effects\TokenEffect.cs" />
     <Compile Include="src\engine\Effects\CounterEffect.cs" />
     <Compile Include="src\Magic.cs" />
+    <Compile Include="ui\CardVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">

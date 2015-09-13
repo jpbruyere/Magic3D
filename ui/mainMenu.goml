@@ -2,12 +2,13 @@
 <Container Name="MainMenu"	
 	Margin="30" Focusable="True" Height="-1" Width="300">
 	<Border BorderWidth="1" Margin="40" Background="0,5;0,5;0,5;0,5" Width="0">
-		<VerticalStack WidgetSpacing="10" Width="0">
+		<VerticalStack Spacing="10" Width="0">
 			<Button Margin = "10" Text="Start New Game" Height="-1" Width="0" 
 				MouseClick="onStartNewGame"/>
 			<Button Margin = "10" Text="Decks" Height="-1" Width="0"
 				MouseClick="onShowDecks"/>
-			<Button Margin = "10" Text="Start New Game" Height="-1" Width="0"/>
+			<Button Margin = "10" Text="Cards" Height="-1" Width="0"
+				MouseClick="onShowCards"/>
 			<Button Margin = "10" Text="Exit" Height="-1" Width="0"
 				MouseClick="onButExit_MouseClick" />
 		</VerticalStack>

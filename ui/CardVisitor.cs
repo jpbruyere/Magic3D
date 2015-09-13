@@ -19,13 +19,56 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Magic3D
 {
 	public class CardVisitor
 	{
-		public CardVisitor ()
+		MagicCard card;
+
+		public CardVisitor (MagicCard _card)
 		{
+			card = _card;
+		}
+		public string Name
+		{ get { return card.Name; }}
+		public MultiformAttribut<CardTypes> Types
+		{ get { return card.Types; }}
+		public int Power { get { return card.Power; }}
+		public int Toughness { get { return card.Toughness; }}
+		public List<Ability> Abilities { get { return card.Abilities; }}
+		public string RawCardData { get { return card.RawCardData; }}
+
+		public string GetImagePath
+		{
+			get {
+				return 
+					Directory.GetFiles (System.IO.Path.Combine (MagicData.cardsArtPath, "cards"),
+						Name + "*.full.jpg", SearchOption.AllDirectories).FirstOrDefault ();
+			}
+		}
+		public bool IsCreature {
+			get { return Types == CardTypes.Creature; }
+		}
+		//		public GraphicObject GoCosts
+		//		{
+		//			get{ 
+		//				HorizontalStack hs = new HorizontalStack ();
+		//				hs.addChild (new go.Image ("") { Width = 16, Height = 16 , SvgSub = "w"});
+		//			}
+		//		}
+		public String[] CostElements
+		{
+			get{
+				if (card.Cost == null)
+					return null;
+				string tmp = card.Cost.ToString ();
+				return tmp.ToCharArray ().Where(cc => cc != ' ').
+					Select(c => new string(c,1)).ToArray ();
+			}
 		}
 	}
 }

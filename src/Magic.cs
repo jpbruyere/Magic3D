@@ -126,6 +126,14 @@ namespace Magic3D
 				notifyValueChange ("DeckList", deckList);
 			}
 		}
+		string[] cardList;
+		public string[] CardList {
+			get { return cardList; }
+			set {
+				cardList = value;
+				notifyValueChange ("CardList", deckList);
+			}			
+		}
 		
 		public static GameLib.SingleLightSimpleShader texturedShader;
 		public static GameLib.GlowShader glowShader;
@@ -140,6 +148,7 @@ namespace Magic3D
 		static List<IAnimatable> Animatables = new List<IAnimatable> ();
 		public static void AddAnimation(IAnimatable a){
 			a.AnimationFinished += onAnimFinished;
+			a.Clone ();
 			Animatables.Add (a);
 		}
 		static void onAnimFinished(object sender, EventArgs e)
@@ -234,7 +243,7 @@ namespace Magic3D
 		void initInterface(){
 			uiMainMenu = LoadInterface("#Magic3D.ui.mainMenu.goml");
 			InitLogPanel ();
-			LoadInterface("#Magic3D.ui.fps.goml");
+			//LoadInterface("#Magic3D.ui.fps.goml");
 			uiPhases = LoadInterface("#Magic3D.ui.phases.goml");
 			wCardText = LoadInterface ("ui/text.goml");
 			txtCard = wCardText.FindByName ("txtCard") as Label;
@@ -252,9 +261,42 @@ namespace Magic3D
 			Exit ();			
 		}
 		Group hsDeck;
+
+		void onStartNewGame(Object sender, MouseButtonEventArgs e)
+		{
+			uiMainMenu.Visible = false;
+			Players = new Player[] 
+			{ 
+				new Player("player 1","Mystical Might.dck"), //"Kor Armory.dck"
+				new AiPlayer("player 2","Lightforce.dck")
+			};
+			Players [0].playerPanel.HorizontalAlignment = HorizontalAlignment.Left;
+			Players [1].playerPanel.HorizontalAlignment = HorizontalAlignment.Right;
+			Players[1].zAngle = MathHelper.Pi;
+
+			engine = new MagicEngine (Players);
+			MagicEngine.MagicEvent += new Magic3D.MagicEngine.MagicEventHandler(MagicEngine_MagicEvent);
+
+			#if DEBUG
+			engine.currentPlayerIndex = engine.interfacePlayer;
+			engine.ip.CurrentState = Player.PlayerStates.InitialDraw;
+			engine.ip.Opponent.CurrentState = Player.PlayerStates.InitialDraw;
+			#else
+			coin = new Coin ();
+			Renderables.Add (coin);
+			AddAnimation (coin);
+			coin.AnimationFinished += onTossResult;
+			#endif
+
+			btOk.Visible = false;
+		}
 		void onShowDecks (object sender, MouseButtonEventArgs e)
 		{						
 			hsDeck = LoadInterface ("#Magic3D.ui.decks.goml").FindByName("hsDeck") as Group;
+		}
+		void onShowCards (object sender, MouseButtonEventArgs e)
+		{						
+			LoadInterface ("#Magic3D.ui.Cards.goml");
 		}
 		void onDeckListValueChange (object sender, ValueChangeEventArgs e)
 		{			
@@ -269,8 +311,10 @@ namespace Magic3D
 			MagicData.TryGetCardFromZip ((e.NewValue as MainLine).name, ref c);
 			if (hsDeck.Children.Count > 1)
 				hsDeck.Children.RemoveAt (hsDeck.Children.Count - 1);
-			hsDeck.addChild(Interface.Load ("#Magic3D.ui.CardDetails.goml", c));
+			hsDeck.addChild(Interface.Load ("#Magic3D.ui.CardDetails.goml",new CardVisitor(c)));
 		}
+
+		#region LogPanel
 		static GraphicObject uiLogs;
 		public static go.Button btOk;
 
@@ -325,6 +369,8 @@ namespace Magic3D
 			syncLogUi ();
 		}
 		#endregion
+
+		#endregion
 		void CloseCurrentGame(){
 			engine = null;
 			foreach (Player p in Players) {
@@ -334,34 +380,6 @@ namespace Magic3D
 			uiMainMenu.Visible = true;
 		}
 
-		void onStartNewGame(Object sender, MouseButtonEventArgs e)
-		{
-			uiMainMenu.Visible = false;
-			Players = new Player[] 
-			{ 
-				new Player("player 1","Mystical Might.dck"), //"Kor Armory.dck"
-				new AiPlayer("player 2","Lightforce.dck")
-			};
-			Players [0].playerPanel.HorizontalAlignment = HorizontalAlignment.Left;
-			Players [1].playerPanel.HorizontalAlignment = HorizontalAlignment.Right;
-			Players[1].zAngle = MathHelper.Pi;
-
-			engine = new MagicEngine (Players);
-			MagicEngine.MagicEvent += new Magic3D.MagicEngine.MagicEventHandler(MagicEngine_MagicEvent);
-
-			#if DEBUG
-			engine.currentPlayerIndex = engine.interfacePlayer;
-			engine.ip.CurrentState = Player.PlayerStates.InitialDraw;
-			engine.ip.Opponent.CurrentState = Player.PlayerStates.InitialDraw;
-			#else
-			coin = new Coin ();
-			Renderables.Add (coin);
-			AddAnimation (coin);
-			coin.AnimationFinished += onTossResult;
-			#endif
-
-			btOk.Visible = false;
-		}
 		void onTossResult(object sender, EventArgs e)
 		{
 			Coin.TossEventArg tea = e as Coin.TossEventArg;
@@ -454,7 +472,9 @@ namespace Magic3D
 			CurrentGameWin = this;
 
 			loadPreconstructedDecks ();
+			loadCardList ();
 
+			AddWidget (new MessageBox () );
 
 			initInterface ();
 
@@ -515,7 +535,10 @@ namespace Magic3D
             }
 			deckList = tmpList.ToArray ();
 		}
-
+		void loadCardList()
+		{
+			CardList = MagicData.GetCardDataFileNames ();
+		}
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
 			time += (float)e.Time;
@@ -624,9 +647,6 @@ namespace Magic3D
 				}
 				if (CardInstance.selectedCard == null)
 					return;
-				
-				using (StreamReader sr = new StreamReader (CardInstance.selectedCard.Model.Stream))
-					txtCard.Text = sr.ReadToEnd ();
 					
 				wCardText.Visible = true;
 				break;

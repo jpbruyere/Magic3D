@@ -118,7 +118,7 @@ namespace Magic3D
 				}
 			}
 		}
-
+		public const string MAGICZIP = "Datas/cardsfolder.zip";
 		public static string cardsArtPath = 
 			System.IO.Path.Combine(
 				Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), 
@@ -153,7 +153,7 @@ namespace Magic3D
 			}
 			#else
 			LoadCardData(cardStream);
-			c = cardDatabase [name];
+			c = CardsDatabase [name];
 			#endif
 
 
@@ -366,7 +366,7 @@ namespace Magic3D
 			ZipFile zf = null;
 			MemoryStream ms = new MemoryStream ();
 			try {
-				FileStream fs = File.OpenRead ("Datas/cardsfolder.zip");
+				FileStream fs = File.OpenRead (MAGICZIP);
 				zf = new ZipFile (fs);
 				//	ZipEntry zipEntry = zf.FindEntry(cardPath,true);
 				//zf.GetInputStream(
@@ -384,11 +384,30 @@ namespace Magic3D
 				}
 			}
 		}
+		public static string[] GetCardDataFileNames(){
+			List<string> tmp = new List<string> ();
+			using (Stream fs = new FileStream(MAGICZIP, FileMode.Open, FileAccess.Read))
+			{
+				ZipFile zf = new ZipFile (fs);
+				int i = 0;
+				foreach (ZipEntry ze in zf)
+				{
+					if (ze.IsDirectory)
+						continue;
+
+					tmp.Add(ze.Name);
+					if (++i > 300)
+						break;
+				}
+				zf.Close ();
+			}	
+			return tmp.ToArray ();
+		}
 		public static Stream GetCardDataStream(string cardPath) {
 			ZipFile zf = null;
 			MemoryStream ms = new MemoryStream ();
 			try {
-				FileStream fs = File.OpenRead ("Datas/cardsfolder.zip");
+				FileStream fs = File.OpenRead (MAGICZIP);
 				zf = new ZipFile (fs);
 			//	ZipEntry zipEntry = zf.FindEntry(cardPath,true);
 			//zf.GetInputStream(
