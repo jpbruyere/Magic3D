@@ -640,7 +640,7 @@ namespace Magic3D
 			Magic.texturedShader.ModelMatrix = ModelMatrix * Magic.texturedShader.ModelMatrix;
 
 			if (CardInstance.selectedCard == this)
-				Magic.texturedShader.Color = SelectedColor;
+				Magic.texturedShader.Color = new Vector4 (1.2f, 1.2f, 1.2f, 1.2f);
 			else if (Combating)
 				Magic.texturedShader.Color = AttackingColor;
 			else 
