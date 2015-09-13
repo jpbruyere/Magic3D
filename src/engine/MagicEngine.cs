@@ -529,6 +529,7 @@ namespace Magic3D
 			foreach (Player p in Players) {
 				//p.CurrentAction = null;
 				p.ManaPool = null;
+				p.NotifyValueChange ("ManaPoolElements", null);
 			}
 
 			if (pea.Phase != GamePhases.CleanUp)
@@ -749,6 +750,7 @@ namespace Magic3D
 					return;
 				} else if (pp.ManaPool != null && ma.RemainingCost != null) {
 					ma.PayCost (ref pp.ManaPool);
+					pp.NotifyValueChange ("ManaPoolElements", pp.ManaPoolElements);
 					pp.UpdateUi ();
 				}
 				

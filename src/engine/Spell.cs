@@ -29,8 +29,10 @@ namespace Magic3D
 				else
 					Magic.AddLog (Source.Message);
 
-				if (CardSource.Controler.ManaPool != null && remainingCost != null)
+				if (CardSource.Controler.ManaPool != null && remainingCost != null) {
 					PayCost (ref CardSource.Controler.ManaPool);
+					CardSource.Controler.NotifyValueChange ("ManaPoolElements", CardSource.Controler.ManaPoolElements);
+				}
 			}
 
 			PrintNextMessage ();
@@ -199,8 +201,10 @@ namespace Magic3D
 
 			Magic.AddLog ("Trying to cast: " + CardSource.Model.Name);
 
-			if (CardSource.Controler.ManaPool != null)
+			if (CardSource.Controler.ManaPool != null) {
 				PayCost (ref CardSource.Controler.ManaPool);
+				CardSource.Controler.NotifyValueChange ("ManaPoolElements", CardSource.Controler.ManaPoolElements);
+			}
 			
 			PrintNextMessage ();
 

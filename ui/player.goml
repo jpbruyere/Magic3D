@@ -2,29 +2,27 @@
 <Container VerticalAlignment="Top" Margin="5" Width="200" Height="100" Background="Transparent">
 	<Border Margin="5" BorderWidth="2" CornerRadius="10">
 		<Group Margin="2" >
-			<HorizontalStack Width="0" VerticalAlignment="Top" Background="1,0;1,0;1,0;0,6">
+			<HorizontalStack Height="-1" VerticalAlignment="Top" Background="1,0;1,0;1,0;0,6">
 				<Border BorderWidth="2" Margin="2" CornerRadius="5" Width="30" Height="30"
-					Background="0,8;0,8;0,8;0,4">
+					Background="0,8;0,8;0,8;0,2">
 					<Image Name="pic"  Path="image2/normal.svg"/>
 				</Border>
-				<Label Text="{Name}" Font="MagicMedieval, 22" Width="0" TextAlignment="LeftCenter"/>
+				<Label Text="{Name}" Font="MagicMedieval, 22" TextAlignment="LeftCenter"/>
+				<GraphicObject/>
+				<Label Text="{LifePoints}" Font="MagicMedieval, 30"
+					Margin="0" Background="CornflowerBlue" Fit="true" TextAlignment="TopLeft"
+					VerticalAlignment="Top"/>
 			</HorizontalStack>
-			<Label Name="labCpts" Text=" " Font="MagicMedieval bold, 10"
-				Margin="0"
-				VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
-			<Label Text="{LifePoints}" Font="MagicMedieval bold, 30"
-				Margin="0"
-				VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+			<ListBox Data="{ManaPoolElements}" 
+					Fit="true" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+					ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
+					Template="#Magic3D.ui.CostTemplate.goml"/>						
 			<ProgressBar Name="pgBar" 
-						VerticalAlignment="Bottom"
-						Width="60" Height="7"
+						VerticalAlignment="Bottom" HorizontalAlignment="Right"
+						Width="60" Height="3"
 						Value="0"
 						Foreground="BlueCrayola" Background="DarkGray"
 						BorderWidth="1" BorderColor="White"/>
-	<!--			<Button Margin="3" Width="40" Height="40"
-				VerticalAlignment="Bottom" HorizontalAlignment="Left">
-				<Image Path="image2/icon_phase_untap.svg"/>
-			</Button>-->
 		</Group>
 	</Border>
 </Container>

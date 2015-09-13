@@ -17,9 +17,15 @@ namespace Magic3D
 	public class Player : IDamagable, IValueChange
     {
 		#region IValueChange implementation
-
 		public event EventHandler<ValueChangeEventArgs> ValueChanged;
-
+		public void NotifyValueChange(string propName, object newValue)
+		{
+			try {
+				ValueChanged.Raise(this, new ValueChangeEventArgs (propName, newValue));
+			} catch (Exception ex) {
+				Debug.WriteLine (propName + ";" + newValue  + ";" + ex.ToString ());
+			}
+		}
 		#endregion
 
 		/// <summary>
@@ -145,6 +151,17 @@ namespace Magic3D
 				ValueChanged.Raise(this, new ValueChangeEventArgs ("LifePoints", _lifePoints));
             }
         }
+		public String[] ManaPoolElements
+		{
+			get{
+				if (ManaPool == null)
+					return null;
+				string tmp = ManaPool.ToString ();
+				return tmp.ToCharArray ().Where(cc => cc != ' ').
+					Select(c => new string(c,1)).ToArray ();
+			}
+		}
+
 		public int AllowedLandsToBePlayed {
 			get;
 			set;
@@ -224,7 +241,6 @@ namespace Magic3D
 		#region interface
 		//public Panel playerPanel;
 		public GraphicObject playerPanel;
-		public Label labCpts;        
 		MessageBoxYesNo msgBox;
 		public ProgressBar pgBar;
 
@@ -234,7 +250,6 @@ namespace Magic3D
 		public virtual void initInterface()
         {
 			playerPanel = Interface.Load ("#Magic3D.ui.player.goml", this);
-			labCpts = playerPanel.FindByName ("labCpts") as Label;
 			pgBar = playerPanel.FindByName ("pgBar") as ProgressBar;
 			//playerPanel.Background = InactiveColor;
 			playerPanel.MouseClick += PlayerPanel_MouseClick;
@@ -255,16 +270,6 @@ namespace Magic3D
 		}
 		public void UpdateUi()
 		{
-			if (ManaPool == null)
-				labCpts.Text = "-";
-			else
-				labCpts.Text = ManaPool.ToString();
-
-//			if (MagicEngine.CurrentEngine.cp == this)
-//				playerPanel.Background = ActiveColor;
-//			else
-//				playerPanel.Background = InactiveColor;
-
 			if (MagicEngine.CurrentEngine.pp == this)
 				pgBar.Visible = true;
 			else

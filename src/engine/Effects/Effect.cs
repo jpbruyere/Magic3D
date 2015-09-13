@@ -79,7 +79,7 @@ namespace Magic3D
 				break;
 			case EffectType.ProduceMana:				
 				player.ManaPool += (this as ManaEffect).ProducedMana.Clone();
-				player.UpdateUi ();
+				player.NotifyValueChange ("ManaPoolElements", player.ManaPoolElements);
 				break;
 			case EffectType.Loose:
 				break;
