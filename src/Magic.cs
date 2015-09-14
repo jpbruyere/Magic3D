@@ -243,7 +243,8 @@ namespace Magic3D
 		void initInterface(){
 			uiMainMenu = LoadInterface("#Magic3D.ui.mainMenu.goml");
 			InitLogPanel ();
-			//LoadInterface("#Magic3D.ui.fps.goml");
+			LoadInterface("#Magic3D.ui.fps.goml");
+			LoadInterface("#Magic3D.ui.StatusBar.goml");
 			uiPhases = LoadInterface("#Magic3D.ui.phases.goml");
 			wCardText = LoadInterface ("ui/text.goml");
 			txtCard = wCardText.FindByName ("txtCard") as Label;
@@ -473,8 +474,6 @@ namespace Magic3D
 
 			loadPreconstructedDecks ();
 			loadCardList ();
-
-			AddWidget (new MessageBox () );
 
 			initInterface ();
 

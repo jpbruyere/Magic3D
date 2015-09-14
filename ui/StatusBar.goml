@@ -1,1 +1,4 @@
-﻿
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Border Height="20" Margin="1" Background="0,5;0,5;0,5;0,5" VerticalAlignment="Bottom">
+	<TextRun Text="StatusBar"/>
+</Border>

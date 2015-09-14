@@ -5,8 +5,8 @@
 			Data="{DeckList}" HorizontalAlignment="Left" ValueChanged="onDeckListValueChange"
 			ItemTemplate="#Magic3D.ui.DeckItemTemplate.goml">
 			<Template>
-				<Border BorderWidth="1" Margin="1" MinimumSize="0;100" >
-					<HorizontalStack Width="0" Height="0">
+				<Border BorderWidth="1" MinimumSize="0;100" >
+					<HorizontalStack Width="0" Height="0" Margin="1">
 						<Scroller  Name="scroller1"  
 						 Margin="1" VerticalScrolling="true" ScrollY="{../scrollbar1.Scroll}">
 							<VerticalStack Width="0" Height="-1" Name="List" Margin="0" VerticalAlignment="Top"/>
