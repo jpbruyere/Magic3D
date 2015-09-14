@@ -147,6 +147,8 @@
     <Compile Include="src\engine\Effects\CounterEffect.cs" />
     <Compile Include="src\Magic.cs" />
     <Compile Include="ui\CardVisitor.cs" />
+    <Compile Include="src\engine\AbilityActivation.cs" />
+    <Compile Include="src\engine\MagicAction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">
@@ -262,6 +264,7 @@
     <EmbeddedResource Include="ui\AbilityItemTemplate.goml" />
     <EmbeddedResource Include="ui\CostTemplate.goml" />
     <EmbeddedResource Include="ui\Cards.goml" />
+    <EmbeddedResource Include="ui\StatusBar.goml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="MiscUtil\MiscUtil.csproj">
