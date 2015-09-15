@@ -2,9 +2,9 @@
 <HorizontalStack Height="-1">
 	<ListBox Data="{CostElements}" Fit="true" 
 			ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
-			Template="#Magic3D.ui.CostTemplate.goml"/>
-	<Label Text="{}"/>
-	<Label Text="{ActivationCost}" />
+			Template="#Magic3D.ui.ImgListTemplate.goml"/>
+<!--	<Label Text="{}"/>-->
+<!--	<Label Text="{ActivationCost}" />-->
 	<Label Text="{Description}" />
 	<Label Text="{Message}" />
 </HorizontalStack>

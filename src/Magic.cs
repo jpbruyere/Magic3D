@@ -310,8 +310,9 @@ namespace Magic3D
 		{
 			MagicCard c = null;
 			MagicData.TryGetCardFromZip ((e.NewValue as MainLine).name, ref c);
-			if (hsDeck.Children.Count > 1)
-				hsDeck.Children.RemoveAt (hsDeck.Children.Count - 1);
+			if (hsDeck.Children.Count > 1) {
+				hsDeck.removeChild(hsDeck.Children.LastOrDefault());
+			}
 			hsDeck.addChild(Interface.Load ("#Magic3D.ui.CardDetails.goml",new CardVisitor(c)));
 		}
 
@@ -529,8 +530,8 @@ namespace Magic3D
             {
 				tmpList.Add(Deck.PreLoadDeck (f));
 				i++;
-				if (i > 50)
-					break;
+//				if (i > 100)
+//					break;
             }
 			deckList = tmpList.ToArray ();
 		}

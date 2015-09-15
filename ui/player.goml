@@ -16,7 +16,7 @@
 		<ListBox Data="{ManaPoolElements}" 
 				Fit="true" VerticalAlignment="Bottom" HorizontalAlignment="Center"
 				ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
-				Template="#Magic3D.ui.CostTemplate.goml"/>						
+				Template="#Magic3D.ui.ImgListTemplate.goml"/>						
 		<ProgressBar Name="pgBar" 
 					VerticalAlignment="Bottom" HorizontalAlignment="Right"
 					Width="60" Height="3"

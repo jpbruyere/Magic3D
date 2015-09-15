@@ -40,7 +40,13 @@ namespace Magic3D
 		public int Power { get { return card.Power; }}
 		public int Toughness { get { return card.Toughness; }}
 		public List<Ability> Abilities { get { return card.Abilities; }}
+		public List<String> StaticAbilities { get { return card.Abilities.Where(a=>a.AbilityType != AbilityEnum.Unset).
+				Select(ab => ab.AbilityType.ToString()).ToList(); }}
+		public List<Ability> ActivatedAbilities { get { return card.Abilities.Where(a=>a.IsActivatedAbility).ToList(); }}
+		public List<Ability> TriggeredAbilities { get { return card.Abilities.Where(a=>a.IsTriggeredAbility).ToList(); }}
 		public string RawCardData { get { return card.RawCardData; }}
+
+
 
 		public string GetImagePath
 		{
