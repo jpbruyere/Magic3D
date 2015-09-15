@@ -783,10 +783,7 @@ namespace Magic3D
 			//				}
 			//			}
 		}
-
-		/// <summary>
-		/// 
-		/// </summary>
+			
 		/// <returns>true if all damages are assigned</returns>
 		public bool CheckStackForUnasignedDamage ()
 		{
