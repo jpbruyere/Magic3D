@@ -9,12 +9,13 @@ namespace Magic3D
 	public class AiPlayer : Player
 	{
 		#region CTOR
-		public AiPlayer (string _name, string _deckPath) : base(_name,_deckPath){}
+		public AiPlayer () : base(){}
+		public AiPlayer (string _name) : base(_name){}
 		#endregion
 
-		public override void initInterface ()
+		public override void InitInterface ()
 		{
-			base.initInterface ();
+			base.InitInterface ();
 			(playerPanel.FindByName ("pic") as Image).Path = "image2/HAL9000.svg";
 		}
 
@@ -23,7 +24,7 @@ namespace Magic3D
 			MagicEngine e = MagicEngine.CurrentEngine;
 
 			switch (CurrentState) {
-			case PlayerStates.init:
+			case PlayerStates.Init:
 				return;
 			case PlayerStates.PlayDrawChoice:
 				//chose to play first
@@ -171,7 +172,7 @@ namespace Magic3D
 				if (availableMana < c.Model.Cost)
 					continue;
 				
-				MagicEngine.CurrentEngine.PushOnStack(new Spell(c));
+				MagicEngine.CurrentEngine.MagicStack.PushOnStack(new Spell(c));
 				return true;
 			}
 			return false;

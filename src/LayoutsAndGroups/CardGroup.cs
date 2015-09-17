@@ -126,7 +126,7 @@ namespace Magic3D
             RemoveCard(c);
             return c;
         }
-        
+
 		public bool PointIsIn(Vector3 _p)
 		{
 			float chW = MagicData.CardWidth / 2f;

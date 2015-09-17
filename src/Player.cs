@@ -33,9 +33,10 @@ namespace Magic3D
 		/// </summary>
 		public enum PlayerStates
 		{
-			init,
+			Init,
 			PlayDrawChoice,		
 			InitialDraw,
+			WaitHandReady,
 			KeepMuliganChoice,
 			Ready,
 			SelectTarget,
@@ -74,16 +75,20 @@ namespace Magic3D
 		}
 
 		#region CTOR
-		public Player(string _name, string _deckPath)
+		public Player()
 		{
-			CurrentState = PlayerStates.init;
-
-			initInterface ();
-
-			LoadDeck (_deckPath);
-
+			initCardGroups ();
+			CurrentState = PlayerStates.Init;
+		}
+		public Player(string _name) : this()
+		{
 			Name = _name;
+		}
 
+		#endregion
+		   
+		void initCardGroups()
+		{
 			Library = new Library();
 
 			Hand = new CardGroup(CardGroupEnum.Hand);
@@ -110,11 +115,7 @@ namespace Magic3D
 			allGroups[2] = Graveyard;
 			allGroups[3] = Exhiled;
 			allGroups[4] = Library;
-
 		}
-
-		#endregion
-		   
      
         public string Name
         {
@@ -247,7 +248,7 @@ namespace Magic3D
 		Color ActiveColor = new Color (0.5, 0.5, 0.6, 0.7);
 		Color InactiveColor = new Color (0.1, 0.1, 0.1, 0.4);
 
-		public virtual void initInterface()
+		public virtual void InitInterface()
         {
 			playerPanel = Interface.Load ("#Magic3D.ui.player.goml", this);
 			pgBar = playerPanel.FindByName ("pgBar") as ProgressBar;
@@ -262,11 +263,11 @@ namespace Magic3D
 			MagicEngine me = MagicEngine.CurrentEngine;
 			if (me.pp != me.ip)
 				return;			
-			if (me.NextActionOnStack == null)
+			if (me.MagicStack.NextActionOnStack == null)
 				return;
-			if (me.NextActionOnStack.IsComplete)
+			if (me.MagicStack.NextActionOnStack.IsComplete)
 				return;
-			me.NextActionOnStack.TryToAddTarget (this);
+			me.MagicStack.NextActionOnStack.TryToAddTarget (this);
 		}
 		public void UpdateUi()
 		{
@@ -303,31 +304,19 @@ namespace Magic3D
 		}
 		//
 		#endregion
+		public volatile int LoadedCardsCount = 0;
 
 		#region deck async loading
-
-		public void LoadDeck(string _deckPath){
-			Thread thread = new Thread(() => loadingThread(_deckPath));
+		public void LoadDeckCards(){
+			pgBar.Visible = true;
+			pgBar.Maximum = Deck.CardCount;
+			pgBar.Value = 0;
+			Thread thread = new Thread(() => loadingThread());
 			thread.Start();
-			//loadingThread (_deckPath);
 		}
-		void loadingThread(string _deckPath){
-			Deck tmp = Deck.PreLoadDeck (Magic.deckPath + _deckPath);
-			int nbc = tmp.CardCount;
-			lock (pgBar) {
-				pgBar.Maximum = nbc;
-				pgBar.Value = 0;
-			}
-			for (int i = 0; i < nbc; i++) {
-				tmp.LoadNextCardsData ();
-				lock (pgBar) {
-					pgBar.Value++;
-				}
-			}
-			Deck = tmp;
-			lock (pgBar) {
-				pgBar.Visible = false;
-			}
+		void loadingThread(){
+			Deck.LoadCards ();
+				
 			Reset (false);
 
 			DeckLoaded = true;
@@ -357,13 +346,20 @@ namespace Magic3D
                 Library.AddCard(c, anim);
             }
         }
+		public void AddCardForeignToHand(MagicCard mc){
+			CardInstance ci = Deck.AddCard (mc);
+			ci.Controler = this;
+			ci.ResetPositionAndRotation();
+			ci.yAngle = MathHelper.Pi;
+			Hand.AddCard(ci,true);			
+		}
 
 		public void initialDraw ()
 		{
 			Animation.DelayMs = 300;
 			Library.ShuffleAndLayoutZ();
 			for (int i = 0; i < CardToDraw; i++) {
-				Animation.DelayMs += i * 5;
+				Animation.DelayMs += i * 50;
 				DrawOneCard ();
 			}
 			Animation.DelayMs = 0;
@@ -398,7 +394,7 @@ namespace Magic3D
 
 			switch (CurrentState) {
 			#region StartUp
-			case PlayerStates.init:
+			case PlayerStates.Init:
 				return;
 			case PlayerStates.PlayDrawChoice:
 				return;
@@ -406,8 +402,13 @@ namespace Magic3D
 				if (!DeckLoaded)
 					return;
 				initialDraw ();
-				CurrentState = PlayerStates.KeepMuliganChoice;
+				CurrentState = PlayerStates.WaitHandReady;
+				return;
+			case PlayerStates.WaitHandReady:
+				if (Deck.HasAnimatedCards)
+					return;
 				createKeepMulliganChoice ();
+				CurrentState = PlayerStates.KeepMuliganChoice;
 				return;
 			case PlayerStates.KeepMuliganChoice:
 				return;
@@ -536,7 +537,7 @@ namespace Magic3D
                     {
                         if (ma.remainingCost.Contains(me.ProducedMana))
                         {
-							MagicEngine.CurrentEngine.PushOnStack(new AbilityActivation(c,a));
+							MagicEngine.CurrentEngine.MagicStack.PushOnStack(new AbilityActivation(c,a));
                             return;
                         }
                     }

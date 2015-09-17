@@ -22,7 +22,8 @@ namespace Magic3D
 		Kicked,
 		Spell,
 		Activated,
-		Triggered
+		Triggered,
+		Charge
     }
     public enum ControlerType
     {
@@ -125,6 +126,9 @@ namespace Magic3D
 					break;
 				case "Player":
 					result |= TargetType.Player;
+					break;
+				case "CHARGE":
+					result |= TargetType.Charge;
 					break;
 				default:
 					CardTarget ctar = new CardTarget();

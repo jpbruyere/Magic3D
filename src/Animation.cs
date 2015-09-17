@@ -68,7 +68,7 @@ namespace Magic3D
 		/// Delay before firing ZnimationFinished event.
 		/// </summary>
 		protected int delayFinishMs = 0;
-        protected static List<Animation> AnimationList = new List<Animation>();
+        public static List<Animation> AnimationList = new List<Animation>();
 
         //public FieldInfo member;
         public Object AnimatedInstance;

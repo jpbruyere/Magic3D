@@ -13,6 +13,8 @@
 						Multiline="true" WordWrap="true" Background="White"/>
 				</Border>
 			</Popper>
+			<Button Margin = "1" Text="Add Card To Hand" Height="20" Width="100"
+					MouseClick="onAddCard"/>
 		</HorizontalStack>
 		<Group Height="190" Width="240" Background="0,2;0,2;0,2;0,8">
 			<HorizontalStack Height="-1" VerticalAlignment="Top" Margin="5">			
@@ -39,9 +41,16 @@
 				<GraphicObject Width="5"/>
 			</HorizontalStack>
 		</Group>
-<!--		<Label Text="{Cost}" Width="0"/>
-		<Label Text="{Oracle}" Width="0" Multiline="true"/>
-		<Label Text="{Abilities}" />-->
+
+		<ListBox Data="{Abilities}" Height="-1" Width="0"
+				ItemTemplate="#Magic3D.ui.AbilityItemTemplate.goml">
+			<Template>
+				<Groupbox Title="All Abilities" Height="{TemplatedHeight}" Width="{TemplatedWidth}" MinimumSize="10;10" >
+					<VerticalStack Margin="0" Name="List" Height="{TemplatedHeight}" Width="{TemplatedWidth}"/>
+				</Groupbox>
+			</Template>
+		</ListBox>
+
 		<Groupbox Title="Static Abilities" Height="-1" Width="0">
 			<ListBox Data="{StaticAbilities}" Height="-1" Width="0" 
 					ItemTemplate="#Magic3D.ui.StaticAbItemTemplate.goml" 
@@ -64,6 +73,7 @@
 				</Groupbox>
 			</Template>
 		</ListBox>
+		<Label Text="{Oracle}" Width="0" Multiline="true"/>
 	</VerticalStack>
 </Border>
 

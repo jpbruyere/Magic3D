@@ -20,7 +20,7 @@ namespace Magic3D
 		Resolve,
 	}
 
-	public class MagicEngine
+	public class MagicEngine 
 	{
 		public delegate void MagicEventHandler (MagicEventArg arg);
 
@@ -34,9 +34,9 @@ namespace Magic3D
 
 		public volatile EngineStates State = EngineStates.Stopped;
 		public Player[] Players;
-		public Stack<object> MagicStack = new Stack<object> ();
+		public MagicStack MagicStack;
 
-		bool decksLoaded = false;
+		public bool DecksLoaded = false;
 
 		int _currentPlayer;
 		int _priorityPlayer;
@@ -164,15 +164,15 @@ namespace Magic3D
 		public void GivePriorityToNextPlayer ()
 		{
 			//first cancel incomplete action of priority player
-			if (NextActionOnStack != null) {
+			if (MagicStack.NextActionOnStack != null) {
 				//cardsource could be null for action request by engine (ex: discard at cleanup)
-				if (NextActionOnStack.CardSource == null){
+				if (MagicStack.NextActionOnStack.CardSource == null){
 					pp.PhaseDone = false;
 					return;
 				}
-				if (NextActionOnStack.CardSource.Controler == pp){
-					if (!NextActionOnStack.IsComplete) {
-						if (!CancelLastActionOnStack ()) {
+				if (MagicStack.NextActionOnStack.CardSource.Controler == pp){
+					if (!MagicStack.NextActionOnStack.IsComplete) {
+						if (!MagicStack.CancelLastActionOnStack ()) {
 							pp.PhaseDone = false;
 							return;
 						}
@@ -187,11 +187,11 @@ namespace Magic3D
 			else
 				stopChrono ();
 
-			if (NextActionOnStack == null) {
+			if (MagicStack.NextActionOnStack == null) {
 				if (priorityPlayer == _currentPlayer && cp.PhaseDone)
 					SwitchToNextPhase ();
-			} else if (NextActionOnStack.CardSource.Controler == pp)
-				ResolveStack ();
+			} else if (MagicStack.NextActionOnStack.CardSource.Controler == pp)
+				MagicStack.ResolveStack ();
 		}
 
 		public void startChrono ()
@@ -213,7 +213,7 @@ namespace Magic3D
 
 		public Stopwatch Chrono = new Stopwatch ();
 		public static int timerLength = 1500;
-		public CardLayout SpellStackLayout = new CardLayout ();
+
 
 
 		#region CTOR
@@ -221,14 +221,10 @@ namespace Magic3D
 		{
 			CurrentEngine = this;
 
+			MagicStack = new MagicStack (this);
+
 			Players = _players;
 			MagicEvent += new MagicEventHandler (MagicEngine_MagicEvent);
-
-			SpellStackLayout.Position = new Vector3 (0, 0, 2);//Magic.vGroupedFocusedPoint;
-			SpellStackLayout.HorizontalSpacing = 0.1f;
-			SpellStackLayout.VerticalSpacing = 0.3f;
-			SpellStackLayout.MaxHorizontalSpace = 3f;
-			//SpellStackLayout.xAngle = Magic.FocusAngle;
 		}
 		#endregion
 
@@ -259,12 +255,10 @@ namespace Magic3D
 			}
 				
 			//animate only if cards are loaded
-			if (decksLoaded)
-				Animation.ProcessAnimations();
-			else
-				decksLoaded = Players.Where (p => !p.DeckLoaded).Count()==0;
+			if (!DecksLoaded)
+				DecksLoaded = Players.Where (p => !p.DeckLoaded).Count()==0;
 
-			checkLastActionOnStack();
+			MagicStack.CheckLastActionOnStack();
 
 			foreach (Player p in Players)
 				p.Process ();
@@ -408,7 +402,7 @@ namespace Magic3D
 					}
 				}
 
-				CheckStackForUnasignedDamage ();
+				MagicStack.CheckStackForUnasignedDamage ();
 				break;
 			case GamePhases.CombatDamage:
 				Chrono.Reset ();
@@ -434,7 +428,7 @@ namespace Magic3D
 					}
 				}
 
-				CheckStackForUnasignedDamage ();
+				MagicStack.CheckStackForUnasignedDamage ();
 				break;
 			case GamePhases.EndOfCombat:
 				break;
@@ -462,9 +456,9 @@ namespace Magic3D
 		}
 		void processPhaseEnd (PhaseEventArg pea)
 		{
-			ClearIncompleteActions ();
+			MagicStack.ClearIncompleteActions ();
 
-			ResolveStack ();
+			MagicStack.ResolveStack ();
 
 			switch (pea.Phase) {
 			case GamePhases.Untap:
@@ -545,20 +539,8 @@ namespace Magic3D
 			if (pp != ip)				
 				return;
 			
-			if (MagicStack.Count > 0) {
-				MagicAction ma = MagicStack.Peek () as MagicAction;
-				if (ma != null) {
-					if (!ma.IsComplete) {
-						if (ma.TryToAddTarget (c))
-							return;
-					}
-				}
-			}
-			if (TryToAssignTargetForDamage(c))
-			{
-				CheckStackForUnasignedDamage();
+			if (MagicStack.TryToHandleClick (c))
 				return;
-			}
 
 			switch (c.CurrentGroup.GroupName) {
 			case CardGroupEnum.Library:
@@ -568,7 +550,7 @@ namespace Magic3D
 				//player controling interface may only click in his own hand
 				if (c.Controler != ip)
 					return;
-				if (!CancelLastActionOnStack())
+				if (!MagicStack.CancelLastActionOnStack())
 					return;
 				if (CurrentPhase == GamePhases.Main1 || CurrentPhase == GamePhases.Main2){
 					if (c.HasType(CardTypes.Land)) {
@@ -578,12 +560,13 @@ namespace Magic3D
 							MagicEvent (new MagicEventArg (MagicEventType.PlayLand, c));
 						}
 					} else {
-						PushOnStack(new Spell (c));
+						Magic.CurrentGameWin.CursorVisible = true;
+						MagicStack.PushOnStack(new Spell (c));
 					}
 				}else if (CurrentPhase != GamePhases.CleanUp && CurrentPhase != GamePhases.Untap){
 					//play instant and abilities
 					if (c.HasType(CardTypes.Instant))
-						PushOnStack(new Spell (c));
+						MagicStack.PushOnStack(new Spell (c));
 				}
 				break;
 				#endregion
@@ -637,7 +620,7 @@ namespace Magic3D
 
 						//TODO:if multiple abs, must choose one
 						if (activableAbs.Count () > 0)
-							PushOnStack (new AbilityActivation (c, activableAbs [0]));
+							MagicStack.PushOnStack (new AbilityActivation (c, activableAbs [0]));
 					}
 					#endregion					
 				}
@@ -654,166 +637,10 @@ namespace Magic3D
 			}
 		}
 
-		#region Stack managment
-		public MagicAction NextActionOnStack {
-			get { return MagicStack.Count == 0 ? null :
-				MagicStack.Peek () is MagicAction ?
-				MagicStack.Peek () as MagicAction : null; }
-		}
-		public void PushOnStack (object s)
-		{			
-			MagicStack.Push (s);
-		}
-		//TODO:should be changed...
-		public void ClearIncompleteActions()
-		{
-			while (MagicStack.Count > 0) {
-				if (MagicStack.Peek () is Damage)
-					return;
-				if ((MagicStack.Peek () as MagicAction).IsComplete)
-					break;
-				MagicStack.Pop ();
-			}
-			Magic.btOk.Visible = false;
-		}
-		/// <summary>
-		/// Cancel incomplete action on stack before doing anything else
-		/// </summary>
-		/// <returns>True if cancelation succed or if nothing has to be canceled, false otherwise</returns>
-		public bool CancelLastActionOnStack()
-		{
-			MagicAction ma = NextActionOnStack;
-			if (ma == null)
-				return true;
-			if (ma.CardSource.Controler != pp) {
-				Debug.Print ("Nothing to cancel");
-				return true;
-			}
-			if (ma.IsComplete)
-				Debug.Print ("Canceling completed action");
-			if (ma.IsMandatory) {
-				Debug.Print ("Unable to cancel mandatory action");
-				return false;
-			}
-
-			MagicStack.Pop ();
-			return true;
-		}
-		public void ResolveStack ()
-		{
-			while (MagicStack.Count > 0) {
-				if (MagicStack.Peek () is MagicAction) {
-
-					if (!(MagicStack.Peek () as MagicAction).IsComplete)
-						break;
-					
-					MagicAction ma = MagicStack.Pop () as MagicAction;
-
-					UpdateStackLayouting ();
-
-					ma.Resolve ();
-
-					continue;
-				}
-
-				if (MagicStack.Peek () is Damage) {
-					(MagicStack.Pop () as Damage).Deal ();
-					continue;
-				}
-			}
-		}
-		/// <summary>
-		/// Check completeness of last action on stack.
-		/// </summary>
-		public void checkLastActionOnStack ()
-		{
-			if (MagicStack.Count == 0)
-				return;
-			
-			MagicAction ma = MagicStack.Peek () as MagicAction;
-
-			if (ma == null)
-				return;
-
-			if (ma.CardSource != null){
-				if (ma.CardSource.Controler != pp)
-					return;
-			}
-
-			if (!ma.IsComplete) {
-				if (ma.remainingCost == CostTypes.Tap) {
-					ma.remainingCost = null;
-					ma.CardSource.Tap ();
-				} else if ((pp.AvailableManaOnTable + pp.ManaPool) < ma.remainingCost) {
-					Magic.AddLog ("Not enough mana available");
-					CancelLastActionOnStack ();
-					return;
-				} else if (pp.ManaPool != null && ma.RemainingCost != null) {
-					ma.PayCost (ref pp.ManaPool);
-					pp.NotifyValueChange ("ManaPoolElements", pp.ManaPoolElements);
-					pp.UpdateUi ();
-				}
-				
-//				if (ma.IsComplete && ma.GoesOnStack)
-//					GivePriorityToNextPlayer ();				
-				
-			}
-			if (ma.IsComplete){
-				if (ma.GoesOnStack) {
-					//should show spell to player...
-					UpdateStackLayouting();
-					GivePriorityToNextPlayer ();				
-				} else {
-					MagicStack.Pop ();
-					ma.Resolve ();
-				}
-				return;
-			}
-
-
-			pp.UpdateUi ();
-
-			//			AbilityActivation aa = ma as AbilityActivation;
-			//			//mana doest go on stack
-			//			if (aa != null){
-			//				if (aa.Source.AbilityType == AbilityEnum.Mana) {
-			//					MagicEvent (new AbilityEventArg (aa.Source, aa.CardSource));				
-			//					MagicStack.Pop;
-			//					return;
-			//				}
-			//			}
-		}
-			
-		/// <returns>true if all damages are assigned</returns>
-		public bool CheckStackForUnasignedDamage ()
-		{
-            foreach (Damage d in MagicStack.ToArray().OfType<Damage>())
-            {
-                if (d.Target == null)
-                {
-					Magic.AddLog(d.Amount + " damage from " + d.Source.Model.Name + " to assign");                    
-                    return false;
-                }
-            }
-			return true;
-		}
-		public bool TryToAssignTargetForDamage (CardInstance c)
-		{
-			foreach (Damage d in MagicStack.ToArray().OfType<Damage>()) {
-				if (d.Target == null) {
-					d.Target = c;
-					//Magic3D.pCurrentSpell.Visible = false;
-					return true;
-				}
-			}
-			return false;
-		}
-		#endregion
-
 		#region Mouse handling
 		public void processMouseMove (Point<float> ptM)
 		{
-			if (!decksLoaded)
+			if (!DecksLoaded)
 				return;
 //			Vector3 M = new Vector3( glHelper.UnProject (ref Magic.projection, Magic.modelview, Magic.viewport, new Vector2 (ptM.X, ptM.Y))) ;
 //			Magic.vMouse = Vector3.Normalize (Magic.vEye - M);
@@ -877,6 +704,7 @@ namespace Magic3D
 			}
 		}
 		#endregion
+
 		public void UpdateOverlays()
 		{
 			foreach (CardInstance ci in CardsInPlayHavingEffects) {
@@ -903,26 +731,12 @@ namespace Magic3D
 		}
 		public void processRendering()
 		{
-			if (!decksLoaded)
+			if (!DecksLoaded)
 				return;
 
 			foreach (Player p in Players) {
 				p.Render ();
 			}
-
-			//SpellStackLayout.Render();
-		}
-
-		public void UpdateStackLayouting()
-		{
-			SpellStackLayout.Cards.Clear ();
-			foreach (MagicAction ma in MagicStack.OfType<MagicAction>()) {
-				if (ma is Spell)
-					SpellStackLayout.Cards.Add ((ma as Spell).CardSource);
-				else if (ma is AbilityActivation)
-					SpellStackLayout.Cards.Add (new CardInstance(ma));
-			}
-			SpellStackLayout.UpdateLayout ();			
 		}
 	}
 }

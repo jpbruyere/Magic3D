@@ -46,16 +46,26 @@ namespace Magic3D
         public List<CardInstance> Cards = new List<CardInstance>();
         public Player Player;
 
-        public void AddCard(MagicCard mc)
+        public CardInstance AddCard(MagicCard mc)
         {
-            Cards.Add(new CardInstance(mc));
+			CardInstance tmp = new CardInstance (mc);
+            Cards.Add(tmp);
+			return tmp;
         }
 
         public void ResetCardStates()
         {
 
         }
-
+		public bool HasAnimatedCards
+		{
+			get {
+				return 
+					Animation.AnimationList.Select (al => al.AnimatedInstance).
+					OfType<CardInstance> ().Where (c => c.Controler == this.Player).Count() > 0 ?
+					true : false;
+			}
+		}
         enum parserState
         {
             init,
@@ -64,7 +74,21 @@ namespace Magic3D
             main,
             sideboard,
         }
-
+		public void LoadCards()
+		{
+			foreach (MainLine l in CardEntries) {
+				MagicCard c = null;
+				if (!MagicData.TryGetCardFromZip (l.name, ref c)) {
+					Debug.WriteLine ("DCK: {0} => Card not found: {1}", Name, l.name);
+					return;
+				}
+				for (int i = 0; i < l.count; i++)
+					AddCard (c);
+				lock (Player.pgBar) {
+					Player.pgBar.Value++;
+				}
+			}
+		}
 		public void LoadNextCardsData()
 		{
 			MainLine l = cardLines.Dequeue();
@@ -77,7 +101,8 @@ namespace Magic3D
 				AddCard(c);
 		}
 		public int CardCount {
-			get { return cardLines == null ? Cards.Count : cardLines.Count; }
+			get { return cardLines == null ?
+				Cards == null ? 0 : Cards.Count : cardLines.Count; }
 		}
 		public IList CardEntries {
 			get { return cardLines.ToList ();}
@@ -175,18 +200,7 @@ namespace Magic3D
 			//PreconstructedDecks.Add(d.Name,d);
 			return d;
 		}
-
-//        public static void LoadPreconstructedDecks()
-//        {
-//            string[] editions = Directory.GetFiles(preconstructedDecksPath, "*.dck");
-//            
-//
-//            foreach (string f in editions)
-//            {
-//				LoadDeck (f);
-//            }
-//
-//        }
+			
 		public override string ToString ()
 		{
 			return Name;

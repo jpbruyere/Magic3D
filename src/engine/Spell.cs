@@ -34,17 +34,6 @@ namespace Magic3D
         
 		List<AbilityActivation> spellAbilities = new List<AbilityActivation>();
 		AbilityActivation currentAbilityActivation = null;
-		public override Cost RemainingCost {
-			get {
-				return currentAbilityActivation == null ? remainingCost : currentAbilityActivation.RemainingCost;
-			}
-			set {
-				if (currentAbilityActivation == null)
-					remainingCost = value;
-				else
-					currentAbilityActivation.RemainingCost = value;
-			}
-		}
 		public MagicAction CurrentAbility {
 			get {
 				if (currentAbilityActivation == null)
@@ -80,6 +69,20 @@ namespace Magic3D
 
 				return a == null ? null :
 					new AbilityActivation (CardSource, a);
+			}
+		}
+
+
+		#region MagicAction implementation
+		public override Cost RemainingCost {
+			get {
+				return currentAbilityActivation == null ? remainingCost : currentAbilityActivation.RemainingCost;
+			}
+			set {
+				if (currentAbilityActivation == null)
+					remainingCost = value;
+				else
+					currentAbilityActivation.RemainingCost = value;
 			}
 		}
 		public override bool IsComplete
@@ -145,7 +148,7 @@ namespace Magic3D
 		public override void Validate ()
 		{
 			if (currentAbilityActivation == null){
-				MagicEngine.CurrentEngine.CancelLastActionOnStack ();
+				MagicEngine.CurrentEngine.MagicStack.CancelLastActionOnStack ();
 				return;//maybe cancel spell if not completed
 			}
 			if (currentAbilityActivation.IsMandatory)
@@ -185,6 +188,7 @@ namespace Magic3D
 			else
 				base.PrintNextMessage ();
 		}
+		#endregion
 
 		public override string ToString ()
 		{

@@ -160,7 +160,7 @@ namespace Magic3D
 			if (SubAbility == null)
 				return;
 
-			MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (_source, SubAbility));
+			MagicEngine.CurrentEngine.MagicStack.PushOnStack (new AbilityActivation (_source, SubAbility));
 		}
 
 		public static Ability Parse (string strAbility)
@@ -1830,8 +1830,7 @@ namespace Magic3D
 				if (ActivationCost == null)
 					return null;
 				string tmp = ActivationCost.ToString ();
-				return tmp.ToCharArray ().Where(cc => cc != ' ').
-					Select(c => new string(c,1)).ToArray ();
+				return tmp.Split(' ').Where(cc => cc.Length < 3).ToArray();
 			}
 		}
 	}

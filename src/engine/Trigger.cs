@@ -67,15 +67,15 @@ namespace Magic3D
 				if ((czea.Origine == Origine || Origine == CardGroupEnum.Any)
 				    && (czea.Destination == Destination || Destination == CardGroupEnum.Any)) {
 					if (InhibStacking)
-						MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (arg.Source, Exec) { GoesOnStack = false });
+						MagicEngine.CurrentEngine.MagicStack.PushOnStack (new AbilityActivation (arg.Source, Exec) { GoesOnStack = false });
 					else
-						MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (arg.Source, Exec));
+						MagicEngine.CurrentEngine.MagicStack.PushOnStack (new AbilityActivation (arg.Source, Exec));
 				}else
 					return false;
 				return true;
 			case MagicEventType.CastSpell:								
 				if (targetIsValid ((arg as SpellEventArg).Spell.CardSource, triggerSource))
-					MagicEngine.CurrentEngine.PushOnStack 
+					MagicEngine.CurrentEngine.MagicStack.PushOnStack 
 						(new AbilityActivation ((arg as SpellEventArg).Spell.CardSource, Exec));
 				else
 					return false;
@@ -84,9 +84,9 @@ namespace Magic3D
 				Debug.WriteLine ("default trigger handler: " + this.ToString ());
 				if (targetIsValid (arg.Source, triggerSource)) {
 					if (InhibStacking)
-						MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (arg.Source, Exec) { GoesOnStack = false });
+						MagicEngine.CurrentEngine.MagicStack.PushOnStack (new AbilityActivation (arg.Source, Exec) { GoesOnStack = false });
 					else
-						MagicEngine.CurrentEngine.PushOnStack (new AbilityActivation (arg.Source, Exec));
+						MagicEngine.CurrentEngine.MagicStack.PushOnStack (new AbilityActivation (arg.Source, Exec));
 				}else
 					return false;
 				return true;

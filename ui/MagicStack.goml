@@ -1,0 +1,8 @@
+﻿<?xml version="1.0"?>
+<Border BorderWidth="2" Background="0,5;0,5;0,5;0,5" Visible="{StackNotEmpty}"
+	CornerRadius="10" Width="200" Height="100">
+	<VerticalStack>
+		<TextRun Text="{NextSpellOnStack}" Font="MagicMedieval, 16" Height="20" Width="0"/>
+		<TextRun Text="Test" Font="MagicMedieval, 16" Margin="10"/>
+	</VerticalStack>
+</Border>				

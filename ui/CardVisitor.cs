@@ -27,7 +27,7 @@ namespace Magic3D
 {
 	public class CardVisitor
 	{
-		MagicCard card;
+		public MagicCard card;
 
 		public CardVisitor (MagicCard _card)
 		{
@@ -72,8 +72,7 @@ namespace Magic3D
 				if (card.Cost == null)
 					return null;
 				string tmp = card.Cost.ToString ();
-				return tmp.ToCharArray ().Where(cc => cc != ' ').
-					Select(c => new string(c,1)).ToArray ();
+				return tmp.Split(' ').Where(cc => cc.Length < 3).ToArray();
 			}
 		}
 	}

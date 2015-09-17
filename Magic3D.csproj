@@ -15,12 +15,11 @@
     <StartupObject>Magic3D.Magic</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>TRACE;DEBUG;_WIN32</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -149,6 +148,8 @@
     <Compile Include="ui\CardVisitor.cs" />
     <Compile Include="src\engine\AbilityActivation.cs" />
     <Compile Include="src\engine\MagicAction.cs" />
+    <Compile Include="ui\MagicActionVisitor.cs" />
+    <Compile Include="src\engine\MagicStack.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">
@@ -266,6 +267,9 @@
     <EmbeddedResource Include="ui\StatusBar.goml" />
     <EmbeddedResource Include="ui\StaticAbItemTemplate.goml" />
     <EmbeddedResource Include="ui\ImgListTemplate.goml" />
+    <EmbeddedResource Include="ui\ListTemplate.goml" />
+    <EmbeddedResource Include="ui\ComboOverlayTemplate.goml" />
+    <EmbeddedResource Include="ui\MagicStack.goml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="MiscUtil\MiscUtil.csproj">

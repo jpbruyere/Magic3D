@@ -27,10 +27,7 @@ namespace Magic3D
 {
 	public class AbilityActivation : MagicAction
 	{
-		List<object> selectedTargets = new List<object> ();
-
-		public Ability Source;
-
+		#region CTOR
 		public AbilityActivation(CardInstance _source, Ability a) : base(_source)
 		{
 			Source = a;
@@ -61,6 +58,13 @@ namespace Magic3D
 			if (IsComplete && GoesOnStack)
 				MagicEngine.CurrentEngine.GivePriorityToNextPlayer ();
 		}
+		#endregion
+
+		bool validated = false;
+
+		List<object> selectedTargets = new List<object> ();
+		public Ability Source;
+
 
 		/// <summary>
 		/// True as long as adding targets is valid
@@ -72,6 +76,8 @@ namespace Magic3D
 				return SelectedTargets.Count < Source.PossibleTargetCount ? true : false;
 			}
 		}
+
+		#region MagicAction implementation
 		public override List<object> SelectedTargets {
 			get {
 				return selectedTargets;
@@ -130,15 +136,14 @@ namespace Magic3D
 					CardSource.Controler.Library.toogleShowAll();
 			}
 		}
-		bool validated = false;
 		/// <summary>
 		/// action will be complete if MinTarget <= targets <= MaxTarget 
 		/// </summary>
 		public override void Validate ()
 		{
 			validated = true;
-			if (!IsComplete && MagicEngine.CurrentEngine.NextActionOnStack == this)
-				MagicEngine.CurrentEngine.CancelLastActionOnStack ();
+			if (!IsComplete && MagicEngine.CurrentEngine.MagicStack.NextActionOnStack == this)
+				MagicEngine.CurrentEngine.MagicStack.CancelLastActionOnStack ();
 		}
 		public override bool TryToAddTarget (object c)
 		{
@@ -203,6 +208,12 @@ namespace Magic3D
 			}
 			MagicEngine.CurrentEngine.RaiseMagicEvent (new ActivatedAbilityEventArg (Source, CardSource));	
 			//MagicEngine.CurrentEngine.UpdateOverlays ();
+		}
+		#endregion
+
+		public override string ToString ()
+		{
+			return "Ability Activation";
 		}
 	}
 

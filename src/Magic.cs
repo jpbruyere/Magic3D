@@ -243,8 +243,7 @@ namespace Magic3D
 		void initInterface(){
 			uiMainMenu = LoadInterface("#Magic3D.ui.mainMenu.goml");
 			InitLogPanel ();
-			LoadInterface("#Magic3D.ui.fps.goml");
-			LoadInterface("#Magic3D.ui.StatusBar.goml");
+			//hsDeck = LoadInterface("#Magic3D.ui.StatusBar.goml").FindByName("hsDeck") as Group;
 			uiPhases = LoadInterface("#Magic3D.ui.phases.goml");
 			wCardText = LoadInterface ("ui/text.goml");
 			txtCard = wCardText.FindByName ("txtCard") as Label;
@@ -262,21 +261,26 @@ namespace Magic3D
 			Exit ();			
 		}
 		Group hsDeck;
+		MagicActionVisitor MAVisitor;
 
 		void onStartNewGame(Object sender, MouseButtonEventArgs e)
 		{
 			uiMainMenu.Visible = false;
-			Players = new Player[] 
-			{ 
-				new Player("player 1","Mystical Might.dck"), //"Kor Armory.dck"
-				new AiPlayer("player 2","Lightforce.dck")
-			};
+
+			foreach (Player p in Players) {
+				p.InitInterface ();
+				p.LoadDeckCards ();
+			}
+			
 			Players [0].playerPanel.HorizontalAlignment = HorizontalAlignment.Left;
 			Players [1].playerPanel.HorizontalAlignment = HorizontalAlignment.Right;
 			Players[1].zAngle = MathHelper.Pi;
 
 			engine = new MagicEngine (Players);
 			MagicEngine.MagicEvent += new Magic3D.MagicEngine.MagicEventHandler(MagicEngine_MagicEvent);
+
+			this.AddWidget(Interface.Load ("#Magic3D.ui.MagicStack.goml", engine.MagicStack));
+
 
 			#if DEBUG
 			engine.currentPlayerIndex = engine.interfacePlayer;
@@ -291,6 +295,20 @@ namespace Magic3D
 
 			btOk.Visible = false;
 		}
+		void onShowFps (object sender, MouseButtonEventArgs e)
+		{						
+			LoadInterface("#Magic3D.ui.fps.goml");
+		}
+
+		void onAddCard (object sender, MouseButtonEventArgs e)
+		{
+			GraphicObject go = sender as GraphicObject;
+			if (go == null)
+				return;
+			
+
+			Players [0].AddCardForeignToHand((go.DataSource as CardVisitor).card);
+		}
 		void onShowDecks (object sender, MouseButtonEventArgs e)
 		{						
 			hsDeck = LoadInterface ("#Magic3D.ui.decks.goml").FindByName("hsDeck") as Group;
@@ -299,7 +317,23 @@ namespace Magic3D
 		{						
 			LoadInterface ("#Magic3D.ui.Cards.goml");
 		}
+		void onP1DeckChanged (object sender, SelectionChangeEventArgs e)
+		{			
+			Players [0].Deck = e.NewValue as Deck;
+		}
+		void onP2DeckChanged (object sender, SelectionChangeEventArgs e)
+		{			
+			Players [1].Deck = e.NewValue as Deck;
+		}
+
 		void onDeckListValueChange (object sender, ValueChangeEventArgs e)
+		{			
+			if (e.MemberName != "SelectedItem")
+				return;
+			hsDeck.Children.Clear ();
+			hsDeck.addChild(Interface.Load ("#Magic3D.ui.DeckDetails.goml", e.NewValue));
+		}
+		void onPlayer1DeckChange (object sender, ValueChangeEventArgs e)
 		{			
 			if (e.MemberName != "SelectedItem")
 				return;
@@ -337,8 +371,8 @@ namespace Magic3D
 
 		void BtOk_MouseClick (object sender, MouseButtonEventArgs e)
 		{			
-			if (engine.NextActionOnStack != null) {
-				engine.NextActionOnStack.Validate ();
+			if (engine.MagicStack.NextActionOnStack != null) {
+				engine.MagicStack.NextActionOnStack.Validate ();
 			}
 				
 			//MagicEngine.CurrentEngine.CancelLastActionOnStack ();
@@ -478,6 +512,12 @@ namespace Magic3D
 
 			initInterface ();
 
+			Players = new Player[] 
+			{ 
+				new Player("player 1"), //"Kor Armory.dck"
+				new AiPlayer("player 2")
+			};
+
 			#region init GL
 			MagicData.InitCardModel();
 			//MagicCard.LoadCardDatabase();
@@ -600,9 +640,13 @@ namespace Magic3D
 //				engine.ip.Hand.UpdateLayout ();
 //			}
 
-
 			if (engine == null)
 				return;
+			if (engine.DecksLoaded)
+				Animation.ProcessAnimations();
+			if (frameCpt % 20 != 0)
+				return;
+
 
 			engine.Process ();
 

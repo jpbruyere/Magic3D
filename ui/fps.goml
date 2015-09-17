@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0"?>
-<Border CornerRadius="10" BorderWidth="2" Margin="10" Fit="true"
-	 HorizontalAlignment="Right" VerticalAlignment="Bottom"
-	>
-	<VerticalStack Fit="true" Margin="5" Spacing="4" Background="0,9;0,5;0,5;0,6">
+<Window Width="100" Height="-1" 
+		HorizontalAlignment="Right" VerticalAlignment="Bottom">
+	<VerticalStack Fit="true" Margin="15" Spacing="4" >
 		<HorizontalStack Fit="true">
 			<Label Text="Update:" />
 			<Label Text="{update}" Background="DarkGreen"/>
@@ -20,4 +19,4 @@
 			<Label Text="{fpsMax}" Font="droid bold, 12" Background="AoEnglish"/>
 		</HorizontalStack>
 	</VerticalStack>				
-</Border>
+</Window>

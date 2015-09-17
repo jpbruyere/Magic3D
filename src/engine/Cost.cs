@@ -15,23 +15,55 @@ namespace Magic3D
         Subtract,
         Sacrifice,
         Exile,
+		SubCounter,
         Composite
     }
-    public class OtherCost : Cost
+    public class CardCost : Cost
     {
         public int Count = 0;
-        public MultiformAttribut<string> ValidTarget = new MultiformAttribut<string>();
+        public MultiformAttribut<Target> ValidTargets = new MultiformAttribut<Target>();
 
-        public OtherCost(CostTypes _type)
+        public CardCost(CostTypes _type)
             : base(_type)
         { }
-        public OtherCost(CostTypes _type, int _count, MultiformAttribut<string> _valid)
-            : base(_type)
-        {
-            Count = _count;
-            ValidTarget = _valid;
-        }
-        
+
+		public static CardCost Parse(CostTypes ct, string strct)
+		{
+			CardCost cc = new CardCost (ct);
+
+			int start = strct.IndexOf("<") + 1;
+			int end = strct.IndexOf(">", start);
+			string result = strct.Substring(start, end - start);
+
+			string[] tmp = result.Split('/');
+			if (tmp.Length != 2)
+				throw new Exception("cost card target parsing error");
+			if (tmp [0] == "X") {
+				//TODO: unknow what to do with this X
+			} else {				
+				cc.Count = int.Parse (tmp [0]);
+			}
+			cc.ValidTargets = CardTarget.ParseTargets (tmp [1]);
+			if (cc.CostType == CostTypes.Discard) {
+				foreach (CardTarget c in cc.ValidTargets.Values.OfType<CardTarget>()) {
+					c.ValidGroup += CardGroupEnum.Hand;
+					c.Controler = ControlerType.You;
+				}
+			} else {
+				foreach (CardTarget c in cc.ValidTargets.Values.OfType<CardTarget>()) {
+					c.ValidGroup += CardGroupEnum.InPlay;
+					c.Controler = ControlerType.You;
+				}
+			}
+			return cc;
+		}
+		public override string ToString ()
+		{
+			string tmp = CostType.ToString () + Count;
+			if (ValidTargets != null)
+				tmp += ValidTargets.ToString ();
+			return tmp;
+		}
     }
 
     public class Cost
@@ -198,6 +230,13 @@ namespace Magic3D
 //			}
 //		}
 
+		static Ability ParseCardCost(EffectType et, string strct)
+		{
+			Ability ab = new Ability (et);
+
+
+			return ab;
+		}
 		public static Cost Parse(string costString)
         {
             if (costString.ToLower() == "no cost")
@@ -223,10 +262,16 @@ namespace Magic3D
                         continue;
                 }
 
-                if (c.StartsWith("Discard"))
-                {
-                    
-                }
+				if (c.StartsWith ("Discard")) {
+					sum += CardCost.Parse (CostTypes.Discard, c);
+					continue;
+				} else if (c.StartsWith ("Sac")) {
+					sum += CardCost.Parse (CostTypes.Sacrifice, c);
+					continue;
+				} else if (c.StartsWith ("SubCounter")) {
+					sum += CardCost.Parse (CostTypes.SubCounter, c);
+					continue;
+				}
 
                 string number = "";
                 ManaChoice choice = new ManaChoice();
@@ -388,6 +433,10 @@ namespace Magic3D
                     return "erreur => " + CostType.ToString();
                 case CostTypes.Tap:
                     return "T";
+			case CostTypes.Sacrifice:
+				return "Sacrifice";
+			case CostTypes.Discard:
+				return "Discard";
             }
             return "erreur";
         }
@@ -396,6 +445,8 @@ namespace Magic3D
 		public virtual ManaTypes GetDominantMana(){
 			return ManaTypes.Any;
 		}
+//		public virtual CardCost[] GetCardCosts ();
+//		public virtual CardCost[] GetCostWithoutCardCosts ();
     }
     public class Costs : Cost
     {

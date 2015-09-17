@@ -19,7 +19,7 @@
 				Template="#Magic3D.ui.ImgListTemplate.goml"/>						
 		<ProgressBar Name="pgBar" 
 					VerticalAlignment="Bottom" HorizontalAlignment="Right"
-					Width="60" Height="3"
+					Width="60" Height="5"
 					Value="0"
 					Foreground="BlueCrayola" Background="DarkGray"
 					BorderWidth="1" BorderColor="White"/>

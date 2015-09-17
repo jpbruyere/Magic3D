@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<Window Width="400" Height="400" Focusable="True" Title="Decks">	
+<Window Width="400" Height="400" Title="Cards">	
 	<HorizontalStack>
 		<ListBox Data="{CardList}" Background="0,5;0,5;0,5;0,5"
 			 HorizontalAlignment="Left">
 			<Template>
-				<Border BorderWidth="1" Margin="1" MinimumSize="0;100" >
+				<Border BorderWidth="1" Margin="1" MinimumSize="20;20" >
 					<HorizontalStack>
 						<Scroller  Name="scroller1" Margin="1" VerticalScrolling="true" 
 									ScrollY="{../scrollbar1.Scroll}">
