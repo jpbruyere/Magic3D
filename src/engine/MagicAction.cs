@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace Magic3D
 {
-	public abstract class MagicAction
+	public abstract class MagicAction : MagicStackElement
 	{
 		#region CTOR
 		public MagicAction(CardInstance _source)
@@ -35,6 +35,19 @@ namespace Magic3D
 				GoesOnStack = false;
 		}
 		#endregion
+
+//		#region implemented abstract members of MagicStackElement
+//		public override string Title {
+//			get { return "Magic Action"; }
+//		}
+//		public override string Message {
+//			get { return string.Format(
+//				"Magic Action for: {0}", CardSource.Model.Name); }
+//		}
+//		public override Cost MSERemainingCost {
+//			get { return remainingCost; }
+//		}
+//		#endregion
 
 		public bool GoesOnStack = true;
 		public bool IsCountered = false;
@@ -56,14 +69,9 @@ namespace Magic3D
 		public virtual void PayCost(ref Cost _amount)
 		{
 			RemainingCost = RemainingCost.Pay (ref _amount);
-			PrintNextMessage ();
 		}
 
-		public virtual void PrintNextMessage()
-		{
-			if (!Cost.IsNullOrCountIsZero(RemainingCost))
-				Magic.AddLog ("\t remaining cost: " + RemainingCost.ToString());
-		}
+		public abstract string NextMessage();
 
 		/// <summary>
 		/// Processes the activation of a spell or ability with target selection or cost payment

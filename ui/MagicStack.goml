@@ -1,8 +1,14 @@
 ﻿<?xml version="1.0"?>
-<Border BorderWidth="2" Background="0,5;0,5;0,5;0,5" Visible="{StackNotEmpty}"
-	CornerRadius="10" Width="200" Height="100">
-	<VerticalStack>
-		<TextRun Text="{NextSpellOnStack}" Font="MagicMedieval, 16" Height="20" Width="0"/>
-		<TextRun Text="Test" Font="MagicMedieval, 16" Margin="10"/>
+<Border BorderWidth="2" Background="0,5;0,5;0,5;0,3" Visible="{UIPlayerActionIsOnStack}"
+	CornerRadius="10" Fit="true">
+	<VerticalStack Margin="20">
+		<TextRun Text="{UIPlayerTitle}" Font="MagicMedieval, 16" Width="-1"/>
+		<TextRun Text="{UIPlayerMessage}" Font="MagicMedieval, 16"/>
+		<HorizontalStack Fit="true">
+			<TextRun Text="Remaining Cost:" Font="MagicMedieval, 16"/>
+			<ListBox Data="{CostElements}" 
+					ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
+						Template="#Magic3D.ui.ImgListTemplate.goml"/>	
+		</HorizontalStack>
 	</VerticalStack>
 </Border>				

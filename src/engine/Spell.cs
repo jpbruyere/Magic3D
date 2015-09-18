@@ -9,6 +9,7 @@ namespace Magic3D
 	public class Spell : MagicAction
     {
 		#region CTOR
+		public Spell() : base(null){}
 		public Spell(CardInstance _cardInstance) : base(_cardInstance)
 		{            
 			_cardInstance.BindedAction = this;
@@ -24,14 +25,27 @@ namespace Magic3D
 				PayCost (ref CardSource.Controler.ManaPool);
 				CardSource.Controler.NotifyValueChange ("ManaPoolElements", CardSource.Controler.ManaPoolElements);
 			}
-			
-			PrintNextMessage ();
 
 			if (IsComplete && GoesOnStack)
 				MagicEngine.CurrentEngine.GivePriorityToNextPlayer ();
 		}
 		#endregion
         
+		#region implemented abstract members of MagicStackElement
+		public override string Title {
+			get { return "Trying to cast " + CardSource.Model.Name; }
+		}
+		public override string Message {
+			get {
+				return currentAbilityActivation == null ? "" :
+					currentAbilityActivation.NextMessage ();
+			}
+		}
+		public override Cost MSERemainingCost {
+			get { return RemainingCost; }
+		}
+		#endregion
+
 		List<AbilityActivation> spellAbilities = new List<AbilityActivation>();
 		AbilityActivation currentAbilityActivation = null;
 		public MagicAction CurrentAbility {
@@ -175,24 +189,21 @@ namespace Magic3D
 				//trick to force update of current ability
 				//should simplify currentAbilityActivation update
 				MagicAction tmp = CurrentAbility;
-				PrintNextMessage ();
 				return true;
 			}
 			return false;
 		}
 
-		public override void PrintNextMessage ()
+		public override string NextMessage ()
 		{
-			if (currentAbilityActivation != null)
-				currentAbilityActivation.PrintNextMessage ();
-			else
-				base.PrintNextMessage ();
+			return currentAbilityActivation == null ? "" :
+				currentAbilityActivation.NextMessage ();
 		}
 		#endregion
 
 		public override string ToString ()
 		{
-			return CardSource.Model.Name;
+			return CardSource == null ? "spell with no card source" : CardSource.Model.Name;
 		}	
     }		
 }

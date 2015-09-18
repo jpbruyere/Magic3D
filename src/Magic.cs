@@ -508,7 +508,7 @@ namespace Magic3D
 			CurrentGameWin = this;
 
 			loadPreconstructedDecks ();
-			loadCardList ();
+			//loadCardList ();
 
 			initInterface ();
 
@@ -521,7 +521,7 @@ namespace Magic3D
 			#region init GL
 			MagicData.InitCardModel();
 			//MagicCard.LoadCardDatabase();
-			Edition.LoadEditionsDatabase();
+			//Edition.LoadEditionsDatabase();
 			//Deck.LoadPreconstructedDecks();
 			//initLights ();
 
@@ -644,7 +644,7 @@ namespace Magic3D
 				return;
 			if (engine.DecksLoaded)
 				Animation.ProcessAnimations();
-			if (frameCpt % 20 != 0)
+			if (frameCpt % 4 != 0)
 				return;
 
 

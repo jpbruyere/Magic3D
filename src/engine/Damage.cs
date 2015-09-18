@@ -5,13 +5,26 @@ using System.Text;
 
 namespace Magic3D
 {
-        public interface IDamagable
+    public interface IDamagable
     {
         void AddDamages(Damage d);
 
     }
-    public class Damage
+	public class Damage : MagicStackElement
     {
+		#region implemented abstract members of MagicStackElement
+		public override string Title {
+			get { return "Damages"; }
+		}
+		public override string Message {
+			get { return string.Format(
+					"{0} deals {1} Damage(s) to {2}", Source.Model.Name, Amount, Target.ToString()); }
+		}
+		public override Cost MSERemainingCost {
+			get { return null; }
+		}
+		#endregion
+
         public IDamagable Target;
         public CardInstance Source;
         public int Amount;

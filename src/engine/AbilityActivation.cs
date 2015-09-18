@@ -51,12 +51,22 @@ namespace Magic3D
 				}
 			}
 
-			PrintNextMessage ();
-
 			if (Source.Category == AbilityCategory.Spell)
 				return;
 			if (IsComplete && GoesOnStack)
 				MagicEngine.CurrentEngine.GivePriorityToNextPlayer ();
+		}
+		#endregion
+
+		#region implemented abstract members of MagicStackElement
+		public override string Title {
+			get { return CardSource.Model.Name + " Ability Activation"; }
+		}
+		public override string Message {
+			get { return WaitForTarget ? Source.TargetPrompt : ""; }
+		}
+		public override Cost MSERemainingCost {
+			get { return RemainingCost; }
 		}
 		#endregion
 
@@ -106,35 +116,28 @@ namespace Magic3D
 					WaitForTarget && !validated ? false : true;
 			}
 		}
-		public override void PrintNextMessage ()
+		public override string NextMessage ()
 		{			
 			if (!IsMandatory)
 				Magic.btOk.Visible = true;
-			//once a mana has been spent for this ab, prompt for target is shown
-			//only if required target count not reached
-			if (remainingCost < Source.ActivationCost) {
-				if (SelectedTargets.Count < RequiredTargetCount)
-					Magic.AddLog (Source.TargetPrompt);
-				else
-					base.PrintNextMessage ();
-			} else if (remainingCost != null)
-				base.PrintNextMessage ();
-			else if (WaitForTarget) {
-				Magic.AddLog (Source.TargetPrompt);
-			}
 
 			if (CardSource == null)
-				return;
-
+				return "";
+			
 			//show library cards if needeed
 			if (WaitForTarget && ValidTargets != null) {
+				Library library = CardSource.Controler.Library;
 				if (ValidTargets.Values.OfType<CardTarget> ().Where
-					(cct => cct.ValidGroup == CardGroupEnum.Library).Count () > 0) {
-					if (!CardSource.Controler.Library.IsExpanded)
-						CardSource.Controler.Library.toogleShowAll();
-				}else if (CardSource.Controler.Library.IsExpanded)
-					CardSource.Controler.Library.toogleShowAll();
+				(cct => cct.ValidGroup == CardGroupEnum.Library).Count () > 0) {
+					if (!library.IsExpanded)
+						library.toogleShowAll ();
+				} else if (library.IsExpanded)
+					library.toogleShowAll ();
+	
+				return Source.TargetPrompt;			
 			}
+
+			return "";
 		}
 		/// <summary>
 		/// action will be complete if MinTarget <= targets <= MaxTarget 
@@ -162,13 +165,12 @@ namespace Magic3D
 			{
 				if (ct.Accept(target, CardSource)){
 					SelectedTargets.Add(target);
-					PrintNextMessage ();					
+					NextMessage ();					
 					return true;
 				}
 			}
 
 			Magic.AddLog ("Invalid target: " + target.ToString());
-			PrintNextMessage ();
 			return false;
 		}
 

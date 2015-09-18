@@ -59,20 +59,43 @@ namespace Magic3D
 				this.Peek () is MagicAction ?
 				this.Peek () as MagicAction : null; }
 		}
-		public String NextSpellOnStack {
-			get { return this.Count == 0 ? null :
-				this.Peek () is Spell ?
-				(this.Peek () as Spell).CardSource.Name : "Empty"; }
+		public string UIPlayerTitle {
+			get { return UIPlayerActionIsOnStack ? 
+				NextActionOnStack.Title	: "";
+			}
 		}
-		public bool StackNotEmpty {
-			get { return NextActionOnStack == null ? false : true; }
+		public string UIPlayerMessage {
+			get { return UIPlayerActionIsOnStack ? 
+				NextActionOnStack.Message	: "";
+			}
+		}
+		public bool UIPlayerActionIsOnStack {
+			get { return NextActionOnStack == null ? false : 
+				NextActionOnStack.CardSource.Controler == engine.ip ? true : false; }
+		}
+		public String[] CostElements
+		{
+			get{
+				if (!UIPlayerActionIsOnStack)
+					return null;
+				MagicAction ma = this.Peek () as MagicAction;
+				if (ma.MSERemainingCost == null)
+					return null;
+				string tmp = ma.MSERemainingCost.ToString ();
+				return tmp.Split(' ').Where(cc => cc.Length < 3).ToArray();
+			}
 		}
 		public void PushOnStack (object s)
 		{			
 			this.Push (s);
-			NotifyValueChanged ("NextSpellOnStack", NextSpellOnStack);
-			NotifyValueChanged ("StackNotEmpty", StackNotEmpty);
-			Debug.WriteLine ("StackNotEmpty: " + StackNotEmpty);
+			notifyStackElementChange ();
+		}
+
+		void notifyStackElementChange(){
+			NotifyValueChanged ("UIPlayerActionIsOnStack", UIPlayerActionIsOnStack);
+			NotifyValueChanged ("UIPlayerTitle", UIPlayerTitle);
+			NotifyValueChanged ("UIPlayerMessage", UIPlayerMessage);
+			NotifyValueChanged ("CostElements", CostElements);
 		}
 
 		//TODO:should be changed...
@@ -83,8 +106,14 @@ namespace Magic3D
 					return;
 				if ((Peek () as MagicAction).IsComplete)
 					break;
-				Pop ();
+				PopMSE ();
 			}
+		}
+		public MagicStackElement PopMSE()
+		{
+			MagicStackElement tmp = this.Pop () as MagicStackElement;
+			notifyStackElementChange ();
+			return tmp;
 		}
 		/// <summary>
 		/// Cancel incomplete action on stack before doing anything else
@@ -106,7 +135,7 @@ namespace Magic3D
 				return false;
 			}
 
-			this.Pop ();
+			PopMSE ();
 			return true;
 		}
 
@@ -118,7 +147,7 @@ namespace Magic3D
 					if (!(Peek () as MagicAction).IsComplete)
 						break;
 
-					MagicAction ma = this.Pop () as MagicAction;
+					MagicAction ma = PopMSE() as MagicAction;
 
 					UpdateStackLayouting ();
 
@@ -128,7 +157,7 @@ namespace Magic3D
 				}
 
 				if (this.Peek () is Damage) {
-					(this.Pop () as Damage).Deal ();
+					(PopMSE() as Damage).Deal ();
 					continue;
 				}
 			}
@@ -175,7 +204,7 @@ namespace Magic3D
 					UpdateStackLayouting();
 					engine.GivePriorityToNextPlayer ();				
 				} else {
-					Pop ();
+					PopMSE ();
 					ma.Resolve ();
 				}
 				return;

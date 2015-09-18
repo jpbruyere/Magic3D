@@ -150,6 +150,7 @@
     <Compile Include="src\engine\MagicAction.cs" />
     <Compile Include="ui\MagicActionVisitor.cs" />
     <Compile Include="src\engine\MagicStack.cs" />
+    <Compile Include="src\engine\MagicStackElement.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">
