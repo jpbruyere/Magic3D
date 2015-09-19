@@ -14,6 +14,231 @@ namespace Magic3D
 		public Trigger TrigEnd;
 		public MultiformAttribut<Target> Affected;
 
+		/// <summary>
+		/// Check if target is suitable for those types of effect
+		/// for example damage on cards may only be affected to cards in play, but valid groups
+		/// are not always set in target structure
+		/// </summary>
+		public virtual bool AcceptTarget(object _target)
+		{
+			CardInstance ci = _target as CardInstance;
+
+			foreach (Effect e in this) {
+				switch (e.TypeOfEffect) {
+				case EffectType.Unset:
+					break;
+				case EffectType.Discard:
+					break;
+				case EffectType.Effect:
+					break;
+				case EffectType.Counter:
+					break;
+					break;
+				case EffectType.TapAll:
+					break;
+				case EffectType.LoseLife:
+					break;
+				case EffectType.PreventDamage:
+					break;
+				case EffectType.Charm:
+					break;
+				case EffectType.Pump:
+				case EffectType.AddPower:
+				case EffectType.AddTouchness:
+				case EffectType.SetPower:
+				case EffectType.SetTouchness:
+				case EffectType.Destroy:
+				case EffectType.Tap:
+				case EffectType.DoesNotUntap:
+				case EffectType.CantAttack:
+				case EffectType.CantBlock:
+				case EffectType.Loose:
+				case EffectType.LooseAllAbilities:
+				case EffectType.Gain:
+				case EffectType.DealDamage:
+					if (ci != null)
+						if (ci.CurrentGroup.GroupName != CardGroupEnum.InPlay)
+							return false;
+					break;
+				case EffectType.ChangeZone:
+					break;
+				case EffectType.Draw:
+					break;
+				case EffectType.DestroyAll:
+					break;
+				case EffectType.RepeatEach:
+					break;
+				case EffectType.Token:
+					break;
+				case EffectType.GainControl:
+					break;
+				case EffectType.Repeat:
+					break;
+				case EffectType.Debuff:
+					break;
+				case EffectType.ChooseColor:
+					break;
+				case EffectType.Dig:
+					break;
+				case EffectType.PumpAll:
+					break;
+				case EffectType.RemoveCounterAll:
+					break;
+				case EffectType.ChangeZoneAll:
+					break;
+				case EffectType.DamageAll:
+					break;
+				case EffectType.UntapAll:
+					break;
+				case EffectType.PutCounter:
+					break;
+				case EffectType.GainLife:
+					break;
+				case EffectType.PutCounterAll:
+					break;
+				case EffectType.StoreSVar:
+					break;
+				case EffectType.FlipACoin:
+					break;
+				case EffectType.SacrificeAll:
+					break;
+				case EffectType.Untap:
+					break;
+				case EffectType.Mill:
+					break;
+				case EffectType.Animate:
+					break;
+				case EffectType.Fog:
+					break;
+				case EffectType.RemoveCounter:
+					break;
+				case EffectType.ExchangeZone:
+					break;
+				case EffectType.AnimateAll:
+					break;
+				case EffectType.ChooseCard:
+					break;
+				case EffectType.Reveal:
+					break;
+				case EffectType.ChooseSource:
+					break;
+				case EffectType.MustBlock:
+					break;
+				case EffectType.ExchangeControl:
+					break;
+				case EffectType.RearrangeTopOfLibrary:
+					break;
+				case EffectType.CopyPermanent:
+					break;
+				case EffectType.SetState:
+					break;
+				case EffectType.Balance:
+					break;
+				case EffectType.RevealHand:
+					break;
+				case EffectType.Sacrifice:
+					break;
+				case EffectType.AddTurn:
+					break;
+				case EffectType.TwoPiles:
+					break;
+				case EffectType.ManaReflected:
+					break;
+				case EffectType.SetLife:
+					break;
+				case EffectType.DebuffAll:
+					break;
+				case EffectType.Fight:
+					break;
+				case EffectType.ChooseType:
+					break;
+				case EffectType.Shuffle:
+					break;
+				case EffectType.NameCard:
+					break;
+				case EffectType.PermanentNoncreature:
+					break;
+				case EffectType.PermanentCreature:
+					break;
+				case EffectType.TapOrUntap:
+					break;
+				case EffectType.GenericChoice:
+					break;
+				case EffectType.Play:
+					break;
+				case EffectType.BecomesBlocked:
+					break;
+				case EffectType.AddOrRemoveCounter:
+					break;
+				case EffectType.WinsGame:
+					break;
+				case EffectType.Proliferate:
+					break;
+				case EffectType.Scry:
+					break;
+				case EffectType.MoveCounter:
+					break;
+				case EffectType.GainOwnership:
+					break;
+				case EffectType.ChangeTargets:
+					break;
+				case EffectType.UnattachAll:
+					break;
+				case EffectType.PeekAndReveal:
+					break;
+				case EffectType.LosesGame:
+					break;
+				case EffectType.DigUntil:
+					break;
+				case EffectType.CopySpellAbility:
+					break;
+				case EffectType.RollPlanarDice:
+					break;
+				case EffectType.RegenerateAll:
+					break;
+				case EffectType.DelayedTrigger:
+					break;
+				case EffectType.MustAttack:
+					break;
+				case EffectType.ProtectionAll:
+					break;
+				case EffectType.RemoveFromCombat:
+					break;
+				case EffectType.RestartGame:
+					break;
+				case EffectType.PreventDamageAll:
+					break;
+				case EffectType.ExchangeLife:
+					break;
+				case EffectType.DeclareCombatants:
+					break;
+				case EffectType.ControlPlayer:
+					break;
+				case EffectType.Phases:
+					break;
+				case EffectType.Clone:
+					break;
+				case EffectType.Clash:
+					break;
+				case EffectType.ChooseNumber:
+					break;
+				case EffectType.EachDamage:
+					break;
+				case EffectType.ReorderZone:
+					break;
+				case EffectType.ChoosePlayer:
+					break;
+				case EffectType.EndTurn:
+					break;
+				case EffectType.MultiplePiles:
+					break;
+				case EffectType.ProduceMana:
+					break;
+				} 
+			}
+			return true;
+		}
+
 		public virtual void Apply(CardInstance _source, Ability _ability = null, object _target = null)
 		{
 			IList<CardInstance> targets = GetAffectedCardInstances (_source, _ability);							

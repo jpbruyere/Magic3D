@@ -41,9 +41,6 @@ namespace Magic3D
 					currentAbilityActivation.NextMessage ();
 			}
 		}
-		public override Cost MSERemainingCost {
-			get { return RemainingCost; }
-		}
 		#endregion
 
 		List<AbilityActivation> spellAbilities = new List<AbilityActivation>();
@@ -165,8 +162,11 @@ namespace Magic3D
 				MagicEngine.CurrentEngine.MagicStack.CancelLastActionOnStack ();
 				return;//maybe cancel spell if not completed
 			}
-			if (currentAbilityActivation.IsMandatory)
-				return;
+			//cancel spell if mandatory ability activation is canceled
+			if (currentAbilityActivation.IsMandatory){
+				MagicEngine.CurrentEngine.MagicStack.CancelLastActionOnStack ();
+				return;//maybe cancel spell if not completed
+			}
 
 			currentAbilityActivation.Validate ();
 

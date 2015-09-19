@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Magic3D
 {
@@ -48,6 +49,24 @@ namespace Magic3D
 //			get { return remainingCost; }
 //		}
 //		#endregion
+		public override string[] MSECostElements {
+			get{
+				if (RemainingCost == null)
+					return null;
+				string tmp = RemainingCost.ToString ();
+				return tmp.Split(' ').Where(cc => cc.Length < 3).ToArray();
+			}
+		}
+
+		Player _sourcePlayer = null;
+		public override Player Player{
+			get { return _sourcePlayer == null ? 
+				CardSource == null ? null : CardSource.Controler
+					: _sourcePlayer; 
+			}
+			set { _sourcePlayer = value; }
+		}
+
 
 		public bool GoesOnStack = true;
 		public bool IsCountered = false;
@@ -70,6 +89,8 @@ namespace Magic3D
 		{
 			RemainingCost = RemainingCost.Pay (ref _amount);
 		}
+
+
 
 		public abstract string NextMessage();
 

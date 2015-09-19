@@ -387,18 +387,18 @@ namespace Magic3D
 					foreach (CardInstance def in ac.BlockingCreatures.Where
 						(cpac => cpac.HasAbility(AbilityEnum.FirstStrike) || 
 							cpac.HasAbility(AbilityEnum.DoubleStrike)))
-						MagicStack.Push (new Damage (ac, def, def.Power));
+						MagicStack.PushOnStack (new Damage (ac, def, def.Power));
 
 					if (ac.BlockingCreatures.Count == 0) {
 						d.Target = cp.Opponent;
-						MagicStack.Push (d);
+						MagicStack.PushOnStack (d);
 					} else if (ac.BlockingCreatures.Count == 1) {
 						d.Target = ac.BlockingCreatures [0];
-						MagicStack.Push (d);
+						MagicStack.PushOnStack (d);
 					} else {
 						//push damages one by one for further resolution
 						for (int i = 0; i < ac.Power; i++)
-							MagicStack.Push (new Damage (null, d.Source, 1));
+							MagicStack.PushOnStack (new Damage (null, d.Source, 1));
 					}
 				}
 
@@ -411,20 +411,20 @@ namespace Magic3D
 
 					foreach (CardInstance def in ac.BlockingCreatures.Where
 						(cpac => !cpac.HasAbility(AbilityEnum.FirstStrike)))
-						MagicStack.Push (new Damage (ac, def, def.Power));
+						MagicStack.PushOnStack (new Damage (ac, def, def.Power));
 
 					if (ac.HasAbility (AbilityEnum.FirstStrike)&&!ac.HasAbility (AbilityEnum.DoubleStrike))
 						return;
 					
 					if (ac.BlockingCreatures.Count == 0) {
 						d.Target = cp.Opponent;
-						MagicStack.Push (d);
+						MagicStack.PushOnStack (d);
 					} else if (ac.BlockingCreatures.Count == 1) {
 						d.Target = ac.BlockingCreatures [0];
-						MagicStack.Push (d);
+						MagicStack.PushOnStack (d);
 					} else {
 						for (int i = 0; i < ac.Power; i++)
-							MagicStack.Push (new Damage (null, d.Source, 1));
+							MagicStack.PushOnStack (new Damage (null, d.Source, 1));
 					}
 				}
 
@@ -444,12 +444,16 @@ namespace Magic3D
 				}
 				int cardDiff = cp.Hand.Cards.Count - 7;
 				Ability discard = new Ability (EffectType.Discard);
-				discard.ValidTargets += new CardTarget () { ValidGroup = CardGroupEnum.Hand };
+				discard.ValidTargets += new CardTarget () { ValidGroup = CardGroupEnum.Hand, Controler = ControlerType.You };
 				discard.Mandatory = true;
 				discard.RequiredTargetCount = 1;
+				discard.TargetPrompt = "Select card to discard";
 
 				for (int i = 0; i < cardDiff; i++) {
-					MagicStack.Push (new AbilityActivation (null, discard) { GoesOnStack = false});
+					MagicStack.PushOnStack (new AbilityActivation (null, discard) { 
+						GoesOnStack = false,
+						Player = cp
+					});
 				}
 				break;
 			}
@@ -536,6 +540,8 @@ namespace Magic3D
 
 		public void ClickOnCard (CardInstance c)
 		{
+			Magic.CurrentGameWin.CursorVisible = true;
+
 			if (pp != ip)				
 				return;
 			
@@ -618,9 +624,15 @@ namespace Magic3D
 						Ability[] activableAbs = c.Model.Abilities.Where (
 							                         sma => sma.IsActivatedAbility).ToArray ();
 
-						//TODO:if multiple abs, must choose one
-						if (activableAbs.Count () > 0)
-							MagicStack.PushOnStack (new AbilityActivation (c, activableAbs [0]));
+						if (activableAbs.Count() == 1)
+							MagicStack.PushOnStack (new AbilityActivation (c, activableAbs[0]));
+						else if (activableAbs.Count() > 1){
+							MagicChoice aachoice = new MagicChoice() { Player = ip };
+							foreach (Ability aa in activableAbs)
+								aachoice.Choices.Add(new AbilityActivation (c, aa));
+						
+							MagicStack.PushOnStack (aachoice);
+						}
 					}
 					#endregion					
 				}

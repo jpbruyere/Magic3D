@@ -1,5 +1,5 @@
 ﻿//
-//  MagicActionVisitor.cs
+//  MagicChoice.cs
 //
 //  Author:
 //       Jean-Philippe Bruyère <jp.bruyere@hotmail.com>
@@ -19,28 +19,33 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
-using go;
+using System.Collections.Generic;
 
 namespace Magic3D
 {
-	public class MagicActionVisitor: IValueChange
+	public class MagicChoice : MagicStackElement
 	{
-		#region IValueChange implementation
-		public event EventHandler<ValueChangeEventArgs> ValueChanged;
-		public virtual void NotifyValueChanged(string MemberName, object _value)
+		public List<MagicStackElement> Choices = new List<MagicStackElement>();
+		Player _player;
+		public MagicChoice ()
 		{
-			ValueChanged.Raise(this, new ValueChangeEventArgs(MemberName, _value));			
+		}
+
+		#region implemented abstract members of MagicStackElement
+		public override string Title {
+			get { return "Choose one:"; }
+		}
+		public override string Message {
+			get { return ""; }
+		}
+		public override string[] MSECostElements {
+			get { return null; }
+		}
+		public override Player Player {
+			get { return _player; }
+			set { _player = value; }
 		}
 		#endregion
-
-		MagicEngine engine;
-		public MagicActionVisitor (MagicEngine _engine)
-		{
-			engine = _engine;
-		}
-		public bool NextMAExists{
-			get { return true; }
-		}
 	}
 }
 

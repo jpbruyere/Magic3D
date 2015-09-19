@@ -26,7 +26,8 @@ namespace Magic3D
 	{
 		public abstract string Title { get; }
 		public abstract string Message { get; }
-		public abstract Cost MSERemainingCost { get;  }
+		public abstract string[] MSECostElements { get;  }
+		public abstract Player Player { get; set;}
 	}
 }
 

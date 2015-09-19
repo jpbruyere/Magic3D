@@ -5,7 +5,10 @@
 		<HorizontalStack Fit="true" Margin="20" Spacing="10">
 			<VerticalStack Width="200" VerticalAlignment="Top">
 				<TextRun Text="Player 1" Font="MagicMedieval, 22" Margin="10"/>
-				<Combobox Data="{DeckList}" Width="0" SelectedItemChanged="onP1DeckChanged"
+				<Combobox Width="0"
+					SelectedItemChanged="onP1DeckChanged"
+					Data="{DeckList}"
+					SelectedIndex="0"
 					ItemTemplate="#Magic3D.ui.DeckItemTemplate.goml"
 					OverlayTemplate="#Magic3D.ui.ComboOverlayTemplate.goml">
 				</Combobox>	
@@ -22,7 +25,10 @@
 			</VerticalStack>
 			<VerticalStack Width="200" VerticalAlignment="Top">
 				<TextRun Text="Player 2" Font="MagicMedieval, 22" Margin="10"/>
-				<Combobox Data="{DeckList}" Width="0" SelectedItemChanged="onP2DeckChanged"
+				<Combobox Width="0" 
+					SelectedItemChanged="onP2DeckChanged"
+					SelectedIndex="1"
+					Data="{DeckList}"
 					ItemTemplate="#Magic3D.ui.DeckItemTemplate.goml"
 					OverlayTemplate="#Magic3D.ui.ComboOverlayTemplate.goml">
 				</Combobox>	

@@ -33,6 +33,15 @@ namespace Magic3D
 		/// <param name="_source">The original card providing this targeting conditions</param>
 		public override bool Accept (object _target, CardInstance _source)
 		{
+			if (TypeOfTarget == TargetType.Player)
+			{
+				Player p = _target as Player;
+				if (p == null)
+					return false;
+				//TODO: more constrains surely for player
+				return true;
+			}
+
 			CardInstance c = _target as CardInstance;
 
 			if (c == null) {
@@ -41,6 +50,7 @@ namespace Magic3D
 				else
 					return base.Accept (_target, _source);
 			}
+
 			if (TypeOfTarget == TargetType.Spell && !(_target is Spell))
 				return false;
 			if (TypeOfTarget == TargetType.Activated) {
@@ -84,14 +94,6 @@ namespace Magic3D
 				}
 			}
 
-			if (Controler == ControlerType.You) {
-				if (_source.Controler != c.Controler)
-					return false;
-			}else if (Controler == ControlerType.Opponent){
-				if (_source.Controler == c.Controler)
-					return false;
-			}
-
 			if (CombatState == CombatImplication.Attacking) {
 				if (!c.Controler.AttackingCreature.Contains (c))
 					return false;
@@ -114,6 +116,23 @@ namespace Magic3D
 				}
 				return false;
 			}
+
+			//_source could be null when action is triggered by engine, not spell
+			if (_source == null) {
+				//controler have to be current player
+				if (c.Controler != MagicEngine.CurrentEngine.cp)
+					return false;
+				return true;
+			}
+			if (Controler == ControlerType.You) {
+				if (_source.Controler != c.Controler)
+					return false;
+			}else if (Controler == ControlerType.Opponent){
+				if (_source.Controler == c.Controler)
+					return false;
+			}
+
+
 			return true;
 		}
 

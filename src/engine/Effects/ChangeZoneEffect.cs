@@ -27,6 +27,7 @@ namespace Magic3D
 		public CardGroupEnum Origin;
 		public CardGroupEnum Destination;
 		public bool Tapped = false;
+		public IntegerValue NumCards;
 
 		public ChangeZoneEffect()
 		{

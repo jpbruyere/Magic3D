@@ -1,14 +1,27 @@
 ﻿<?xml version="1.0"?>
-<Border BorderWidth="2" Background="0,5;0,5;0,5;0,3" Visible="{UIPlayerActionIsOnStack}"
-	CornerRadius="10" Fit="true">
+<Window Visible="{UIPlayerActionIsOnStack}" >
+	<Template>
+		<Border Name="Content" Height="{TemplatedHeight}" Width="{TemplatedWidth}" 
+			BorderWidth="2" Background="0,5;0,5;0,5;0,3" CornerRadius="10"/>
+	</Template>
 	<VerticalStack Margin="20">
-		<TextRun Text="{UIPlayerTitle}" Font="MagicMedieval, 16" Width="-1"/>
-		<TextRun Text="{UIPlayerMessage}" Font="MagicMedieval, 16"/>
-		<HorizontalStack Fit="true">
+		<TextRun Text="{UIPlayerTitle}" Font="MagicMedieval, 16"/>
+		<TextRun Text="{UIPlayerMessage}" Font="MagicMedieval, 16" Visible="{MessageIsNotNull}"/>
+		<HorizontalStack Fit="true" Visible="{CostIsNotNull}">
 			<TextRun Text="Remaining Cost:" Font="MagicMedieval, 16"/>
 			<ListBox Data="{CostElements}" 
 					ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
 						Template="#Magic3D.ui.ImgListTemplate.goml"/>	
 		</HorizontalStack>
+		<ListBox Data="{Choices}" Visible="{UIActionIsChoice}" Width="-1" SelectedItemChanged="onChoiceMade"
+			ItemTemplate="#Magic3D.ui.MSEItemTemplate.goml">
+			<Template>
+				<Groupbox Title="Coicess" Height="{TemplatedHeight}" Width="{TemplatedWidth}" MinimumSize="10;10" >
+					<VerticalStack Margin="10" Name="List" Height="{TemplatedHeight}" Width="{TemplatedWidth}"/>
+				</Groupbox>
+			</Template>
+		</ListBox>
+		<Button HorizontalAlignment="Right"  Text="Done" MouseClick="ActionDone_MouseClick" Height="-1" Margin="5"/>
 	</VerticalStack>
-</Border>				
+</Window>
+

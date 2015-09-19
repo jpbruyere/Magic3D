@@ -67,7 +67,7 @@ namespace Magic3D
 				ci = _source;
 			if (player == null && _source != null)
 				player = _source.Controler;
-			
+
 			switch (TypeOfEffect) {
 			case EffectType.GainLife:				
 				player.LifePoints += (this as NumericEffect).Amount.GetValue(_source);
@@ -113,9 +113,16 @@ namespace Magic3D
 			case EffectType.Charm:
 				break;
 			case EffectType.DealDamage:
-				engine.MagicStack.Push (new Damage (_target as IDamagable, _source, (this as NumericEffect).Amount.GetValue(_source))); 
+				engine.MagicStack.PushOnStack (new Damage (_target as IDamagable, _source, (this as NumericEffect).Amount.GetValue(_source))); 
 				break;
 			case EffectType.ChangeZone:
+				if ((this as ChangeZoneEffect).Destination == CardGroupEnum.Reveal) {
+					CardGroup cg = player.allGroups.Where (ag => ag.GroupName == (this as ChangeZoneEffect).Origin).FirstOrDefault();
+					for (int i = 0; i < (this as ChangeZoneEffect).NumCards; i++) {
+						cg.Cards [cg.Cards.Count - 1].SwitchFocus ();
+					}
+					break;
+				}
 				ci.Reset ();
 				ci.ChangeZone ((this as ChangeZoneEffect).Destination);
 				if ((this as ChangeZoneEffect).Tapped)
@@ -124,6 +131,12 @@ namespace Magic3D
 					ci.tappedWithoutEvent = false;
 				break;
 			case EffectType.Draw:
+				Animation.DelayMs = 300;
+				for (int i = 0; i < (this as NumericEffect).Amount.GetValue (_source); i++) {
+					player.DrawOneCard ();
+					Animation.DelayMs += i * 100;
+				}
+				Animation.DelayMs = 0;
 				break;
 			case EffectType.DestroyAll:
 				break;

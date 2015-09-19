@@ -148,9 +148,9 @@
     <Compile Include="ui\CardVisitor.cs" />
     <Compile Include="src\engine\AbilityActivation.cs" />
     <Compile Include="src\engine\MagicAction.cs" />
-    <Compile Include="ui\MagicActionVisitor.cs" />
     <Compile Include="src\engine\MagicStack.cs" />
     <Compile Include="src\engine\MagicStackElement.cs" />
+    <Compile Include="src\engine\MagicChoice.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">
@@ -271,6 +271,7 @@
     <EmbeddedResource Include="ui\ListTemplate.goml" />
     <EmbeddedResource Include="ui\ComboOverlayTemplate.goml" />
     <EmbeddedResource Include="ui\MagicStack.goml" />
+    <EmbeddedResource Include="ui\MSEItemTemplate.goml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="MiscUtil\MiscUtil.csproj">

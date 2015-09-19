@@ -23,6 +23,7 @@ namespace Magic3D
 		Stack,
 		Sideboard,
 		Command,
+		Reveal,
     }
 		
     public class CardGroup : CardLayout

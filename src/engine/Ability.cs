@@ -130,6 +130,8 @@ namespace Magic3D
 		{
 			if (Effects == null)
 				return;
+			if (Effects.Count == 0)
+				return;
 			if (this.AbilityType == AbilityEnum.Pump) {
 				if (this.AcceptTargets) {
 					foreach (CardInstance ci in _targets.OfType<CardInstance>()) {
@@ -230,6 +232,7 @@ namespace Magic3D
 					#region ability type
 					switch (value) {
 					case "Discard":
+						a.Effects.Add(new NumericEffect(EffectType.Discard));
 						break;
 					case "Mana":
 						a.Effects.Add(new ManaEffect());
@@ -279,6 +282,7 @@ namespace Magic3D
 						a.Effects.Add (new ChangeZoneEffect() { TypeOfEffect = EffectType.ChangeZoneAll });
 						break;
 					case "Draw":
+						a.Effects.Add(new NumericEffect(EffectType.Draw));
 						break;
 					case "DestroyAll":
 						break;
@@ -296,7 +300,7 @@ namespace Magic3D
 					case "ChooseColor":
 						break;
 					case "Dig":
-						a.Effects.Add (new ChangeZoneEffect());
+						a.Effects.Add (new ChangeZoneEffect() { Origin = CardGroupEnum.Library });
 						break;
 					case "PumpAll":
 						break;
@@ -476,7 +480,11 @@ namespace Magic3D
 					}
 					break;
 				case AbilityFieldsEnum.NumCards:
-					
+					numEff = a.Effects.OfType<NumericEffect> ().LastOrDefault ();
+					if (int.TryParse (value, out v))
+						numEff.Amount = v;
+					else
+						SVarToResolve.RegisterSVar(value, numEff, numEff.GetType().GetField("Amount"));					
 					break;
 				case AbilityFieldsEnum.References:
 					break;
@@ -808,6 +816,11 @@ namespace Magic3D
 				case AbilityFieldsEnum.Keywords:
 					break;
 				case AbilityFieldsEnum.DigNum:
+					ChangeZoneEffect cze = a.Effects.OfType<ChangeZoneEffect> ().LastOrDefault ();
+					if (int.TryParse (value, out v))
+						cze.NumCards = v;
+					else
+						SVarToResolve.RegisterSVar(value, cze, cze.GetType().GetProperty("NumCards"));
 					break;
 				case AbilityFieldsEnum.ConditionCheckSVar:
 					break;
@@ -846,6 +859,7 @@ namespace Magic3D
 				case AbilityFieldsEnum.Optional:
 					break;
 				case AbilityFieldsEnum.Reveal:
+					a.Effects.OfType<ChangeZoneEffect>().LastOrDefault().Destination = CardGroupEnum.Reveal;
 					break;
 				case AbilityFieldsEnum.LibraryPosition:
 					break;

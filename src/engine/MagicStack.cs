@@ -27,7 +27,7 @@ using System.Linq;
 
 namespace Magic3D
 {
-	public class MagicStack : Stack<object> , IValueChange
+	public class MagicStack : Stack<MagicStackElement> , IValueChange
 	{
 		#region IValueChange implementation
 		public event EventHandler<ValueChangeEventArgs> ValueChanged;
@@ -59,36 +59,57 @@ namespace Magic3D
 				this.Peek () is MagicAction ?
 				this.Peek () as MagicAction : null; }
 		}
+		public List<MagicStackElement> Choices {
+			get { return UIActionIsChoice ? 
+				(this.Peek() as MagicChoice).Choices:new List<MagicStackElement>(); }
+		}
+		public bool UIActionIsChoice{
+			get { 
+				if (this.Count == 0)
+					return false;
+				MagicStackElement mse = this.Peek ();
+				if (mse.Player != engine.ip)
+					return false;				
+				return mse is MagicChoice;
+			}
+		}
+
+		public bool UIPlayerActionIsOnStack {
+			get { 
+				return this.Count == 0 ? false : 
+					((this.Peek ()).Player == engine.ip);
+			}
+		}
+
 		public string UIPlayerTitle {
 			get { return UIPlayerActionIsOnStack ? 
-				NextActionOnStack.Title	: "";
+				this.Peek().Title	: "";
 			}
 		}
 		public string UIPlayerMessage {
 			get { return UIPlayerActionIsOnStack ? 
-				NextActionOnStack.Message	: "";
+				this.Peek().Message	: "";
 			}
-		}
-		public bool UIPlayerActionIsOnStack {
-			get { return NextActionOnStack == null ? false : 
-				NextActionOnStack.CardSource.Controler == engine.ip ? true : false; }
 		}
 		public String[] CostElements
-		{
-			get{
-				if (!UIPlayerActionIsOnStack)
-					return null;
-				MagicAction ma = this.Peek () as MagicAction;
-				if (ma.MSERemainingCost == null)
-					return null;
-				string tmp = ma.MSERemainingCost.ToString ();
-				return tmp.Split(' ').Where(cc => cc.Length < 3).ToArray();
-			}
-		}
-		public void PushOnStack (object s)
+		{ get{ return UIPlayerActionIsOnStack ? this.Peek ().MSECostElements : null; }}
+		public bool CostIsNotNull
+		{ get { return CostElements != null; }}
+		public bool MessageIsNotNull
+		{ get { return !string.IsNullOrEmpty(UIPlayerMessage); }}
+
+		public void PushOnStack (MagicStackElement s)
 		{			
 			this.Push (s);
 			notifyStackElementChange ();
+			Magic.CurrentGameWin.NotifyValueChange ("MagicStack", this.ToList());
+		}
+		public MagicStackElement PopMSE()
+		{
+			MagicStackElement tmp = this.Pop ();
+			notifyStackElementChange ();
+			Magic.CurrentGameWin.NotifyValueChange ("MagicStack", this.ToList());
+			return tmp;
 		}
 
 		void notifyStackElementChange(){
@@ -96,6 +117,11 @@ namespace Magic3D
 			NotifyValueChanged ("UIPlayerTitle", UIPlayerTitle);
 			NotifyValueChanged ("UIPlayerMessage", UIPlayerMessage);
 			NotifyValueChanged ("CostElements", CostElements);
+			NotifyValueChanged ("CostIsNotNull", CostIsNotNull);
+			NotifyValueChanged ("MessageIsNotNull", MessageIsNotNull);
+			NotifyValueChanged ("UIActionIsChoice", UIActionIsChoice);
+			if (UIActionIsChoice)
+				NotifyValueChanged ("Choices", Choices);
 		}
 
 		//TODO:should be changed...
@@ -104,16 +130,15 @@ namespace Magic3D
 			while (this.Count > 0) {
 				if (Peek () is Damage)
 					return;
+				//TODO: check if choice may be canceled
+				if (Peek () is MagicChoice) {
+					PopMSE ();
+					return;
+				}
 				if ((Peek () as MagicAction).IsComplete)
 					break;
 				PopMSE ();
 			}
-		}
-		public MagicStackElement PopMSE()
-		{
-			MagicStackElement tmp = this.Pop () as MagicStackElement;
-			notifyStackElementChange ();
-			return tmp;
 		}
 		/// <summary>
 		/// Cancel incomplete action on stack before doing anything else
@@ -179,7 +204,7 @@ namespace Magic3D
 				if (ma.CardSource.Controler != engine.pp)
 					return;
 			}
-
+			Magic.CurrentGameWin.CursorVisible = true;
 			if (!ma.IsComplete) {
 				if (ma.remainingCost == CostTypes.Tap) {
 					ma.remainingCost = null;
@@ -192,6 +217,7 @@ namespace Magic3D
 					ma.PayCost (ref engine.pp.ManaPool);
 					engine.pp.NotifyValueChange ("ManaPoolElements", engine.pp.ManaPoolElements);
 					engine.pp.UpdateUi ();
+					notifyStackElementChange ();
 				}
 
 				//				if (ma.IsComplete && ma.GoesOnStack)
@@ -223,19 +249,24 @@ namespace Magic3D
 			//				}
 			//			}
 		}
-		public bool TryToHandleClick(CardInstance c)
-		{			
+		public bool TryToHandleClick(Object target)
+		{
+			Magic.CurrentGameWin.CursorVisible = true;
 			MagicAction ma = NextActionOnStack;
 			if (ma != null) {
 				if (!ma.IsComplete) {
-					if (ma.TryToAddTarget (c))
+					if (ma.TryToAddTarget (target)) {
+						notifyStackElementChange ();
 						return true;
+					}
 				}
 			}
-
-			if (TryToAssignTargetForDamage(c))
+			if (!(target is CardInstance))
+				return false;
+			if (TryToAssignTargetForDamage(target as CardInstance))
 			{
-				CheckStackForUnasignedDamage();
+				notifyStackElementChange ();
+				CheckStackForUnasignedDamage();//TODO:this do nothing...
 				return true;
 			}			
 			return false;

@@ -1,18 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-	<Border Margin="3" BorderWidth="1" CornerRadius="5" Background="0,6;0,6;0,6;0,5"
-		VerticalAlignment="Top"  Width="600" Height="-1">
-		<Group Height="-1" Name="logs" >
-			<VerticalStack Height="-1" Focusable="False">
-				<Label Name="line1" Width="0" Text="Line1" Margin="0"/>
-				<Label Name="line2" Width="0" Text="Line2" Margin="0"/>
-				<Label Name="line3" Width="0" Text="Line3" Margin="0"/>
-				<Label Name="line4" Width="0" Text="Line4" Margin="0"/>
-			</VerticalStack>
-			<Button Name="btOk" Background="Gray" Fit="True"
-				HorizontalAlignment="Right" VerticalAlignment="Bottom"
-				MouseClick="BtOk_MouseClick">
-				<Label Text="Ok" Margin="3" Foreground="White" />
-			</Button>
-		</Group>
+	<Border BorderWidth="1" CornerRadius="5" Background="0,6;0,6;0,6;0,5"
+			VerticalAlignment="Top"  Width="600" Height="-1">
+		<VerticalStack Height="-1" Focusable="False" Margin="3">
+			<Label Name="line1" Width="0" Text="Line1" Margin="0"/>
+			<Label Name="line2" Width="0" Text="Line2" Margin="0"/>
+			<Label Name="line3" Width="0" Text="Line3" Margin="0"/>
+			<Label Name="line4" Width="0" Text="Line4" Margin="0"/>
+		</VerticalStack>
 	</Border>
 

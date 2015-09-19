@@ -21,7 +21,7 @@ namespace Magic3D
 		#region IValueChange implementation
 
 		public event EventHandler<ValueChangeEventArgs> ValueChanged;
-		void notifyValueChange(string propName, object newValue)
+		public void NotifyValueChange(string propName, object newValue)
 		{
 			ValueChanged.Raise(this, new ValueChangeEventArgs (propName, newValue));
 		}
@@ -123,7 +123,7 @@ namespace Magic3D
 			}
 			set {
 				deckList = value;
-				notifyValueChange ("DeckList", deckList);
+				NotifyValueChange ("DeckList", deckList);
 			}
 		}
 		string[] cardList;
@@ -131,7 +131,7 @@ namespace Magic3D
 			get { return cardList; }
 			set {
 				cardList = value;
-				notifyValueChange ("CardList", deckList);
+				NotifyValueChange ("CardList", deckList);
 			}			
 		}
 		
@@ -235,7 +235,6 @@ namespace Magic3D
 		#region interface
 		public Player[] Players;
 		MagicEngine engine;
-		go.Container g;
 		GraphicObject uiPhases, wCardText, uiMainMenu;
 		MessageBoxYesNo msgBox;
 		go.Label txtCard;
@@ -244,6 +243,7 @@ namespace Magic3D
 			uiMainMenu = LoadInterface("#Magic3D.ui.mainMenu.goml");
 			InitLogPanel ();
 			//hsDeck = LoadInterface("#Magic3D.ui.StatusBar.goml").FindByName("hsDeck") as Group;
+			LoadInterface("#Magic3D.ui.StatusBar.goml");
 			uiPhases = LoadInterface("#Magic3D.ui.phases.goml");
 			wCardText = LoadInterface ("ui/text.goml");
 			txtCard = wCardText.FindByName ("txtCard") as Label;
@@ -256,12 +256,15 @@ namespace Magic3D
 			this.MouseButtonDown += new EventHandler<MouseButtonEventArgs>(Mouse_Down);;
 		}
 
-		void onButExit_MouseClick (object sender, MouseButtonEventArgs e)
-		{
-			Exit ();			
-		}
 		Group hsDeck;
-		MagicActionVisitor MAVisitor;
+
+		public List<MagicStackElement> MagicStack
+		{ 
+			get { 
+				return engine == null ? new List<MagicStackElement> () :
+						engine.MagicStack.ToList (); 
+			}
+		}
 
 		void onStartNewGame(Object sender, MouseButtonEventArgs e)
 		{
@@ -292,14 +295,16 @@ namespace Magic3D
 			AddAnimation (coin);
 			coin.AnimationFinished += onTossResult;
 			#endif
-
-			btOk.Visible = false;
 		}
+		void onButExit_MouseClick (object sender, MouseButtonEventArgs e)
+		{
+			Exit ();			
+		}
+
 		void onShowFps (object sender, MouseButtonEventArgs e)
 		{						
 			LoadInterface("#Magic3D.ui.fps.goml");
 		}
-
 		void onAddCard (object sender, MouseButtonEventArgs e)
 		{
 			GraphicObject go = sender as GraphicObject;
@@ -349,10 +354,14 @@ namespace Magic3D
 			}
 			hsDeck.addChild(Interface.Load ("#Magic3D.ui.CardDetails.goml",new CardVisitor(c)));
 		}
+		void onChoiceMade (object sender, SelectionChangeEventArgs e)
+		{			
+			engine.MagicStack.PopMSE ();
+			engine.MagicStack.PushOnStack (e.NewValue as MagicStackElement);
+		}
 
 		#region LogPanel
 		static GraphicObject uiLogs;
-		public static go.Button btOk;
 
 		static Label[] llogs = new Label[4];
 		static List<String> logBuffer = new List<string> ();
@@ -365,18 +374,15 @@ namespace Magic3D
 			for (int i = 0; i < 4; i++) {
 				llogs [i] = uiLogs.FindByName ("line" + (i + 1)) as Label;
 			}
-			btOk = uiLogs.FindByName ("btOk") as Button;
-			//btOk.Visible = false;
 		}
 
-		void BtOk_MouseClick (object sender, MouseButtonEventArgs e)
+		void ActionDone_MouseClick (object sender, MouseButtonEventArgs e)
 		{			
 			if (engine.MagicStack.NextActionOnStack != null) {
 				engine.MagicStack.NextActionOnStack.Validate ();
 			}
 				
 			//MagicEngine.CurrentEngine.CancelLastActionOnStack ();
-			btOk.Visible = false;			
 		}
 		public static void AddLog(string msg)
 		{
@@ -510,13 +516,14 @@ namespace Magic3D
 			loadPreconstructedDecks ();
 			//loadCardList ();
 
-			initInterface ();
-
 			Players = new Player[] 
 			{ 
 				new Player("player 1"), //"Kor Armory.dck"
 				new AiPlayer("player 2")
 			};
+
+			initInterface ();
+
 
 			#region init GL
 			MagicData.InitCardModel();
@@ -685,14 +692,10 @@ namespace Magic3D
 				CloseCurrentGame ();
 				break;
 			case Key.H:				
-				if (wCardText.Visible) {
-					wCardText.Visible = false;
-					break;
-				}
+				wCardText.Visible = !wCardText.Visible;
 				if (CardInstance.selectedCard == null)
 					return;
-					
-				wCardText.Visible = true;
+				txtCard.Text = CardInstance.selectedCard.Model.RawCardData;	
 				break;
 			case Key.O:
 				engine.ip.Opponent.Hand.RevealToUIPlayer();

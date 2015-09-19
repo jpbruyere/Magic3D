@@ -261,13 +261,9 @@ namespace Magic3D
 		void PlayerPanel_MouseClick (object sender, MouseButtonEventArgs e)
 		{
 			MagicEngine me = MagicEngine.CurrentEngine;
-			if (me.pp != me.ip)
-				return;			
-			if (me.MagicStack.NextActionOnStack == null)
+			if (me.pp != me.ip)				
 				return;
-			if (me.MagicStack.NextActionOnStack.IsComplete)
-				return;
-			me.MagicStack.NextActionOnStack.TryToAddTarget (this);
+			me.MagicStack.TryToHandleClick (this);
 		}
 		public void UpdateUi()
 		{
@@ -570,6 +566,8 @@ namespace Magic3D
             }
         }
 			
+		public bool HasThreshold
+		{ get { return Graveyard.Cards.Count > 7; } }
 
 		#region Rendering
 		public float zAngle = 0.0f;

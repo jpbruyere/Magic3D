@@ -1,0 +1,15 @@
+﻿<?xml version="1.0"?>
+<Border Fit="true" Focusable="true">
+	<HorizontalStack Height="-1" Margin="20"		
+		MouseEnter="{Background=SteelBlue}"
+		MouseLeave="{Background=Transparent}">
+		<ListBox Data="{MSECostElements}" Fit="true" 
+				ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
+				Template="#Magic3D.ui.ImgListTemplate.goml"/>
+		<Label Text="{}"/>
+	<!--	<Label Text="{ActivationCost}" />-->
+	<!--	<Label Text="{Description}" Foreground="Blue"/>-->
+		<Label Text="{Message}" />
+	</HorizontalStack>
+</Border>
+

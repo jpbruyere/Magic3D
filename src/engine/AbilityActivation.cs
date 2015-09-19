@@ -60,13 +60,11 @@ namespace Magic3D
 
 		#region implemented abstract members of MagicStackElement
 		public override string Title {
-			get { return CardSource.Model.Name + " Ability Activation"; }
+			get { return CardSource == null ? "Engine Request:" :
+				CardSource.Model.Name + " Ability Activation"; }
 		}
 		public override string Message {
-			get { return WaitForTarget ? Source.TargetPrompt : ""; }
-		}
-		public override Cost MSERemainingCost {
-			get { return RemainingCost; }
+			get { return WaitForTarget ? Source.TargetPrompt : Source.Description; }
 		}
 		#endregion
 
@@ -118,9 +116,6 @@ namespace Magic3D
 		}
 		public override string NextMessage ()
 		{			
-			if (!IsMandatory)
-				Magic.btOk.Visible = true;
-
 			if (CardSource == null)
 				return "";
 			
@@ -143,17 +138,16 @@ namespace Magic3D
 		/// action will be complete if MinTarget <= targets <= MaxTarget 
 		/// </summary>
 		public override void Validate ()
-		{
+		{			
 			validated = true;
 			if (!IsComplete && MagicEngine.CurrentEngine.MagicStack.NextActionOnStack == this)
 				MagicEngine.CurrentEngine.MagicStack.CancelLastActionOnStack ();
 		}
-		public override bool TryToAddTarget (object c)
+		public override bool TryToAddTarget (object target)
 		{
 			if (!WaitForTarget)
 				return false;
 
-			object target = c;
 			if (target is CardInstance) {
 				CardInstance ci = target as CardInstance;
 				if (ci.BindedAction != null)
@@ -164,9 +158,10 @@ namespace Magic3D
 			foreach (Target ct in ValidTargets.Values)
 			{
 				if (ct.Accept(target, CardSource)){
-					SelectedTargets.Add(target);
-					NextMessage ();					
-					return true;
+					if (Source.Effects.AcceptTarget (target)) {
+						SelectedTargets.Add (target);
+						return true;
+					}
 				}
 			}
 
@@ -175,9 +170,7 @@ namespace Magic3D
 		}
 
 		public override void Resolve ()
-		{
-			Magic.btOk.Visible = false;
-
+		{			
 			if (IsCountered)
 				return;
 
