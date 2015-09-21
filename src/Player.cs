@@ -304,6 +304,10 @@ namespace Magic3D
 
 		#region deck async loading
 		public void LoadDeckCards(){
+			if (DeckLoaded) {
+				Reset (false);
+				return;
+			}
 			pgBar.Visible = true;
 			pgBar.Maximum = Deck.CardCount;
 			pgBar.Value = 0;
@@ -488,7 +492,7 @@ namespace Magic3D
 					return false;
 				MagicAction ma = e.MagicStack.Peek () as MagicAction;
 
-				return ma == null ? false : (ma.IsComplete || ma.CardSource.Controler != this) ? false : true;				
+				return ma == null ? false : (ma.IsComplete || ma.Player != this) ? false : true;				
 			}
 		}
 //		public bool PlayableSpell
@@ -521,6 +525,10 @@ namespace Magic3D
 			MagicAction ma = engine.MagicStack.Peek () as MagicAction;
 			if (ma == null) {
 				Debug.WriteLine ("no action to activate mana for.");
+				return;
+			}
+			if (ma.remainingCost == null) {
+				Debug.WriteLine ("Action has no cost");
 				return;
 			}
 

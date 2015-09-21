@@ -4,6 +4,7 @@
 			MouseLeave="{Background=Transparent}">
 		
 		<Label Text="{name}" Width="0"/>
+		<Label Text="{code}" Width="-1"/>
 		<Image Width="16" Height="16" Path="{ExpansionImg}"/>
 		<Spinner Value="{count}" Width="50"  />
 

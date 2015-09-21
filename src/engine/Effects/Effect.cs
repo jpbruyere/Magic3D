@@ -160,7 +160,7 @@ namespace Magic3D
 				else 
 					picPath = System.IO.Path.Combine (picPath, tkEff.Image + ".jpg").Replace(' ','_').ToLower();				
 
-				tk.Texture = new Texture (picPath);
+				tk.SetTexture(picPath);
 
 				Player[] players;
 

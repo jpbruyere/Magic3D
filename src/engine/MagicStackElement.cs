@@ -27,6 +27,7 @@ namespace Magic3D
 		public abstract string Title { get; }
 		public abstract string Message { get; }
 		public abstract string[] MSECostElements { get;  }
+		public abstract string[] MSEOtherCostElements { get;  }
 		public abstract Player Player { get; set;}
 	}
 }

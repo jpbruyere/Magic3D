@@ -38,9 +38,8 @@ namespace Magic3D
 		public override string Message {
 			get { return ""; }
 		}
-		public override string[] MSECostElements {
-			get { return null; }
-		}
+		public override string[] MSECostElements {get { return null; }}
+		public override string[] MSEOtherCostElements {get { return null; }}
 		public override Player Player {
 			get { return _player; }
 			set { _player = value; }

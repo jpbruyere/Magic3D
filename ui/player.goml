@@ -10,7 +10,7 @@
 			<Label Text="{Name}" Font="MagicMedieval, 22" TextAlignment="LeftCenter"/>
 			<GraphicObject/>
 			<Label Text="{LifePoints}" Font="MagicMedieval, 30"
-				Margin="0" Background="CornflowerBlue" Fit="true" TextAlignment="TopLeft"
+				Margin="5" Background="CornflowerBlue" Fit="true" TextAlignment="TopLeft"
 				VerticalAlignment="Top"/>
 		</HorizontalStack>
 		<ListBox Data="{ManaPoolElements}" 

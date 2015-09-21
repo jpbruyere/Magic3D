@@ -27,11 +27,13 @@ namespace Magic3D
 {
 	public class CardVisitor
 	{
+		public string Edition;
 		public MagicCard card;
 
-		public CardVisitor (MagicCard _card)
+		public CardVisitor (MagicCard _card, string _edition = "")
 		{
 			card = _card;
+			Edition = _edition;
 		}
 		public string Name
 		{ get { return card.Name; }}
@@ -51,8 +53,13 @@ namespace Magic3D
 		public string GetImagePath
 		{
 			get {
+				string basePath = System.IO.Path.Combine (MagicData.cardsArtPath, "cards");
+				string editionPicsPath = System.IO.Path.Combine (basePath, Edition);
+				if (Directory.Exists (editionPicsPath))
+					basePath = editionPicsPath;
+				
 				return 
-					Directory.GetFiles (System.IO.Path.Combine (MagicData.cardsArtPath, "cards"),
+					Directory.GetFiles (basePath,
 						Name + "*.full.jpg", SearchOption.AllDirectories).FirstOrDefault ();
 			}
 		}

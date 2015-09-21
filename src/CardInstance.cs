@@ -18,6 +18,8 @@ namespace Magic3D
     [Serializable]
 	public class CardInstance : RenderedCardModel, IDamagable
     {
+		static Random rnd = new Random();
+
 		#region CardAnimEvent
 		public class CardAnimEventArg : EventArgs
 		{
@@ -28,6 +30,8 @@ namespace Magic3D
 		}
 		#endregion
 
+		public string Edition;
+		int _selectedTexture = -1;
 		public MagicAction BindedAction = null;
 
 		#region CTOR
@@ -53,8 +57,8 @@ namespace Magic3D
 		public static CardInstance focusedCard = null;
         public static CardInstance selectedCard;
 
-		public static go.Color notSelectedColor = new go.Color(0.9f, 0.9f, 0.9f, 1f);
-		public static go.Color SelectedColor = new go.Color(1f, 1f, 1f, 1f);
+		public static go.Color notSelectedColor = new go.Color(1.0f, 1.0f, 1.0f, 1f);
+		public static Vector4 SelectedColor = new Vector4(1.2f, 1.2f, 1.2f, 1.2f);
 		public static go.Color AttackingColor = new go.Color(1.0f, 0.8f, 0.8f, 1f);
         #endregion
 
@@ -287,7 +291,8 @@ namespace Magic3D
         {
             get { return _isTapped; }
         }
-        public bool tappedWithoutEvent
+        /// <summary> Tap card without raising MagicEvent, usefull when card enter battelfield tapped </summary>        
+		public bool tappedWithoutEvent
         {
             get { return _isTapped; }
             set
@@ -422,8 +427,6 @@ namespace Magic3D
         }
 
 		#region layouting
-
-
 		//TODO: create function for attached card position update instead of
 		//		copying again and again the same code
         public override float x
@@ -633,20 +636,25 @@ namespace Magic3D
 		#endregion
 
 		#region IRenderable implementation
-
 		public override void Render ()
 		{
 			Matrix4 mSave = Magic.texturedShader.ModelMatrix;            
 			Magic.texturedShader.ModelMatrix = ModelMatrix * Magic.texturedShader.ModelMatrix;
 
 			if (CardInstance.selectedCard == this)
-				Magic.texturedShader.Color = new Vector4 (1.2f, 1.2f, 1.2f, 1.2f);
+				Magic.texturedShader.Color = SelectedColor;
 			else if (Combating)
 				Magic.texturedShader.Color = AttackingColor;
 			else 
 				Magic.texturedShader.Color = notSelectedColor;
 
-			Model.Render();
+			if (_selectedTexture < 0) {
+				if (Model.nbrImg > 1)
+					_selectedTexture = rnd.Next (Model.nbrImg);
+				else
+					_selectedTexture = 0;
+			}
+			Model.Render(Edition, _selectedTexture);
 
 			if (pointsTexture != 0 && CurrentGroup != null && !HasFocus)
 			{				

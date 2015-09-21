@@ -46,9 +46,9 @@ namespace Magic3D
         public List<CardInstance> Cards = new List<CardInstance>();
         public Player Player;
 
-        public CardInstance AddCard(MagicCard mc)
+		public CardInstance AddCard(MagicCard mc, string edition = "")
         {
-			CardInstance tmp = new CardInstance (mc);
+			CardInstance tmp = new CardInstance (mc) { Edition = edition };
             Cards.Add(tmp);
 			return tmp;
         }
@@ -83,7 +83,7 @@ namespace Magic3D
 					return;
 				}
 				for (int i = 0; i < l.count; i++)
-					AddCard (c);
+					AddCard (c, l.code);
 				lock (Player.pgBar) {
 					Player.pgBar.Value++;
 				}

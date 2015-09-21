@@ -16,9 +16,7 @@
 		<ListBox Data="{Choices}" Visible="{UIActionIsChoice}" Width="-1" SelectedItemChanged="onChoiceMade"
 			ItemTemplate="#Magic3D.ui.MSEItemTemplate.goml">
 			<Template>
-				<Groupbox Title="Coicess" Height="{TemplatedHeight}" Width="{TemplatedWidth}" MinimumSize="10;10" >
-					<VerticalStack Margin="10" Name="List" Height="{TemplatedHeight}" Width="{TemplatedWidth}"/>
-				</Groupbox>
+				<VerticalStack Margin="10" Name="List" Height="{TemplatedHeight}" Width="{TemplatedWidth}"/>
 			</Template>
 		</ListBox>
 		<Button HorizontalAlignment="Right"  Text="Done" MouseClick="ActionDone_MouseClick" Height="-1" Margin="5"/>

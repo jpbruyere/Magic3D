@@ -23,7 +23,7 @@
 				</VerticalStack>
 			</HorizontalStack>
 		</Popper>
-		<!--<Popper Title="Decks" Width="50" >
+<!--		<Popper Title="Decks" Width="50" >
 			<HorizontalStack Width="650" Height="600">
 				<ListBox Height="0" Width="150" Background="0,5;0,5;0,5;0,5" Name="deckList"
 					Data="{DeckList}" HorizontalAlignment="Left" ValueChanged="onDeckListValueChange"

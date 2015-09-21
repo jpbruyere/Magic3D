@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0"?>
 
 	<Border BorderWidth="2" Background="0,5;0,5;0,5;0,5" 
-		CornerRadius="10" Fit="true">
-		<HorizontalStack Fit="true" Margin="20" Spacing="10">
-			<VerticalStack Width="200" VerticalAlignment="Top">
+		CornerRadius="10" Fit="true" >
+		<HorizontalStack Fit="true" Margin="20" Spacing="10" BackgroundImagePath="#Magic3D.images.abstrait3.jpg">
+			<VerticalStack Width="200" VerticalAlignment="Top" >
 				<TextRun Text="Player 1" Font="MagicMedieval, 22" Margin="10"/>
 				<Combobox Width="0"
 					SelectedItemChanged="onP1DeckChanged"

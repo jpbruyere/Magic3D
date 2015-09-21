@@ -239,7 +239,9 @@ namespace Magic3D
     {
 
         public float TargetValue;
+		float initialValue;
         public float Step;
+		public bool Cycle;
 
 
         public FloatAnimation(Object instance, string _propertyName, float Target, float step = 0.2f)
@@ -249,6 +251,7 @@ namespace Magic3D
             TargetValue = Target;
 
             float value = getValue();
+			initialValue = value;
 
             Step = step;
 
@@ -268,6 +271,11 @@ namespace Magic3D
         {
             float value = getValue();
 
+			CardInstance ci = AnimatedInstance as CardInstance;
+			if (ci != null)
+				if (ci.CurrentGroup.Cached)
+					ci.CurrentGroup.CacheIsUpToDate = false;
+				
 			//Debug.WriteLine ("Anim: {0} <= {1}", value, this.ToString ());
 
             if (Step > 0f)
@@ -286,6 +294,13 @@ namespace Magic3D
                 if (TargetValue < value)
                     return;
             }
+
+			if (Cycle) {
+				Step = -Step;
+				TargetValue = initialValue;
+				Cycle = false;
+				return;
+			}
 
             setValue(TargetValue);
             AnimationList.Remove(this);

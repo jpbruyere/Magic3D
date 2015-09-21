@@ -157,7 +157,7 @@ namespace Magic3D
 		}
 		Coin coin;	//coin object for the toss
 
-		void drawScene()
+		public void ActivateMainShader()
 		{
 			texturedShader.Enable ();
 			//shader.LineWidth = lineWidth;
@@ -167,9 +167,12 @@ namespace Magic3D
 			texturedShader.ProjectionMatrix = projection;
 			texturedShader.ModelViewMatrix = modelview;
 			texturedShader.ModelMatrix = Matrix4.Identity;
+		}
+		void drawScene()
+		{
+			ActivateMainShader ();
 
 			drawTable ();
-
 
 			if (engine != null)
 				engine.processRendering ();
@@ -180,8 +183,6 @@ namespace Magic3D
 				Renderables [i].Render ();
 				i++;
 			}
-
-
 		}
 			
 		#region table
@@ -224,30 +225,17 @@ namespace Magic3D
 		}
 		#endregion
 
-		void initArrow()
-		{
-			arrowShader = new GameLib.EffectShader ("GGL.Shaders.GameLib.red");
-
-		}
-			
-
-
 		#region interface
 		public Player[] Players;
 		MagicEngine engine;
-		GraphicObject uiPhases, wCardText, uiMainMenu;
+		GraphicObject uiPhases, wCardText, uiMainMenu, uiStatusBar, uiSplash;
 		MessageBoxYesNo msgBox;
 		go.Label txtCard;
 
-		void initInterface(){
+		void initInterface(){			
 			uiMainMenu = LoadInterface("#Magic3D.ui.mainMenu.goml");
-			InitLogPanel ();
+			uiMainMenu.Visible = false;
 			//hsDeck = LoadInterface("#Magic3D.ui.StatusBar.goml").FindByName("hsDeck") as Group;
-			LoadInterface("#Magic3D.ui.StatusBar.goml");
-			uiPhases = LoadInterface("#Magic3D.ui.phases.goml");
-			wCardText = LoadInterface ("ui/text.goml");
-			txtCard = wCardText.FindByName ("txtCard") as Label;
-			wCardText.Visible = false;
 
 			//special event handlers fired only if mouse not in interface objects
 			//for scene mouse handling
@@ -265,16 +253,52 @@ namespace Magic3D
 						engine.MagicStack.ToList (); 
 			}
 		}
+		void createSceneObjects()
+		{
+			MagicData.InitCardModel();
+			abstractTex = new Texture(@"images/abstract1.jpg");
+			glowShader = new GameLib.GlowShader ();
+			wirlpoolShader = new GameLib.EffectShader ("GGL.Shaders.GameLib.wirlpool2",256,256);
+			arrowShader = new GameLib.EffectShader ("GGL.Shaders.GameLib.red");
 
+			initTableModel ();
+			initDice ();			
+		}
+		void destroySceneObjects()
+		{
+			MagicData.DesinitCardModel ();
+			GL.DeleteTexture (abstractTex);
+			GL.DeleteTexture (tableTexture);
+			GL.DeleteTexture (diceTex);
+
+			dice.Dispose ();
+			table.Dispose ();
+			glowShader.Dispose ();
+			wirlpoolShader.Dispose ();
+
+			arrowShader.Dispose ();
+
+		}
 		void onStartNewGame(Object sender, MouseButtonEventArgs e)
 		{
+			createSceneObjects ();
+
+
 			uiMainMenu.Visible = false;
 
 			foreach (Player p in Players) {
 				p.InitInterface ();
 				p.LoadDeckCards ();
 			}
-			
+
+			InitLogPanel ();
+			uiStatusBar = LoadInterface("#Magic3D.ui.StatusBar.goml");
+			uiPhases = LoadInterface("#Magic3D.ui.phases.goml");
+			wCardText = LoadInterface ("ui/text.goml");
+			txtCard = wCardText.FindByName ("txtCard") as Label;
+			wCardText.Visible = false;
+
+
 			Players [0].playerPanel.HorizontalAlignment = HorizontalAlignment.Left;
 			Players [1].playerPanel.HorizontalAlignment = HorizontalAlignment.Right;
 			Players[1].zAngle = MathHelper.Pi;
@@ -347,12 +371,14 @@ namespace Magic3D
 		}
 		void onCardListValueChange (object sender, ValueChangeEventArgs e)
 		{
+			MainLine l = e.NewValue as MainLine;
 			MagicCard c = null;
-			MagicData.TryGetCardFromZip ((e.NewValue as MainLine).name, ref c);
+
+			MagicData.TryGetCardFromZip (l.name, ref c);
 			if (hsDeck.Children.Count > 1) {
 				hsDeck.removeChild(hsDeck.Children.LastOrDefault());
 			}
-			hsDeck.addChild(Interface.Load ("#Magic3D.ui.CardDetails.goml",new CardVisitor(c)));
+			hsDeck.addChild(Interface.Load ("#Magic3D.ui.CardDetails.goml",new CardVisitor(c, l.code)));
 		}
 		void onChoiceMade (object sender, SelectionChangeEventArgs e)
 		{			
@@ -413,12 +439,21 @@ namespace Magic3D
 		#endregion
 
 		#endregion
+
 		void CloseCurrentGame(){
+			
 			engine = null;
 			foreach (Player p in Players) {
 				this.DeleteWidget (p.playerPanel);
 			}
-			Players = null;
+
+			this.DeleteWidget(uiPhases);
+			this.DeleteWidget(wCardText);
+			this.DeleteWidget(uiLogs);
+			this.DeleteWidget(uiStatusBar);
+
+
+
 			uiMainMenu.Visible = true;
 		}
 
@@ -513,6 +548,23 @@ namespace Magic3D
 
 			CurrentGameWin = this;
 
+			uiSplash = LoadInterface("#Magic3D.ui.Splash.goml");
+			pbSplash = uiSplash.FindByName ("pbSplash") as ProgressBar;
+			pbSplash.Value = 10;
+
+			initOpenGL();
+
+			loadingThread ();
+//			Thread t = new Thread (loadingThread);
+//			t.Start ();
+
+		}
+
+		volatile bool startLoadingFinished = false;
+		bool mainMenuLoaded = false;
+		ProgressBar pbSplash;
+
+		void loadingThread(){
 			loadPreconstructedDecks ();
 			//loadCardList ();
 
@@ -522,51 +574,27 @@ namespace Magic3D
 				new AiPlayer("player 2")
 			};
 
-			initInterface ();
+			Thread.Sleep (500);
+			startLoadingFinished = true;
+		}
 
-
-			#region init GL
-			MagicData.InitCardModel();
-			//MagicCard.LoadCardDatabase();
-			//Edition.LoadEditionsDatabase();
-			//Deck.LoadPreconstructedDecks();
-			//initLights ();
-
+		void initOpenGL()
+		{
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Less);
 			GL.Enable(EnableCap.CullFace);
 			GL.PrimitiveRestartIndex (int.MaxValue);
 			GL.Enable (EnableCap.PrimitiveRestart);
-//			GL.Enable (EnableCap.PointSprite);
-//			GL.Enable(EnableCap.VertexProgramPointSize);
-//			GL.PointParameter(PointSpriteCoordOriginParameter.LowerLeft);
 			GL.Enable (EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-//			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-//			GL.ShadeModel(ShadingModel.Smooth);
-//			GL.Hint (HintTarget.LineSmoothHint, HintMode.Nicest);
-
-			abstractTex = new Texture(@"images/abstract1.jpg");
 
 			texturedShader = new GameLib.SingleLightSimpleShader ();
-			glowShader = new GameLib.GlowShader ();
-			wirlpoolShader = new GameLib.EffectShader ("GGL.Shaders.GameLib.wirlpool2",256,256);
-
-			initArrow ();
-			initTableModel ();
-			initDice ();
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 			ErrorCode err = GL.GetError ();
-			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");
-			#endregion
-
-			//engine.StartNewGame();
-			//this.AddWidget (new MessageBox ("Play first?"));
-			//this.CursorVisible = false;
+			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");			
 		}
-
 		void loadPreconstructedDecks()
 		{
 			string[] editions = Directory.GetFiles(Magic.deckPath, "*.dck");
@@ -590,7 +618,6 @@ namespace Magic3D
 		{
 			time += (float)e.Time;
 
-			base.OnUpdateFrame (e);
 
 			fps = (int)RenderFrequency;
 			if (frameCpt > 200) {
@@ -599,6 +626,19 @@ namespace Magic3D
 			}
 			frameCpt++;
 
+			if (frameCpt % 2 == 0)
+				base.OnUpdateFrame (e);
+			
+			if (!mainMenuLoaded) {
+				if (startLoadingFinished) {
+					initInterface ();
+					mainMenuLoaded = true;
+					uiMainMenu.Visible = true;
+					uiSplash.Visible = false;
+				}
+				return;
+			}
+
 			int i = 0;
 			while(i < Animatables.Count)
 			{
@@ -606,34 +646,34 @@ namespace Magic3D
 				i++;
 			}
 				
-			if (Keyboard [Key.ControlLeft]) {
-				//light movment
-				if (Keyboard [Key.Up])
-					vLight += new Vector4 (MoveSpeed * vLookDirOnXYPlane, 0);
-				else if (Keyboard [Key.Down])
-					vLight -= new Vector4 (MoveSpeed * vLookDirOnXYPlane, 0);
-				else if (Keyboard [Key.Left])
-					vLight -= new Vector4 (MoveSpeed * vLookPerpendicularOnXYPlane, 0);
-				else if (Keyboard [Key.Right])
-					vLight += new Vector4 (MoveSpeed * vLookPerpendicularOnXYPlane, 0);
-				else if (Keyboard [Key.PageUp])
-					vLight.Z += MoveSpeed * .5f;
-				else if (Keyboard [Key.PageDown])
-					vLight.Z -= MoveSpeed * .5f;
-
-				texturedShader.LightPos = vLight;
-			} else if (Keyboard [Key.ShiftLeft]) {
-				if (Keyboard [Key.Up])
-					vEye.Y += MoveSpeed * .5f;
-				else if (Keyboard [Key.Down])
-					vEye.Y -= MoveSpeed * .5f;
-				else if (Keyboard [Key.PageUp])
-					vEye.Z += MoveSpeed * .5f;
-				else if (Keyboard [Key.PageDown])
-					vEye.Z -= MoveSpeed * .5f;
-				
-				UpdateViewMatrix ();
-			} 
+//			if (Keyboard [Key.ControlLeft]) {
+//				//light movment
+//				if (Keyboard [Key.Up])
+//					vLight += new Vector4 (MoveSpeed * vLookDirOnXYPlane, 0);
+//				else if (Keyboard [Key.Down])
+//					vLight -= new Vector4 (MoveSpeed * vLookDirOnXYPlane, 0);
+//				else if (Keyboard [Key.Left])
+//					vLight -= new Vector4 (MoveSpeed * vLookPerpendicularOnXYPlane, 0);
+//				else if (Keyboard [Key.Right])
+//					vLight += new Vector4 (MoveSpeed * vLookPerpendicularOnXYPlane, 0);
+//				else if (Keyboard [Key.PageUp])
+//					vLight.Z += MoveSpeed * .5f;
+//				else if (Keyboard [Key.PageDown])
+//					vLight.Z -= MoveSpeed * .5f;
+//
+//				texturedShader.LightPos = vLight;
+//			} else if (Keyboard [Key.ShiftLeft]) {
+//				if (Keyboard [Key.Up])
+//					vEye.Y += MoveSpeed * .5f;
+//				else if (Keyboard [Key.Down])
+//					vEye.Y -= MoveSpeed * .5f;
+//				else if (Keyboard [Key.PageUp])
+//					vEye.Z += MoveSpeed * .5f;
+//				else if (Keyboard [Key.PageDown])
+//					vEye.Z -= MoveSpeed * .5f;
+//				
+//				UpdateViewMatrix ();
+//			} 
 //			else if (Keyboard [Key.AltLeft]) {
 //				if (Keyboard [Key.Up])
 //					engine.ip.Hand.y += MoveSpeed * .5f;
@@ -651,21 +691,22 @@ namespace Magic3D
 				return;
 			if (engine.DecksLoaded)
 				Animation.ProcessAnimations();
-			if (frameCpt % 4 != 0)
+			if (frameCpt % 2 != 0)
 				return;
 
 
 			engine.Process ();
 
 			//TODO:disable update if wirlpoolTexture not binded
-			wirlpoolShader.Update (time);
+			//wirlpoolShader.Update (time);
 
 			Rectangle r = this.ClientRectangle;
 			GL.Viewport( r.X, r.Y, r.Width, r.Height);
 		}
 		public override void OnRender (FrameEventArgs e)
 		{
-			drawScene();
+			if (engine != null)
+				drawScene();
 		}
 		public override void GLClear ()
 		{

@@ -6,12 +6,12 @@ namespace Magic3D
 	public class Library : CardGroup
 	{
 		public Library()
-			: base(CardGroupEnum.Library)
+			: base(CardGroupEnum.Library,true)
 		{
 			x = -6;
 			y = -1.0f;
 			xAngle = MathHelper.Pi;
-			VerticalSpacing = 0.02f;
+			VerticalSpacing = 0.01f;
 		}
 	}
 }

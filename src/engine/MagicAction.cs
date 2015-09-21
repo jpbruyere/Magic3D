@@ -37,18 +37,7 @@ namespace Magic3D
 		}
 		#endregion
 
-//		#region implemented abstract members of MagicStackElement
-//		public override string Title {
-//			get { return "Magic Action"; }
-//		}
-//		public override string Message {
-//			get { return string.Format(
-//				"Magic Action for: {0}", CardSource.Model.Name); }
-//		}
-//		public override Cost MSERemainingCost {
-//			get { return remainingCost; }
-//		}
-//		#endregion
+		#region implemented abstract members of MagicStackElement
 		public override string[] MSECostElements {
 			get{
 				if (RemainingCost == null)
@@ -57,7 +46,11 @@ namespace Magic3D
 				return tmp.Split(' ').Where(cc => cc.Length < 3).ToArray();
 			}
 		}
-
+		public override string[] MSEOtherCostElements {
+			get {
+				throw new NotImplementedException ();
+			}
+		}
 		Player _sourcePlayer = null;
 		public override Player Player{
 			get { return _sourcePlayer == null ? 
@@ -66,7 +59,7 @@ namespace Magic3D
 			}
 			set { _sourcePlayer = value; }
 		}
-
+		#endregion
 
 		public bool GoesOnStack = true;
 		public bool IsCountered = false;

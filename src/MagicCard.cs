@@ -22,11 +22,8 @@ namespace Magic3D
     public class MagicCard
     {
 		//TODO:fix data links
-        static Random rnd = new Random();
+        
                 
-		#if DEBUG
-		public Stream Stream;
-		#endif
 		public string RawCardData;
 
 		public string FilePath;
@@ -68,35 +65,25 @@ namespace Magic3D
         public bool Alternate = false;
 
         [NonSerialized]
-        int[] texture;
-        int _selectedTexture = 0;
+		Dictionary<String, int[]> textures = new Dictionary<string, int[]>();        
         public int nbrImg = 1;
 
-        public int Texture
+		public void SetTexture(string _path)
         {
-            get { return texture == null ? 0 : texture[_selectedTexture]; }
-			set {
-				if (value == null) {
-					if (texture == null)
-						return;
-					try {
-						GL.DeleteTextures (texture.Count(), texture);					
-					} catch (Exception ex) { }
-				}
-
-				if (texture == null)
-					texture = new int[1];
-				
-				texture [0] = value;
+			UnloadTextures ();
+			if (File.Exists(_path))
+			{
+				textures[""] = new int[1];
+				textures[""][0] = CreateTexture(_path);  
 			}
         }
 			
-
-
-        public void Render()
+		public void Render(string edition = "", int selectedTexIdx = 0)
         {
-            if (Texture == 0)
-                loadTexture();
+			if (!textures.ContainsKey (edition)) {
+				loadTextures (edition);
+
+			}
 				
 			GL.CullFace(CullFaceMode.Front);
             GL.BindTexture(TextureTarget.Texture2D, MagicData.CardBack);
@@ -105,7 +92,7 @@ namespace Magic3D
 			//Magic.texturedShader.ModelMatrix = Matrix4.CreateRotationY (MathHelper.Pi) * Magic.texturedShader.ModelMatrix;
 
 			GL.CullFace(CullFaceMode.Back);
-            GL.BindTexture(TextureTarget.Texture2D, Texture);
+            GL.BindTexture(TextureTarget.Texture2D, textures[edition][selectedTexIdx]);
 			MagicData.CardMesh.Render (PrimitiveType.TriangleStrip);
 
 			GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -113,53 +100,54 @@ namespace Magic3D
 
         public bool DownloadingTextureInProgress = false;
         public int DownloadingTryCount = 0;
-        void loadTexture()
+		void loadTextures(string edition = "")
         {
             if (DownloadingTextureInProgress || DownloadingTryCount > 3)
                 return;
+				            
+			string basePath = System.IO.Path.Combine (MagicData.cardsArtPath, "cards");
+			string editionPicsPath = System.IO.Path.Combine (basePath, edition);
 
-            texture = new int[nbrImg];
+			if (Directory.Exists (editionPicsPath))
+				basePath = editionPicsPath;
+			
+			textures[edition] = new int[nbrImg];
 
-			string[] subPath = { "cards", "cards/4E", "cards/5E", "cards/10E" };
-
-            foreach (string sb in subPath)
+			bool texturesFound = false;
+            for (int i = 0; i < nbrImg; i++)
             {
-				string basePath = System.IO.Path.Combine (MagicData.cardsArtPath, sb);
-                for (int i = 0; i < nbrImg; i++)
+                string f = "";
+                if (nbrImg == 1)
+                    f = Directory.GetFiles(basePath, Name + ".full.jpg").FirstOrDefault();
+                else
+                    f = Directory.GetFiles(basePath, Name + (i + 1) + ".full.jpg").FirstOrDefault();
+
+                if (File.Exists(f))
                 {
-                    string f = "";
-                    if (nbrImg == 1)
-                        f = Directory.GetFiles(basePath, Name + ".full.jpg").FirstOrDefault();
-                    else
-                        f = Directory.GetFiles(basePath, Name + (i + 1) + ".full.jpg").FirstOrDefault();
+					texturesFound = true;
+					textures[edition][i] = CreateTexture(f);                        
+                }
+            }                
 
-                    if (File.Exists(f))
-                    {
-                        texture[i] = CreateTexture(f);                        
-                    }
-                }                
-            }
-
-            if (nbrImg > 1)
-                _selectedTexture = rnd.Next(nbrImg);
-
-            if (texture[_selectedTexture] > 0)
-                return;
-
+			if (texturesFound)
+				return;
+			
             if (!MagicData.MissingPicToDownload.Contains(this))
                 MagicData.MissingPicToDownload.Add(this);
         }
-        public void UnloadTexture()
+        public void UnloadTextures()
         {
-            if (texture == null)
+            if (textures == null)
                 return;
 
-            for (int i = 0; i < nbrImg; i++)
-            {
-                int tex = texture[i];
-                if (tex > 0)
-                    GL.DeleteTextures(1, ref tex);
-            }
+			foreach (int[] texs in textures.Values) {
+				for (int i = 0; i < nbrImg; i++)
+				{
+					int tex = texs[i];
+					if (tex > 0)
+						GL.DeleteTextures(1, ref tex);
+				}
+			}
         }
         public int CreateTexture(string file)
         {

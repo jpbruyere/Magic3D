@@ -20,9 +20,8 @@ namespace Magic3D
 			get { return string.Format(
 					"{0} deals {1} Damage(s) to {2}", Source.Model.Name, Amount, Target.ToString()); }
 		}
-		public override string[] MSECostElements {
-			get { return null; }
-		}
+		public override string[] MSECostElements {get { return null; }}
+		public override string[] MSEOtherCostElements {get { return null; }}
 		public override Player Player {
 			get {
 				return Source.Controler;

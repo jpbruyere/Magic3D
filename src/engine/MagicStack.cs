@@ -113,7 +113,10 @@ namespace Magic3D
 		}
 
 		void notifyStackElementChange(){
-			NotifyValueChanged ("UIPlayerActionIsOnStack", UIPlayerActionIsOnStack);
+			bool uipaios = UIPlayerActionIsOnStack;
+			NotifyValueChanged ("UIPlayerActionIsOnStack", uipaios);
+			if (!uipaios)
+				return;
 			NotifyValueChanged ("UIPlayerTitle", UIPlayerTitle);
 			NotifyValueChanged ("UIPlayerMessage", UIPlayerMessage);
 			NotifyValueChanged ("CostElements", CostElements);
@@ -181,7 +184,7 @@ namespace Magic3D
 					continue;
 				}
 
-				if (this.Peek () is Damage) {
+ 				if (this.Peek () is Damage) {
 					(PopMSE() as Damage).Deal ();
 					continue;
 				}

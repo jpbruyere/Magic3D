@@ -10,6 +10,7 @@ using System.Linq;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Text.RegularExpressions;
+using OpenTK.Graphics.OpenGL;
 
 namespace Magic3D
 {
@@ -22,6 +23,7 @@ namespace Magic3D
 		public static vaoMesh CardMesh;
 		public static vaoMesh AbilityMesh;
 		public static vaoMesh PointsMesh;
+		public static vaoMesh UIQuad;
 
 		public static int CardBack = 0;
 
@@ -43,26 +45,26 @@ namespace Magic3D
 			return result;
 		}
 		public static void InitCardModel()
-		{
+		{			
 			if (!Directory.Exists (cardsArtPath))
 				Directory.CreateDirectory (cardsArtPath);
-
-			//LoadAllCardsInZip ();
 
 			hSVGsymbols = loadRessourceSvg ("Magic3D.image2.abilities.svg");
 
 			CardBack = new Texture(@"images/card_back.jpg");
 
 			MagicData.CardMesh = new vaoMesh(0, 0, 0, MagicData.CardWidth, MagicData.CardHeight);
-
 			MagicData.AbilityMesh = new vaoMesh(0, 0, 0.002f, 1.0f, 0.2f);
 			MagicData.PointsMesh = new vaoMesh(0, 0, 0.002f, 0.50f, 0.2f);
-
-			//			imgManaW = new ImageSurface(@"images/manaw.png");
-			//			imgManaG = new ImageSurface(@"images/manag.png");
-			//			imgManaR = new ImageSurface(@"images/manar.png");
-			//			imgManaB = new ImageSurface(@"images/manab.png");
-			//			imgManaU = new ImageSurface(@"images/manau.png");
+		}
+		public static void DesinitCardModel()
+		{
+			if (hSVGsymbols != null)
+				hSVGsymbols.Dispose ();
+			GL.DeleteTexture(CardBack);
+			CardMesh.Dispose ();
+			AbilityMesh.Dispose ();
+			PointsMesh.Dispose ();
 		}
 
 		public static List<MagicCard> MissingPicToDownload = new List<MagicCard>();
