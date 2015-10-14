@@ -250,7 +250,8 @@ namespace Magic3D
 
 		public virtual void InitInterface()
         {
-			playerPanel = Interface.Load ("#Magic3D.ui.player.goml", this);
+			playerPanel = Interface.Load ("#Magic3D.ui.player.goml");
+			playerPanel.DataSource = this;
 			pgBar = playerPanel.FindByName ("pgBar") as ProgressBar;
 			//playerPanel.Background = InactiveColor;
 			playerPanel.MouseClick += PlayerPanel_MouseClick;
@@ -313,6 +314,7 @@ namespace Magic3D
 			pgBar.Value = 0;
 			Thread thread = new Thread(() => loadingThread());
 			thread.Start();
+			thread.Join ();
 		}
 		void loadingThread(){
 			Deck.LoadCards ();

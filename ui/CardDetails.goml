@@ -14,7 +14,7 @@
 				</Border>
 			</Popper>
 			<Button Margin = "1" Text="Add Card To Hand" Height="20" Width="100"
-					MouseClick="onAddCard"/>
+					MouseClick="/onAddCard"/>
 		</HorizontalStack>
 		<Group Height="190" Width="240" Background="0,2;0,2;0,2;0,8">
 			<HorizontalStack Height="-1" VerticalAlignment="Top" Margin="5">			
@@ -45,8 +45,8 @@
 		<ListBox Data="{Abilities}" Height="-1" Width="0"
 				ItemTemplate="#Magic3D.ui.AbilityItemTemplate.goml">
 			<Template>
-				<Groupbox Title="All Abilities" Height="{TemplatedHeight}" Width="{TemplatedWidth}" MinimumSize="10;10" >
-					<VerticalStack Margin="0" Name="List" Height="{TemplatedHeight}" Width="{TemplatedWidth}"/>
+				<Groupbox Title="All Abilities" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}" MinimumSize="10;10" >
+					<VerticalStack Margin="0" Name="List" Height="{../../TemplatedHeight}" Width="{../../TemplatedWidth}"/>
 				</Groupbox>
 			</Template>
 		</ListBox>
@@ -59,8 +59,8 @@
 		<ListBox Data="{TriggeredAbilities}" Height="-1" Width="0"
 				ItemTemplate="#Magic3D.ui.AbilityItemTemplate.goml">
 			<Template>
-				<Groupbox Title="Triggered Abilities" Height="{TemplatedHeight}" Width="{TemplatedWidth}" MinimumSize="10;10" >
-					<VerticalStack Margin="0" Name="List" Height="{TemplatedHeight}" Width="{TemplatedWidth}"/>
+				<Groupbox Title="Triggered Abilities" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}" MinimumSize="10;10" >
+					<VerticalStack Margin="0" Name="List" Height="{../../TemplatedHeight}" Width="{../../TemplatedWidth}"/>
 				</Groupbox>
 			</Template>
 		</ListBox>
@@ -68,8 +68,8 @@
 		<ListBox Data="{ActivatedAbilities}" Height="-1" Width="0"
 				ItemTemplate="#Magic3D.ui.AbilityItemTemplate.goml">
 			<Template>
-				<Groupbox Title="Activated Abilities" Height="{TemplatedHeight}" Width="{TemplatedWidth}" MinimumSize="10;10" >
-					<VerticalStack Margin="0" Name="List" Height="{TemplatedHeight}" Width="{TemplatedWidth}"/>
+				<Groupbox Title="Activated Abilities" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}" MinimumSize="10;10" >
+					<VerticalStack Margin="0" Name="List" Height="{../../TemplatedHeight}" Width="{../../TemplatedWidth}"/>
 				</Groupbox>
 			</Template>
 		</ListBox>

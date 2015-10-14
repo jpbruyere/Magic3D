@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
 <Window Visible="{UIPlayerActionIsOnStack}" >
 	<Template>
-		<Border Name="Content" Height="{TemplatedHeight}" Width="{TemplatedWidth}" 
+		<Border Name="Content" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}" 
 			BorderWidth="2" Background="0,5;0,5;0,5;0,3" CornerRadius="10"/>
 	</Template>
 	<VerticalStack Margin="20">
@@ -11,15 +11,20 @@
 			<TextRun Text="Remaining Cost:" Font="MagicMedieval, 16"/>
 			<ListBox Data="{CostElements}" 
 					ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
-						Template="#Magic3D.ui.ImgListTemplate.goml"/>	
+						Template="#Magic3D.ui.ImgListTemplate.goml"/>
+			<ListBox Data="{OtherCostElements}">
+				<Template>
+					<HorizontalStack Name="List" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}"/>
+				</Template>
+			</ListBox>
 		</HorizontalStack>
-		<ListBox Data="{Choices}" Visible="{UIActionIsChoice}" Width="-1" SelectedItemChanged="onChoiceMade"
+		<ListBox Data="{Choices}" Visible="{UIActionIsChoice}" Width="-1" SelectedItemChanged="/onChoiceMade"
 			ItemTemplate="#Magic3D.ui.MSEItemTemplate.goml">
 			<Template>
-				<VerticalStack Margin="10" Name="List" Height="{TemplatedHeight}" Width="{TemplatedWidth}"/>
+				<VerticalStack Margin="10" Name="List" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}"/>
 			</Template>
 		</ListBox>
-		<Button HorizontalAlignment="Right"  Text="Done" MouseClick="ActionDone_MouseClick" Height="-1" Margin="5"/>
+		<Button HorizontalAlignment="Right"  Text="Done" MouseClick="/ActionDone_MouseClick" Height="-1" Margin="5"/>
 	</VerticalStack>
 </Window>
 

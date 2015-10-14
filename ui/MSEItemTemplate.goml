@@ -6,6 +6,11 @@
 		<ListBox Data="{MSECostElements}" Fit="true" 
 				ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
 				Template="#Magic3D.ui.ImgListTemplate.goml"/>
+		<ListBox Data="{MSEOtherCostElements}">
+			<Template>
+				<HorizontalStack Name="List" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}"/>
+			</Template>
+		</ListBox>
 		<Label Text="{}"/>
 	<!--	<Label Text="{ActivationCost}" />-->
 	<!--	<Label Text="{Description}" Foreground="Blue"/>-->

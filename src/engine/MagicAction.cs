@@ -48,8 +48,10 @@ namespace Magic3D
 		}
 		public override string[] MSEOtherCostElements {
 			get {
-				throw new NotImplementedException ();
-			}
+				if (RemainingCost == null)
+					return null;
+				string tmp = RemainingCost.ToString ();
+				return tmp.Split(' ').Where(cc => cc.Length > 3).ToArray();			}
 		}
 		Player _sourcePlayer = null;
 		public override Player Player{

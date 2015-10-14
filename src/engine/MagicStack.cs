@@ -95,6 +95,8 @@ namespace Magic3D
 		{ get{ return UIPlayerActionIsOnStack ? this.Peek ().MSECostElements : null; }}
 		public bool CostIsNotNull
 		{ get { return CostElements != null; }}
+		public String[] OtherCostElements
+		{ get{ return UIPlayerActionIsOnStack ? this.Peek ().MSEOtherCostElements : null; }}
 		public bool MessageIsNotNull
 		{ get { return !string.IsNullOrEmpty(UIPlayerMessage); }}
 
@@ -120,6 +122,7 @@ namespace Magic3D
 			NotifyValueChanged ("UIPlayerTitle", UIPlayerTitle);
 			NotifyValueChanged ("UIPlayerMessage", UIPlayerMessage);
 			NotifyValueChanged ("CostElements", CostElements);
+			NotifyValueChanged ("MSEOtherCostElements", OtherCostElements);
 			NotifyValueChanged ("CostIsNotNull", CostIsNotNull);
 			NotifyValueChanged ("MessageIsNotNull", MessageIsNotNull);
 			NotifyValueChanged ("UIActionIsChoice", UIActionIsChoice);

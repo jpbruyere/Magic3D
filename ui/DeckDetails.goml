@@ -6,17 +6,17 @@
 			<Label Text="{Name}" Font="MagicMedieval, 22" Width="0"/>
 		</HorizontalStack>
 		<ListBox Height="0" Width="200" Background="0,5;0,5;0,5;0,5" Name="deckList"
-			Data="{CardEntries}" HorizontalAlignment="Left" ValueChanged="onCardListValueChange"
+			Data="{CardEntries}" HorizontalAlignment="Left" ValueChanged="/onCardListValueChange"
 			ItemTemplate="#Magic3D.ui.CardItemTemplate.goml">
 			<Template>
-				<Border BorderWidth="1" MinimumSize="0;100" Height="{TemplatedHeight}" Width="{TemplatedWidth}">
-					<HorizontalStack Margin="1" Height="{TemplatedHeight}" Width="{TemplatedWidth}">
-						<Scroller  Name="scroller1" Height="{TemplatedHeight}" Width="{TemplatedWidth}" 
+				<Border BorderWidth="1" MinimumSize="0;100" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}">
+					<HorizontalStack Margin="1" Height="{../../TemplatedHeight}" Width="{../../TemplatedWidth}">
+						<Scroller  Name="scroller1" Height="{../../../TemplatedHeight}" Width="{../../../TemplatedWidth}" 
 						 Margin="2" VerticalScrolling="true" ScrollY="{../scrollbar1.Scroll}">
-							<VerticalStack Width="{TemplatedWidth}" Height="-1" Name="List" Margin="0" VerticalAlignment="Top"/>
+							<VerticalStack Width="{../../../../TemplatedWidth}" Height="-1" Name="List" Margin="0" VerticalAlignment="Top"/>
 						</Scroller>
 						<Scrollbar Name="scrollbar1" Scroll="{../scroller1.ScrollY}" MaximumScroll="{../scroller1.MaximumScroll}"
-							Orientation="Vertical" Width="10" Height="{TemplatedHeight}" />
+							Orientation="Vertical" Width="10" Height="{../../../TemplatedHeight}" />
 					</HorizontalStack>
 				</Border>
 			</Template>

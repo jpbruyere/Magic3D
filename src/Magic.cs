@@ -235,6 +235,7 @@ namespace Magic3D
 		void initInterface(){			
 			uiMainMenu = LoadInterface("#Magic3D.ui.mainMenu.goml");
 			uiMainMenu.Visible = false;
+			uiMainMenu.DataSource = this;
 			//hsDeck = LoadInterface("#Magic3D.ui.StatusBar.goml").FindByName("hsDeck") as Group;
 
 			//special event handlers fired only if mouse not in interface objects
@@ -293,8 +294,12 @@ namespace Magic3D
 
 			InitLogPanel ();
 			uiStatusBar = LoadInterface("#Magic3D.ui.StatusBar.goml");
+			uiStatusBar.DataSource = this;
+			hsDeck = uiStatusBar.FindByName ("hsDeck") as Group;
 			uiPhases = LoadInterface("#Magic3D.ui.phases.goml");
+			uiPhases.DataSource = this;
 			wCardText = LoadInterface ("ui/text.goml");
+			wCardText.DataSource = this;
 			txtCard = wCardText.FindByName ("txtCard") as Label;
 			wCardText.Visible = false;
 
@@ -306,7 +311,9 @@ namespace Magic3D
 			engine = new MagicEngine (Players);
 			MagicEngine.MagicEvent += new Magic3D.MagicEngine.MagicEventHandler(MagicEngine_MagicEvent);
 
-			this.AddWidget(Interface.Load ("#Magic3D.ui.MagicStack.goml", engine.MagicStack));
+			GraphicObject mstack = Interface.Load ("#Magic3D.ui.MagicStack.goml");				
+			this.AddWidget(mstack);
+			mstack.DataSource = engine.MagicStack;
 
 
 			#if DEBUG
@@ -339,8 +346,10 @@ namespace Magic3D
 			Players [0].AddCardForeignToHand((go.DataSource as CardVisitor).card);
 		}
 		void onShowDecks (object sender, MouseButtonEventArgs e)
-		{						
-			hsDeck = LoadInterface ("#Magic3D.ui.decks.goml").FindByName("hsDeck") as Group;
+		{				
+			GraphicObject tmp = LoadInterface ("#Magic3D.ui.decks.goml");
+			hsDeck = tmp.FindByName("hsDeck") as Group;
+			tmp.DataSource = this;
 		}
 		void onShowCards (object sender, MouseButtonEventArgs e)
 		{						
@@ -360,7 +369,9 @@ namespace Magic3D
 			if (e.MemberName != "SelectedItem")
 				return;
 			hsDeck.Children.Clear ();
-			hsDeck.addChild(Interface.Load ("#Magic3D.ui.DeckDetails.goml", e.NewValue));
+			GraphicObject details = Interface.Load ("#Magic3D.ui.DeckDetails.goml");
+			hsDeck.addChild(details);
+			details.DataSource = e.NewValue;
 		}
 		void onPlayer1DeckChange (object sender, ValueChangeEventArgs e)
 		{			
@@ -378,7 +389,9 @@ namespace Magic3D
 			if (hsDeck.Children.Count > 1) {
 				hsDeck.removeChild(hsDeck.Children.LastOrDefault());
 			}
-			hsDeck.addChild(Interface.Load ("#Magic3D.ui.CardDetails.goml",new CardVisitor(c, l.code)));
+			GraphicObject tmp = Interface.Load ("#Magic3D.ui.CardDetails.goml");
+			hsDeck.addChild (tmp);
+			tmp.DataSource = new CardVisitor(c, l.code);
 		}
 		void onChoiceMade (object sender, SelectionChangeEventArgs e)
 		{			
@@ -698,7 +711,7 @@ namespace Magic3D
 			engine.Process ();
 
 			//TODO:disable update if wirlpoolTexture not binded
-			//wirlpoolShader.Update (time);
+			wirlpoolShader.Update (time);
 
 			Rectangle r = this.ClientRectangle;
 			GL.Viewport( r.X, r.Y, r.Width, r.Height);

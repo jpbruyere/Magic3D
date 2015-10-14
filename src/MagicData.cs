@@ -182,7 +182,7 @@ namespace Magic3D
 					switch (tmp[0].ToLower())
 					{
 					case "name":
-						c.Name = tmp[1];
+						c.Name = tmp [1];
 						break;
 					case "manacost":
 						c.Cost = Mana.Parse(tmp[1]);

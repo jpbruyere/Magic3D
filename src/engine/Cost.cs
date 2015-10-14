@@ -57,6 +57,13 @@ namespace Magic3D
 			}
 			return cc;
 		}
+		/// <summary>
+		/// it's not a deep clone.
+		/// </summary>
+		public override Cost Clone ()
+		{
+			return new CardCost (CostType) { Count = Count, ValidTargets = ValidTargets };
+		}
 		public override string ToString ()
 		{
 			string tmp = CostType.ToString () + Count;
@@ -434,9 +441,9 @@ namespace Magic3D
                 case CostTypes.Tap:
                     return "T";
 			case CostTypes.Sacrifice:
-				return "Sacrifice";
+				return "Sacrifice " + (this as CardCost).ValidTargets.ToString();
 			case CostTypes.Discard:
-				return "Discard";
+				return "Discard "+ (this as CardCost).ValidTargets.ToString();
             }
             return "erreur";
         }

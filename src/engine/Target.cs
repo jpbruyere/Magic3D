@@ -163,6 +163,7 @@ namespace Magic3D
 						case "blocking":
 							ctar.CombatState = CombatImplication.Blocking;
 							break;
+						case "CARDNAME":
 						case "Self":
 							ctar.TypeOfTarget = TargetType.Self;
 							break;
