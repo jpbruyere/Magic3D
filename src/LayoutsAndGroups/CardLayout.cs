@@ -31,11 +31,8 @@ namespace Magic3D
 			if (Cached) {
 				if (!CacheIsUpToDate)
 					updateFbo ();
-				Matrix4 Projection;
-				//GL.BindTexture (TextureTarget.Texture2D, tex);
-				//Magic.CurrentGameWin.uiQuad.Render (PrimitiveType.TriangleStrip);
+
 				Magic.CurrentGameWin.RenderCustomTextureOnUIQuad (tex);
-				//GL.BindTexture (TextureTarget.Texture2D, 0);
 				return;
 			}
 

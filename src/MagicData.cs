@@ -398,7 +398,7 @@ namespace Magic3D
 						continue;
 
 					tmp.Add(ze.Name);
-					if (++i > 300)
+					if (++i > 2000)
 						break;
 				}
 				zf.Close ();

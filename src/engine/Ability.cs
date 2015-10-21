@@ -348,6 +348,7 @@ namespace Magic3D
 					case "ExchangeControl":
 						break;
 					case "RearrangeTopOfLibrary":
+						a.Effects.Add(new NumericEffect(EffectType.RearrangeTopOfLibrary));
 						break;
 					case "CopyPermanent":
 						break;

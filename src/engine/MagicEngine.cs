@@ -8,6 +8,7 @@ using System.Threading;
 using go;
 using OpenTK;
 using OpenTK.Input;
+using GGL;
 
 namespace Magic3D
 {

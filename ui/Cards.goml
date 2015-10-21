@@ -1,9 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Window Width="400" Height="400" Title="Cards">	
-	<HorizontalStack>
+<!--	<HorizontalStack>-->
 		<ListBox Data="{CardList}" Background="0,5;0,5;0,5;0,5"
-			 HorizontalAlignment="Left">
-			<Template>
+			  Height="0" Width="0"
+			 Template="#Magic3D.ui.ListTemplate.goml">
+<!--			<Template>
 				<Border BorderWidth="1" Margin="1" MinimumSize="20;20" >
 					<HorizontalStack>
 						<Scroller  Name="scroller1" Margin="1" VerticalScrolling="true" 
@@ -14,8 +15,8 @@
 							Orientation="Vertical" Width="10" />
 					</HorizontalStack>
 				</Border>
-			</Template>
+			</Template>-->
 		</ListBox>
-	</HorizontalStack>
+<!--	</HorizontalStack>-->
 </Window>
 

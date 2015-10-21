@@ -353,7 +353,8 @@ namespace Magic3D
 		}
 		void onShowCards (object sender, MouseButtonEventArgs e)
 		{						
-			LoadInterface ("#Magic3D.ui.Cards.goml");
+			GraphicObject tmp = LoadInterface ("#Magic3D.ui.Cards.goml");
+			tmp.DataSource = this;
 		}
 		void onP1DeckChanged (object sender, SelectionChangeEventArgs e)
 		{			
@@ -579,7 +580,7 @@ namespace Magic3D
 
 		void loadingThread(){
 			loadPreconstructedDecks ();
-			//loadCardList ();
+			loadCardList ();
 
 			Players = new Player[] 
 			{ 
