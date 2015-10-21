@@ -1,6 +1,0 @@
-[submodule "GGL"]
-	path = GGL
-	url = git://github.com/jpbruyere/GGL.git
-[submodule "MiscUtil"]
-	path = MiscUtil
-	url = git://github.com/jpbruyere/MiscUtil.git
