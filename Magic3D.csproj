@@ -110,17 +110,12 @@
     <Compile Include="src\CardInstance.cs" />
     <Compile Include="src\engine\Trigger.cs" />
     <Compile Include="src\ExtentionMethods.cs" />
-    <Compile Include="src\glHelper.cs" />
-    <Compile Include="src\Geo2D\Rectangle.cs" />
-    <Compile Include="src\Geo2D\Point.cs" />
-    <Compile Include="src\Geo2D\Size.cs" />
     <Compile Include="src\engine\Enums.cs" />
     <Compile Include="src\engine\MagicEventArgs.cs" />
     <Compile Include="src\MessageBoxYesNo.cs" />
     <Compile Include="src\divers\Coin.cs" />
     <Compile Include="src\divers\IRenderable.cs" />
     <Compile Include="src\divers\IAnimatable.cs" />
-    <Compile Include="src\Animation.cs" />
     <Compile Include="src\AiPlayer.cs" />
     <Compile Include="src\engine\NewCost.cs" />
     <Compile Include="src\MagicData.cs" />
@@ -152,6 +147,7 @@
     <Compile Include="src\engine\MagicStack.cs" />
     <Compile Include="src\engine\MagicStackElement.cs" />
     <Compile Include="src\engine\MagicChoice.cs" />
+    <Compile Include="src\Animation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="images\marble1.jpg">
@@ -172,7 +168,6 @@
     <Folder Include="src\engine\" />
     <Folder Include="src\render\" />
     <Folder Include="ui\" />
-    <Folder Include="src\Geo2D\" />
     <Folder Include="image2\" />
     <Folder Include="src\divers\" />
     <Folder Include="Datas\" />
@@ -280,10 +275,6 @@
     <EmbeddedResource Include="images\abstrait3.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="MiscUtil\MiscUtil.csproj">
-      <Project>{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}</Project>
-      <Name>MiscUtil</Name>
-    </ProjectReference>
     <ProjectReference Include="GGL\GGL.csproj">
       <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
       <Name>GGL</Name>
