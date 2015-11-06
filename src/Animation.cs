@@ -271,11 +271,6 @@ namespace Magic3D
         {
             float value = getValue();
 
-			CardInstance ci = AnimatedInstance as CardInstance;
-			if (ci != null)
-				if (ci.CurrentGroup.Cached)
-					ci.CurrentGroup.CacheIsUpToDate = false;
-				
 			//Debug.WriteLine ("Anim: {0} <= {1}", value, this.ToString ());
 
             if (Step > 0f)

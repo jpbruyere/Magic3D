@@ -177,7 +177,6 @@ namespace Magic3D
 			if (engine != null)
 				engine.processRendering ();
 
-			//renderDice ();
 			int i = 0;
 			while (i < Renderables.Count) {
 				Renderables [i].Render ();

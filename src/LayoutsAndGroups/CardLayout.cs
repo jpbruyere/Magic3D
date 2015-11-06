@@ -13,29 +13,12 @@ namespace Magic3D
 		protected const float attachedCardsSpacing = 0.01f;
 		public List<CardInstance> Cards = new List<CardInstance> ();
 
-		public bool Cached = false;
-		public bool CacheIsUpToDate = false;
-		int tex, fbo;
-
 		#region CTOR
-		public CardLayout(bool _isCached = false)
-		{
-			Cached = _isCached;
-			if (Cached)
-				initFbo ();
-		}
+		public CardLayout(){}
 		#endregion
 
 		public override void Render ()
 		{
-			if (Cached) {
-				if (!CacheIsUpToDate)
-					updateFbo ();
-
-				Magic.CurrentGameWin.RenderCustomTextureOnUIQuad (tex);
-				return;
-			}
-
 			foreach (CardInstance c in Cards) {
 				c.Render ();
 			}
@@ -247,56 +230,7 @@ namespace Magic3D
 					//					Animation.StartAnimation(new AngleAnimation(ac, "yAngle", yAngle, MathHelper.Pi * 0.3f));
 				}
 			}
-		}
-
-		#region FBO
-		void initFbo()
-		{
-			System.Drawing.Size cz = Magic.CurrentGameWin.ClientRectangle.Size;
-			tex = new Texture (cz.Width, cz.Height);
-			int stride = 4 * cz.Width;
-			int bmpSize = Math.Abs (stride) * cz.Height;
-			byte[] bmp = new byte[bmpSize];
-
-			GL.ActiveTexture (TextureUnit.Texture0);
-			GL.BindTexture(TextureTarget.Texture2D, tex);
-
-			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, 
-				cz.Width, cz.Height, 0,
-				OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmp);
-
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-
-			GL.BindTexture(TextureTarget.Texture2D, 0);
-
-			GL.GenFramebuffers(1, out fbo);
-
-			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
-			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
-				TextureTarget.Texture2D, tex, 0);
-
-			if (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != FramebufferErrorCode.FramebufferComplete)
-			{
-				throw new Exception(GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer).ToString());
-			}
-
-			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-		}
-		void updateFbo()
-		{						
-			GL.Disable (EnableCap.DepthTest);
-			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
-			GL.ClearColor (0, 0, 0, 0);
-			GL.Clear (ClearBufferMask.ColorBufferBit);
-			foreach (CardInstance c in Cards) {
-				c.Render ();
-			}
-			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-			GL.Enable (EnableCap.DepthTest);
-			CacheIsUpToDate = true;
-		}
-		#endregion
+		}			
 	}
 }
 

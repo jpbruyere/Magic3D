@@ -81,6 +81,7 @@ namespace Magic3D
 		{
 			x = y = z = xAngle = yAngle = zAngle = 0;
 		}
+
 		#region IRenderable implementation
 
 		public abstract void Render ();

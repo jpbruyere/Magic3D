@@ -30,7 +30,7 @@ namespace Magic3D
     public class CardGroup : CardLayout
     {       		
 		#region CTOR
-		public CardGroup(CardGroupEnum groupName, bool isCached = false) : base(isCached)        
+		public CardGroup(CardGroupEnum groupName) : base()        
 		{
 			GroupName = groupName;
 		}

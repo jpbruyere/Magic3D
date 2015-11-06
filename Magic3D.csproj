@@ -51,7 +51,7 @@
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib" />
     <Reference Include="OpenTK">
-      <HintPath>..\opentk\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
+      <HintPath>lib\opentk\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -275,11 +275,11 @@
     <EmbeddedResource Include="images\abstrait3.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="GGL\GGL.csproj">
+    <ProjectReference Include="lib\GGL\GGL.csproj">
       <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
       <Name>GGL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GOLib\GOLib.csproj">
+    <ProjectReference Include="lib\GOLib\GOLib.csproj">
       <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
       <Name>GOLib</Name>
     </ProjectReference>
