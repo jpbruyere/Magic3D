@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using Cairo;
 using GGL;
-using go;
+using Crow;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
@@ -57,9 +57,9 @@ namespace Magic3D
 		public static CardInstance focusedCard = null;
         public static CardInstance selectedCard;
 
-		public static go.Color notSelectedColor = new go.Color(1.0f, 1.0f, 1.0f, 1f);
+		public static Crow.Color notSelectedColor = new Crow.Color(1.0f, 1.0f, 1.0f, 1f);
 		public static Vector4 SelectedColor = new Vector4(1.2f, 1.2f, 1.2f, 1.2f);
-		public static go.Color AttackingColor = new go.Color(1.0f, 0.8f, 0.8f, 1f);
+		public static Crow.Color AttackingColor = new Crow.Color(1.0f, 0.8f, 0.8f, 1f);
         #endregion
 
 		const float attachedCardsSpacing = 0.03f;
@@ -660,7 +660,7 @@ namespace Magic3D
 			{				
 				if (CurrentGroup.GroupName == CardGroupEnum.InPlay)
 				{
-					Magic.texturedShader.Color = go.Color.White;
+					Magic.texturedShader.Color = Crow.Color.White;
 
 					Matrix4 mMod = Magic.texturedShader.ModelMatrix;
 					Matrix4 mO = Matrix4.CreateRotationX (Magic.FocusAngle) * Matrix4.CreateRotationZ (-Controler.zAngle);
@@ -690,7 +690,7 @@ namespace Magic3D
 
 
 			Magic.texturedShader.ModelMatrix = mSave;
-			Magic.texturedShader.Color = go.Color.White;
+			Magic.texturedShader.Color = Crow.Color.White;
 
 			if (arrows == null)
 				return;
@@ -753,8 +753,8 @@ namespace Magic3D
 			{
 				using (Context gr = new Context(draw))
 				{
-//					go.Rectangle r = new go.Rectangle(0, 0, width, height);
-//					gr.Color = go.Color.White;
+//					Crow.Rectangle r = new Crow.Rectangle(0, 0, width, height);
+//					gr.Color = Crow.Color.White;
 //					gr.Rectangle(r);
 //					gr.Fill();
 
@@ -816,22 +816,22 @@ namespace Magic3D
 			{
 				using (Context gr = new Context(draw))
 				{
-					go.Rectangle r = new go.Rectangle(0, 0, width, height);
+					Crow.Rectangle r = new Crow.Rectangle(0, 0, width, height);
 
 					if (Damages.Count == 0)
-						gr.Color = go.Color.White;
+						gr.Color = Crow.Color.White;
 					else
-						gr.Color = go.Color.Red;
+						gr.Color = Crow.Color.Red;
 
 					gr.Rectangle(r);
 					gr.FillPreserve();
-					gr.Color = go.Color.Black;
+					gr.Color = Crow.Color.Black;
 					gr.LineWidth = 1.5f;
 					gr.Stroke();
 
 					gr.SelectFontFace("Times New Roman", FontSlant.Normal, FontWeight.Bold);
 					gr.SetFontSize(40);
-					gr.Color = go.Color.Black;
+					gr.Color = Crow.Color.Black;
 
 					string text = Power.ToString() + " / " + Toughness.ToString();
 

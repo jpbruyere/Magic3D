@@ -35,7 +35,7 @@
 								 Margin="2" VerticalScrolling="true" ScrollY="{../scrollbar1.Scroll}">
 									<VerticalStack Width="{../../../../TemplatedWidth}" Height="-1" Name="List" Margin="0" VerticalAlignment="Top"/>
 								</Scroller>
-								<Scrollbar Name="scrollbar1" Scroll="{../scroller1.ScrollY}" MaximumScroll="{../scroller1.MaximumScroll}"
+								<ScrollBar Name="scrollbar1" Scroll="{../scroller1.ScrollY}" MaximumScroll="{../scroller1.MaximumScroll}"
 									Orientation="Vertical" Width="10" Height="{../../../TemplatedHeight}" />
 							</HorizontalStack>
 						</Border>
@@ -55,7 +55,7 @@
 							 Margin="2" VerticalScrolling="true" ScrollY="{../scrollbar1.Scroll}">
 								<VerticalStack Width="{../../../../TemplatedWidth}" Height="-1" Name="List" Margin="0" VerticalAlignment="Top"/>
 							</Scroller>
-							<Scrollbar Name="scrollbar1" Scroll="{../scroller1.ScrollY}" MaximumScroll="{../scroller1.MaximumScroll}"
+							<ScrollBar Name="scrollbar1" Scroll="{../scroller1.ScrollY}" MaximumScroll="{../scroller1.MaximumScroll}"
 								Orientation="Vertical" Width="10" Height="{../../../TemplatedHeight}" />
 						</HorizontalStack>
 					</Border>

@@ -2,18 +2,18 @@
 <Border BorderWidth="2" Margin="2" MinimumSize="0;100" >
 	<VerticalStack Margin="2" >
 		<HorizontalStack Height="-1">
-			<Popper Title="Full sized image">
+			<Popper Caption="Full sized image">
 				<Image Fit="true" Path="{GetImagePath}"/>
 			</Popper>
-			<Popper Title="Forge data file">
+<!--			<Popper Caption="Forge data file">
 				<Border Margin="5" Fit="true" 
 					MouseEnter="{BorderColor=Blue}"
 					MouseLeave="{BorderColor=LightGray}">
-					<TextRun Foreground="DimGray" Text="{RawCardData}" 
+					<Label Foreground="DimGray" Text="{RawCardData}" 
 						Multiline="true" WordWrap="true" Background="White"/>
 				</Border>
-			</Popper>
-			<Button Margin = "1" Text="Add Card To Hand" Height="20" Width="100"
+			</Popper>-->
+			<Button Margin = "1" Caption="Add Card To Hand" Height="20" Width="100"
 					MouseClick="/onAddCard"/>
 		</HorizontalStack>
 		<Group Height="190" Width="240" Background="0,2;0,2;0,2;0,8">
@@ -32,7 +32,7 @@
 				<Label Text="{Types}" Font="droid, 12" Width="0"/>
 				<Border BorderWidth="2" CornerRadius="5" Margin="1" 
 					Width="-1" Background="White" Foreground="Black"  Visible="{IsCreature}">
-					<HorizontalStack>
+					<HorizontalStack Margin="2">
 						<Label Text="{Power}" Font="droid bold, 14" Foreground="Black" Margin="0"/>
 						<Label Text="/" Font="droid bold, 12" Foreground="DimGray"/>
 						<Label Text="{Toughness}" Font="droid bold, 14" Foreground="Black" Margin="0"/>
@@ -45,32 +45,32 @@
 		<ListBox Data="{Abilities}" Height="-1" Width="0"
 				ItemTemplate="#Magic3D.ui.AbilityItemTemplate.goml">
 			<Template>
-				<Groupbox Title="All Abilities" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}" MinimumSize="10;10" >
+				<GroupBox Caption="All Abilities" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}" MinimumSize="10;10" >
 					<VerticalStack Margin="0" Name="List" Height="{../../TemplatedHeight}" Width="{../../TemplatedWidth}"/>
-				</Groupbox>
+				</GroupBox>
 			</Template>
 		</ListBox>
 
-		<Groupbox Title="Static Abilities" Height="-1" Width="0">
+		<GroupBox Caption="Static Abilities" Height="-1" Width="0">
 			<ListBox Data="{StaticAbilities}" Height="-1" Width="0" 
 					ItemTemplate="#Magic3D.ui.StaticAbItemTemplate.goml" 
 					Template="#Magic3D.ui.ImgListTemplate.goml"/>
-		</Groupbox>
+		</GroupBox>
 		<ListBox Data="{TriggeredAbilities}" Height="-1" Width="0"
 				ItemTemplate="#Magic3D.ui.AbilityItemTemplate.goml">
 			<Template>
-				<Groupbox Title="Triggered Abilities" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}" MinimumSize="10;10" >
+				<GroupBox Caption="Triggered Abilities" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}" MinimumSize="10;10" >
 					<VerticalStack Margin="0" Name="List" Height="{../../TemplatedHeight}" Width="{../../TemplatedWidth}"/>
-				</Groupbox>
+				</GroupBox>
 			</Template>
 		</ListBox>
 
 		<ListBox Data="{ActivatedAbilities}" Height="-1" Width="0"
 				ItemTemplate="#Magic3D.ui.AbilityItemTemplate.goml">
 			<Template>
-				<Groupbox Title="Activated Abilities" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}" MinimumSize="10;10" >
+				<GroupBox Caption="Activated Abilities" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}" MinimumSize="10;10" >
 					<VerticalStack Margin="0" Name="List" Height="{../../TemplatedHeight}" Width="{../../TemplatedWidth}"/>
-				</Groupbox>
+				</GroupBox>
 			</Template>
 		</ListBox>
 		<Label Text="{Oracle}" Width="0" Multiline="true"/>

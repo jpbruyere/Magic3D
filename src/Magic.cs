@@ -7,7 +7,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using GGL;
-using go;
+using Crow;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
@@ -229,7 +229,7 @@ namespace Magic3D
 		MagicEngine engine;
 		GraphicObject uiPhases, wCardText, uiMainMenu, uiStatusBar, uiSplash;
 		MessageBoxYesNo msgBox;
-		go.Label txtCard;
+		Label txtCard;
 
 		void initInterface(){			
 			uiMainMenu = LoadInterface("#Magic3D.ui.mainMenu.goml");
@@ -481,10 +481,10 @@ namespace Magic3D
 				engine.ip.Opponent.CurrentState = Player.PlayerStates.InitialDraw;
 				msgBox = new MessageBoxYesNo ("You won the toss, what will you do ?");
 				msgBox.btOk.MouseClick += OnPlayFirst;
-				msgBox.btOk.Text = "Play First";
+				msgBox.btOk.Caption = "Play First";
 				msgBox.btOk.Fit = true;
 				msgBox.btCancel.MouseClick += onDrawFirst;
-				msgBox.btCancel.Text = "Draw First";
+				msgBox.btCancel.Caption = "Draw First";
 				msgBox.btCancel.Fit = true;
 
 				this.AddWidget (msgBox);
@@ -531,13 +531,13 @@ namespace Magic3D
 				b = uiPhases.FindByName 
 					((arg as PhaseEventArg).Phase.ToString ()) as Border;
 				if (b!=null)
-					b.BorderColor = Color.White;				
+					b.Foreground = Color.White;				
 				break;
 			case MagicEventType.EndPhase:
 				b = uiPhases.FindByName 
 					((arg as PhaseEventArg).Phase.ToString ()) as Border;
 				if (b!=null)
-					b.BorderColor = Color.Transparent;
+					b.Foreground = Color.Transparent;
 				break;
 			case MagicEventType.PlayLand:
 				break;

@@ -5,7 +5,7 @@ using System.Text;
 using OpenTK.Graphics.OpenGL;
 using GGL;
 using OpenTK;
-using go;
+using Crow;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
@@ -177,7 +177,7 @@ namespace Magic3D
                     //Rectangle r = new Rectangle(0, 0, renderBounds.Width, renderBounds.Height);
                     gr.SelectFontFace("MagicMedieval", FontSlant.Normal, FontWeight.Bold);
                     gr.SetFontSize(12);
-                    gr.Color = go.Color.Black;
+                    gr.Color = Crow.Color.Black;
 
                     string test = "Test string";
 

@@ -1,5 +1,5 @@
 ﻿using System;
-using go;
+using Crow;
 
 namespace Magic3D
 {
@@ -27,16 +27,20 @@ namespace Magic3D
 			hs.Margin = 0;
 			hs.Spacing = 10;
 			btOk = hs.addChild (new Button ());
-			btOk.Text = "Ok";
+			btOk.Caption = "Ok";
+			btOk.Width = 60;
+			btOk.Height = 30;
 			btCancel = hs.addChild (new Button ());
-			btCancel.Text = "Cancel";
+			btCancel.Caption = "Cancel";
+			btCancel.Width = 60;
+			btCancel.Height = 30;
 
 //			btCancel.MouseClick += onClick;
 //			btOk.MouseClick += onClick;
 		}
 		void onClick(object sender, OpenTK.Input.MouseButtonEventArgs e)
 		{
-			this.TopContainer.DeleteWidget (this);
+			this.HostContainer.DeleteWidget (this);
 		}
 	}
 }

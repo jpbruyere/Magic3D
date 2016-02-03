@@ -150,7 +150,7 @@ namespace Magic3D
 //				Magic.glowShader.ProjectionMatrix = Magic.projection;
 //				Magic.glowShader.ModelViewMatrix = Magic.modelview;
 //				Magic.glowShader.ModelMatrix = Matrix4.CreateScale(1.2f) * Transformations;
-//				Magic.glowShader.Color = go.Color.Red;
+//				Magic.glowShader.Color = Crow.Color.Red;
 //				Magic.glowShader.BorderWidth = 0.05f;
 //
 //				GL.BindTexture (TextureTarget.Texture2D, Magic.abstractTex);

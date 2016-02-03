@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
-using go;
+using Crow;
 using System.Diagnostics;
 using System.Threading;
 using OpenTK.Input;
@@ -277,21 +277,21 @@ namespace Magic3D
 		{
 			msgBox = new MessageBoxYesNo ("Keep or take mulligan ?");
 			msgBox.btOk.MouseClick += OnKeep;
-			msgBox.btOk.Text = "Keep";
+			msgBox.btOk.Caption = "Keep";
 			msgBox.btCancel.MouseClick += OnTakeMulligan;
-			msgBox.btCancel.Text = "Mulligan";
-			playerPanel.TopContainer.AddWidget (msgBox);
+			msgBox.btCancel.Caption = "Mulligan";
+			playerPanel.HostContainer.AddWidget (msgBox);
 		}
 		void OnKeep(Object sender, MouseButtonEventArgs _e)
 		{
-			playerPanel.TopContainer.DeleteWidget (msgBox);
+			playerPanel.HostContainer.DeleteWidget (msgBox);
 			CurrentState = PlayerStates.Ready;
 			MagicEngine e = MagicEngine.CurrentEngine;
 			e.RaiseMagicEvent(new MagicEventArg(MagicEventType.PlayerIsReady,this));
 		}
 		void OnTakeMulligan(Object sender, MouseButtonEventArgs e)
 		{
-			playerPanel.TopContainer.DeleteWidget (msgBox);
+			playerPanel.HostContainer.DeleteWidget (msgBox);
 			for (int i = 0; i < CardToDraw; i++)
 				Library.AddCard (Hand.TakeTopOfStack);
 
