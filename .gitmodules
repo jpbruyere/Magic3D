@@ -1,5 +1,5 @@
 [submodule "lib/GOLib"]
-	path = lib/GOLib
+	path = lib/Crow
 	url = https://github.com/jpbruyere/Crow.git
 [submodule "lib/GGL"]
 	path = lib/GGL
