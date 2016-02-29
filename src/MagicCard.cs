@@ -177,7 +177,7 @@ namespace Magic3D
                     //Rectangle r = new Rectangle(0, 0, renderBounds.Width, renderBounds.Height);
                     gr.SelectFontFace("MagicMedieval", FontSlant.Normal, FontWeight.Bold);
                     gr.SetFontSize(12);
-                    gr.Color = Crow.Color.Black;
+					gr.SetSourceColor(Crow.Color.Black);
 
                     string test = "Test string";
 

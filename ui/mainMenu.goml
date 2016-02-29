@@ -1,36 +1,37 @@
 ﻿<?xml version="1.0"?>
-
 	<Border BorderWidth="2" Background="0,5;0,5;0,5;0,5" 
 		CornerRadius="10" Fit="true" >
-		<HorizontalStack Fit="true" Margin="20" Spacing="10" BackgroundImagePath="#Magic3D.images.abstrait3.jpg">
-			<VerticalStack Width="200" VerticalAlignment="Top" >
+		<HorizontalStack Fit="true" Margin="20" Spacing="10" Background="#Magic3D.images.abstrait4.jpg">
+			<VerticalStack Width="200" VerticalAlignment="Top">
 				<TextRun Text="Player 1" Font="MagicMedieval, 22" Margin="10"/>
-				<ComboBox Width="0"
+				<ComboBox
+					SelectedIndex="0"
 					SelectedItemChanged="onP1DeckChanged"
 					Data="{DeckList}"
-					SelectedIndex="0"
-					ItemTemplate="#Magic3D.ui.DeckItemTemplate.goml"
-					OverlayTemplate="#Magic3D.ui.ComboOverlayTemplate.goml">
+					ItemTemplate="#Magic3D.ui.DeckItemTemplate.goml">
 				</ComboBox>	
 			</VerticalStack>		
-			<VerticalStack Spacing="10" Height="-1" Width="150" Margin="20">
-				<Button Margin = "10" Caption="Start New Game" Height="-1" Width="0" 
+			<VerticalStack Spacing="10" Height="-1" Width="180" Margin="20">
+				<Button Style="#Magic3D.Styles.MainMenuBut.style"
+					Caption="New Game"
 					MouseClick="onStartNewGame"/>
-				<Button Margin = "10" Caption="Decks" Height="-1" Width="0"
+				<Button Style="#Magic3D.Styles.MainMenuBut.style"
+					Caption="Decks"
 					MouseClick="onShowDecks"/>
-				<Button Margin = "10" Caption="Cards" Height="-1" Width="0"
+				<Button Style="#Magic3D.Styles.MainMenuBut.style"
+					Caption="Cards"
 					MouseClick="onShowCards"/>
-				<Button Margin = "10" Caption="Exit" Height="-1" Width="0"
+				<Button Style="#Magic3D.Styles.MainMenuBut.style"
+					Caption="Exit"
 					MouseClick="onButExit_MouseClick" />
 			</VerticalStack>
 			<VerticalStack Width="200" VerticalAlignment="Top">
 				<TextRun Text="Player 2" Font="MagicMedieval, 22" Margin="10"/>
-				<ComboBox Width="0" 
+				<ComboBox
 					SelectedItemChanged="onP2DeckChanged"
 					SelectedIndex="1"
 					Data="{DeckList}"
-					ItemTemplate="#Magic3D.ui.DeckItemTemplate.goml"
-					OverlayTemplate="#Magic3D.ui.ComboOverlayTemplate.goml">
+					ItemTemplate="#Magic3D.ui.DeckItemTemplate.goml">
 				</ComboBox>	
 			</VerticalStack>		
 		</HorizontalStack>

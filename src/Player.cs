@@ -62,6 +62,27 @@ namespace Magic3D
 		public int LifePointsLooseThisTurn = 0;
 		public int LifePointsGainedThisTurn = 0;
 
+		int progressValue=0;
+		int progressMax=0;
+		public int ProgressValue{
+			get { return progressValue; }
+			set {
+				progressValue = value;
+				NotifyValueChange ("ProgressValue", progressValue);
+			}
+		}
+		public int ProgressMax{
+			get { return progressMax; }
+			set {
+				progressMax = value;
+				NotifyValueChange ("ProgressMax", progressMax);
+			}
+		}
+		public bool ProgressBarVisible {
+			get { return MagicEngine.CurrentEngine.pp == this; }
+		}
+
+
 		public Library Library;
 		public CardGroup Hand;
 		public CardGroup Graveyard;
@@ -242,8 +263,7 @@ namespace Magic3D
 		#region interface
 		//public Panel playerPanel;
 		public GraphicObject playerPanel;
-		MessageBoxYesNo msgBox;
-		public ProgressBar pgBar;
+		MessageBox msgBox;
 
 		Color ActiveColor = new Color (0.5, 0.5, 0.6, 0.7);
 		Color InactiveColor = new Color (0.1, 0.1, 0.1, 0.4);
@@ -252,7 +272,6 @@ namespace Magic3D
         {
 			playerPanel = Interface.Load ("#Magic3D.ui.player.goml");
 			playerPanel.DataSource = this;
-			pgBar = playerPanel.FindByName ("pgBar") as ProgressBar;
 			//playerPanel.Background = InactiveColor;
 			playerPanel.MouseClick += PlayerPanel_MouseClick;
 
@@ -268,30 +287,37 @@ namespace Magic3D
 		}
 		public void UpdateUi()
 		{
-			if (MagicEngine.CurrentEngine.pp == this)
-				pgBar.Visible = true;
-			else
-				pgBar.Visible = false;
+//			if (MagicEngine.CurrentEngine.pp == this)
+//				pgBar.Visible = true;
+//			else
+//				pgBar.Visible = false;
 		}
 		void createKeepMulliganChoice()
 		{
-			msgBox = new MessageBoxYesNo ("Keep or take mulligan ?");
-			msgBox.btOk.MouseClick += OnKeep;
-			msgBox.btOk.Caption = "Keep";
-			msgBox.btCancel.MouseClick += OnTakeMulligan;
-			msgBox.btCancel.Caption = "Mulligan";
+			msgBox = new MessageBox ();
+			msgBox.Message = "Would you like to take a mulligan?";
+			msgBox.Ok += OnTakeMulligan;
+			msgBox.Cancel += OnKeep;
+
+//			msgBox.btOk.MouseClick += OnKeep;
+//			msgBox.btOk.Caption = "Keep";
+//			msgBox.btCancel.MouseClick += OnTakeMulligan;
+//			msgBox.btCancel.Caption = "Mulligan";
 			playerPanel.HostContainer.AddWidget (msgBox);
 		}
-		void OnKeep(Object sender, MouseButtonEventArgs _e)
+		void OnKeep(Object sender, EventArgs _e)
 		{
 			playerPanel.HostContainer.DeleteWidget (msgBox);
+			msgBox = null;
 			CurrentState = PlayerStates.Ready;
 			MagicEngine e = MagicEngine.CurrentEngine;
 			e.RaiseMagicEvent(new MagicEventArg(MagicEventType.PlayerIsReady,this));
 		}
-		void OnTakeMulligan(Object sender, MouseButtonEventArgs e)
+		void OnTakeMulligan(Object sender, EventArgs e)
 		{
 			playerPanel.HostContainer.DeleteWidget (msgBox);
+			msgBox = null;
+
 			for (int i = 0; i < CardToDraw; i++)
 				Library.AddCard (Hand.TakeTopOfStack);
 
@@ -309,12 +335,13 @@ namespace Magic3D
 				Reset (false);
 				return;
 			}
-			pgBar.Visible = true;
-			pgBar.Maximum = Deck.CardCount;
-			pgBar.Value = 0;
+//			pgBar.Visible = true;
+//			pgBar.Maximum = Deck.CardCount;
+//			pgBar.Value = 0;
 			Thread thread = new Thread(() => loadingThread());
 			thread.Start();
-			thread.Join ();
+//			loadingThread();
+			//thread.Join ();
 		}
 		void loadingThread(){
 			Deck.LoadCards ();

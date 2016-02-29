@@ -819,19 +819,19 @@ namespace Magic3D
 					Crow.Rectangle r = new Crow.Rectangle(0, 0, width, height);
 
 					if (Damages.Count == 0)
-						gr.Color = Crow.Color.White;
+						gr.SetSourceColor(Crow.Color.White);
 					else
-						gr.Color = Crow.Color.Red;
+						gr.SetSourceColor(Crow.Color.Red);
 
 					gr.Rectangle(r);
 					gr.FillPreserve();
-					gr.Color = Crow.Color.Black;
+					gr.SetSourceColor(Crow.Color.Black);
 					gr.LineWidth = 1.5f;
 					gr.Stroke();
 
 					gr.SelectFontFace("Times New Roman", FontSlant.Normal, FontWeight.Bold);
 					gr.SetFontSize(40);
-					gr.Color = Crow.Color.Black;
+					gr.SetSourceColor(Crow.Color.Black);
 
 					string text = Power.ToString() + " / " + Toughness.ToString();
 

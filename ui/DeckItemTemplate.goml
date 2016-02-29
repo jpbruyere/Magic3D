@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
-<HorizontalStack Height="-1" Width="0" Focusable="true"
+<HorizontalStack HorizontalAlignment="Left" Height="-1" Width="-1" Focusable="true"
 			MouseEnter="{Background=BlueCrayola}"
 			MouseLeave="{Background=Transparent}">
 		<Image Width="16" Height="16" Path="{ImgSetPath}"/>
-		<Label Text="{Name}" Width="-1"/>
+		<Label Text="{Name}"/>
 </HorizontalStack>

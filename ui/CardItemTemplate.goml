@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0"?>
 <HorizontalStack Width="0" Height="-1" Focusable="true"
 			MouseEnter="{Background=BlueCrayola}"
-			MouseLeave="{Background=Transparent}">
-		
+			MouseLeave="{Background=Transparent}">		
 		<Label Text="{name}" Width="0"/>
 		<Label Text="{code}" Width="-1"/>
 		<Image Width="16" Height="16" Path="{ExpansionImg}"/>
-		<Spinner Value="{count}" Width="50"  />
+<!--		<Label Text="{count}" Width="-1"/>-->
+		<Spinner Value="{count}" Width="50"/>
 
 </HorizontalStack>
 

@@ -7,8 +7,8 @@
 			</Popper>
 <!--			<Popper Caption="Forge data file">
 				<Border Margin="5" Fit="true" 
-					MouseEnter="{BorderColor=Blue}"
-					MouseLeave="{BorderColor=LightGray}">
+					MouseEnter="{Foreground=Blue}"
+					MouseLeave="{Foreground=LightGray}">
 					<Label Foreground="DimGray" Text="{RawCardData}" 
 						Multiline="true" WordWrap="true" Background="White"/>
 				</Border>

@@ -7,7 +7,7 @@
 				Background="0,8;0,8;0,8;0,2">
 				<Image Name="pic"  Path="image2/normal.svg"/>
 			</Border>
-			<Label Text="{Name}" Font="MagicMedieval, 22" TextAlignment="LeftCenter"/>
+			<Label Text="{Name}" Font="MagicMedieval, 22" TextAlignment="Left"/>
 			<GraphicObject/>
 			<Label Text="{LifePoints}" Font="MagicMedieval, 30"
 				Margin="5" Background="CornflowerBlue" Fit="true" TextAlignment="TopLeft"
@@ -16,13 +16,12 @@
 		<ListBox Data="{ManaPoolElements}" 
 				Fit="true" VerticalAlignment="Bottom" HorizontalAlignment="Center"
 				ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
-				Template="#Magic3D.ui.ImgListTemplate.goml"/>						
-		<ProgressBar Name="pgBar" 
+				Template="#Magic3D.ui.ImgListTemplate.goml"/>
+		<ProgressBar 
 					VerticalAlignment="Bottom" HorizontalAlignment="Right"
 					Width="60" Height="5"
 					Value="0"
-					Foreground="BlueCrayola" Background="DarkGray"
-					BorderWidth="1" BorderColor="White"/>
+					Foreground="BlueCrayola" Background="DarkGray"/>
 	</Group>
 </Border>
 

@@ -4,40 +4,40 @@
 	Margin="10" Fit="True" >
 	<Group Fit="True">
 		<VerticalStack Spacing="0">			
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2" Name="Untap" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2" Name="Untap" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_untap.svg"/>
 			</Border>
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2" Name="Upkeep" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2" Name="Upkeep" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_upkeep.svg"/>
 			</Border>
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2" Name="Draw" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2" Name="Draw" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_draw.svg"/>
 			</Border>
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2" Name="Main1" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2" Name="Main1" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_main1.svg"/>
 			</Border>
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2" Name="BeforeCombat" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2" Name="BeforeCombat" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_combat_start.svg"/>
 			</Border>
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2" Name="DeclareAttacker" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2" Name="DeclareAttacker" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_combat_attackers.svg"/>
 			</Border>
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2" Name="DeclareBlocker" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2" Name="DeclareBlocker" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_combat_blockers.svg"/>
 			</Border>
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2" Name="CombatDamage" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2" Name="CombatDamage" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_combat_damage.svg"/>
 			</Border>
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2" Name="EndOfCombat" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2" Name="EndOfCombat" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_combat_end.svg"/>
 			</Border>
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2"  Name="Main2" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2"  Name="Main2" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_main2.svg"/>
 			</Border>
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2" Name="EndOfTurn" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2" Name="EndOfTurn" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_cleanup.svg"/>
 			</Border>
-			<Border CornerRadius="5" BorderColor="Transparent" BorderWidth="2" Name="CleanUp" Margin="2" Width="40" Height="40">
+			<Border CornerRadius="5" Foreground="Transparent" BorderWidth="2" Name="CleanUp" Margin="2" Width="40" Height="40">
 				<Image Path="#Magic3D.image2.icon_phase_nextturn.svg"/>
 			</Border>
 		</VerticalStack>

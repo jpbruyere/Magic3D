@@ -47,8 +47,8 @@ namespace Magic3D
 				}
 
 				ValueChanged.Raise(this, new ValueChangeEventArgs ("fps", _fps));
-				ValueChanged.Raise (this, new ValueChangeEventArgs ("update",
-					this.updateTime.ElapsedMilliseconds.ToString () + " ms"));
+//				ValueChanged.Raise (this, new ValueChangeEventArgs ("update",
+//					this.updateTime.ElapsedMilliseconds.ToString () + " ms"));
 			}
 		}
 
@@ -286,15 +286,20 @@ namespace Magic3D
 
 			uiMainMenu.Visible = false;
 
+			for (int i = 0; i < Players.Length; i++) {
+				if (Players [i].Deck == null)
+					Players [i].Deck = DeckList [i];
+			}
+
 			foreach (Player p in Players) {
 				p.InitInterface ();
 				p.LoadDeckCards ();
 			}
 
 			InitLogPanel ();
-			uiStatusBar = LoadInterface("#Magic3D.ui.StatusBar.goml");
-			uiStatusBar.DataSource = this;
-			hsDeck = uiStatusBar.FindByName ("hsDeck") as Group;
+//			uiStatusBar = LoadInterface("#Magic3D.ui.StatusBar.goml");
+//			uiStatusBar.DataSource = this;
+//			hsDeck = uiStatusBar.FindByName ("hsDeck") as Group;
 			uiPhases = LoadInterface("#Magic3D.ui.phases.goml");
 			uiPhases.DataSource = this;
 			wCardText = LoadInterface ("ui/text.goml");
@@ -347,7 +352,7 @@ namespace Magic3D
 		void onShowDecks (object sender, MouseButtonEventArgs e)
 		{				
 			GraphicObject tmp = LoadInterface ("#Magic3D.ui.decks.goml");
-			hsDeck = tmp.FindByName("hsDeck") as Group;
+			//hsDeck = tmp.FindByName("hsDeck") as Group;
 			tmp.DataSource = this;
 		}
 		void onShowCards (object sender, MouseButtonEventArgs e)
@@ -370,7 +375,7 @@ namespace Magic3D
 				return;
 			hsDeck.Children.Clear ();
 			GraphicObject details = Interface.Load ("#Magic3D.ui.DeckDetails.goml");
-			hsDeck.addChild(details);
+			hsDeck.AddChild(details);
 			details.DataSource = e.NewValue;
 		}
 		void onPlayer1DeckChange (object sender, ValueChangeEventArgs e)
@@ -378,20 +383,23 @@ namespace Magic3D
 			if (e.MemberName != "SelectedItem")
 				return;
 			hsDeck.Children.Clear ();
-			hsDeck.addChild(Interface.Load ("#Magic3D.ui.DeckDetails.goml", e.NewValue));
+			hsDeck.AddChild(Interface.Load ("#Magic3D.ui.DeckDetails.goml", e.NewValue));
 		}
-		void onCardListValueChange (object sender, ValueChangeEventArgs e)
+		void onCardListValueChange (object sender, SelectionChangeEventArgs e)
 		{
 			MainLine l = e.NewValue as MainLine;
 			MagicCard c = null;
 
 			MagicData.TryGetCardFromZip (l.name, ref c);
-			if (hsDeck.Children.Count > 1) {
-				hsDeck.removeChild(hsDeck.Children.LastOrDefault());
+			CardDetails = new CardVisitor(c, l.code);
+		}
+		CardVisitor cardDetails = null;
+		public CardVisitor CardDetails {
+			get { return cardDetails; }
+			set {
+				cardDetails = value;
+				NotifyValueChange ("CardDetails", cardDetails);
 			}
-			GraphicObject tmp = Interface.Load ("#Magic3D.ui.CardDetails.goml");
-			hsDeck.addChild (tmp);
-			tmp.DataSource = new CardVisitor(c, l.code);
 		}
 		void onChoiceMade (object sender, SelectionChangeEventArgs e)
 		{			
@@ -562,14 +570,14 @@ namespace Magic3D
 			CurrentGameWin = this;
 
 			uiSplash = LoadInterface("#Magic3D.ui.Splash.goml");
-			pbSplash = uiSplash.FindByName ("pbSplash") as ProgressBar;
-			pbSplash.Value = 10;
+			uiSplash.DataSource = this;
+
 
 			initOpenGL();
 
-			loadingThread ();
-//			Thread t = new Thread (loadingThread);
-//			t.Start ();
+			//loadingThread ();
+			Thread t = new Thread (loadingThread);
+			t.Start ();
 
 		}
 
@@ -587,7 +595,7 @@ namespace Magic3D
 				new AiPlayer("player 2")
 			};
 
-			Thread.Sleep (500);
+			//Thread.Sleep (500);
 			startLoadingFinished = true;
 		}
 
@@ -618,8 +626,6 @@ namespace Magic3D
             {
 				tmpList.Add(Deck.PreLoadDeck (f));
 				i++;
-//				if (i > 100)
-//					break;
             }
 			deckList = tmpList.ToArray ();
 		}
@@ -787,7 +793,6 @@ namespace Magic3D
 			if (activeWidget == null)
 				return;
 
-			activeWidget.registerClipRect ();
 			if (activeWidget!=null) {
 				activeWidget.Left += e.XDelta;
 				activeWidget.Top += e.YDelta;

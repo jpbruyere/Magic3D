@@ -84,9 +84,9 @@ namespace Magic3D
 				}
 				for (int i = 0; i < l.count; i++)
 					AddCard (c, l.code);
-				lock (Player.pgBar) {
-					Player.pgBar.Value++;
-				}
+//				lock (Player.pgBar) {
+//					Player.pgBar.Value++;
+//				}
 			}
 		}
 		public void LoadNextCardsData()

@@ -1,12 +1,96 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <Window Width="800" Height="600" Title="Decks">	
-	<HorizontalStack>
-		<ListBox Height="0" Width="150" Background="0,5;0,5;0,5;0,5" Name="deckList"
-			Data="{DeckList}" HorizontalAlignment="Left" ValueChanged="onDeckListValueChange"
+	<HorizontalStack Background="vgradient|0:DimGray|1:Black">
+		<ListBox Name="deckList" SelectedIndex="0"
+			Height="0" Width="150" Background="0,5;0,5;0,5;0,5"
+			Data="{DeckList}" HorizontalAlignment="Left"
 			Template="#Magic3D.ui.ListTemplate.goml"
 			ItemTemplate="#Magic3D.ui.DeckItemTemplate.goml">
 		</ListBox>
-		<HorizontalStack Width="0" Height="0" Background="DimGray" Name="hsDeck"/>
+		<Splitter/>
+		<VerticalStack SelectedIndex="0"
+			DataSource="{../deckList.SelectedItem}" Width="0" Height="0" Margin="0" MinimumSize="0;100">
+			<HorizontalStack Width="0" Height="-1" Margin="5">
+				<Image Width="32" Height="32" Path="{ImgSetPath}"/>
+				<Label Text="{Name}" Font="MagicMedieval, 22" Width="0"/>
+			</HorizontalStack>
+			<ListBox Height="0" Width="200" Background="0,5;0,5;0,5;0,5" Name="cardList"
+				Data="{CardEntries}" HorizontalAlignment="Left"
+				SelectedItemChanged="/onCardListValueChange"
+				Template="#Magic3D.ui.ListTemplate.goml"
+				ItemTemplate="#Magic3D.ui.CardItemTemplate.goml">
+			</ListBox>
+		</VerticalStack>
+		<Splitter/>
+		<Border DataSource="{/CardDetails}" BorderWidth="1" Margin="10" MinimumSize="0;80">
+			<VerticalStack Margin="2" >
+				<HorizontalStack Height="-1">
+					<Popper Caption="Full sized image" Fit="true">
+						<Image Fit="true" Path="{GetImagePath}"/>
+					</Popper>
+					<Button Margin = "1" Caption="Add Card To Hand" Height="20" Width="100"
+							MouseClick="/onAddCard"/>
+				</HorizontalStack>
+				<Group Height="190" Width="240" Background="0,2;0,2;0,2;0,8">
+					<HorizontalStack Height="-1" VerticalAlignment="Top" Margin="5">			
+						<Label Text="{Name}" Font="MagicMedieval bold, 16" Width="0" />
+						<ListBox Data="{CostElements}" Fit="true" 
+								ItemTemplate="#Magic3D.ui.CostItemTemplate.goml"
+								Template="#Magic3D.ui.ImgListTemplate.goml"/>			
+						<GraphicObject Width="5"/>
+					</HorizontalStack>
+					<Border Width="182" Height="142" Margin="0">
+						<Image Background="Red" Scaled="false" Top="-22" Fit="true" Path="{GetImagePath}"/>
+					</Border>
+
+					<HorizontalStack Height="-1" VerticalAlignment="Bottom" Margin="5">
+						<Label Text="{Types}" Font="droid, 12" Width="0"/>
+						<Border BorderWidth="2" CornerRadius="5" Margin="1" 
+							Fit="true" Background="White" Foreground="Black"  Visible="{IsCreature}">
+							<HorizontalStack Margin="2" Fit="true">
+								<Label Fit="true" Text="{Power}" Font="droid bold, 14" Foreground="Black" Margin="0"/>
+								<Label Fit="true" Text="/" Font="droid bold, 12" Foreground="DimGray"/>
+								<Label Fit="true" Text="{Toughness}" Font="droid bold, 14" Foreground="Black" Margin="0"/>
+							</HorizontalStack>
+						</Border>
+						<GraphicObject Width="5" Height="5"/>
+					</HorizontalStack>
+				</Group>
+
+				<ListBox Data="{Abilities}" Height="-1" Width="0"
+						ItemTemplate="#Magic3D.ui.AbilityItemTemplate.goml">
+					<Template>
+						<GroupBox Caption="All Abilities" Height="{../HeightPolicy}" Width="{../WidthPolicy}" MinimumSize="10;10" >
+							<VerticalStack Margin="0" Name="List" Height="{../../HeightPolicy}" Width="{../../WidthPolicy}"/>
+						</GroupBox>
+					</Template>
+				</ListBox>
+
+				<GroupBox Caption="Static Abilities" Height="-1" Width="0">
+					<ListBox Data="{StaticAbilities}" Height="-1" Width="0" 
+							ItemTemplate="#Magic3D.ui.StaticAbItemTemplate.goml" 
+							Template="#Magic3D.ui.ImgListTemplate.goml"/>
+				</GroupBox>
+				<ListBox Data="{TriggeredAbilities}" Height="-1" Width="0"
+						ItemTemplate="#Magic3D.ui.AbilityItemTemplate.goml">
+					<Template>
+						<GroupBox Caption="Triggered Abilities" Height="{../HeightPolicy}" Width="{../WidthPolicy}" MinimumSize="10;10" >
+							<VerticalStack Margin="0" Name="List" Height="{../../HeightPolicy}" Width="{../../WidthPolicy}"/>
+						</GroupBox>
+					</Template>
+				</ListBox>
+
+				<ListBox Data="{ActivatedAbilities}" Height="-1" Width="0"
+						ItemTemplate="#Magic3D.ui.AbilityItemTemplate.goml">
+					<Template>
+						<GroupBox Caption="Activated Abilities" Height="{../HeightPolicy}" Width="{../WidthPolicy}" MinimumSize="10;10" >
+							<VerticalStack Margin="0" Name="List" Height="{../../HeightPolicy}" Width="{../../WidthPolicy}"/>
+						</GroupBox>
+					</Template>
+				</ListBox>
+				<Label Text="{Oracle}" Width="0" Multiline="true"/>
+			</VerticalStack>
+		</Border>
 	</HorizontalStack>
 </Window>
 

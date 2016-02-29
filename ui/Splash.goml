@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Group>
-	<Image Path="#Magic3D.images.abstrait4.jpg"/>
+<Group Background="#Magic3D.images.abstrait4.jpg">	
 	<Border Fit="true" BorderWidth="2" CornerRadius="15">
 		<VerticalStack Background="Black" Margin="20">
 			<Image Fit="true" Path="#Magic3D.images.splash.png"/>

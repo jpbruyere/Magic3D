@@ -18,12 +18,12 @@
 				</Template>
 			</ListBox>
 		</HorizontalStack>
-		<ListBox Data="{Choices}" Visible="{UIActionIsChoice}" Width="-1" SelectedItemChanged="/onChoiceMade"
+<!--		<ListBox Data="{Choices}" Visible="{UIActionIsChoice}" Width="-1" SelectedItemChanged="/onChoiceMade"
 			ItemTemplate="#Magic3D.ui.MSEItemTemplate.goml">
 			<Template>
 				<VerticalStack Margin="10" Name="List" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}"/>
 			</Template>
-		</ListBox>
+		</ListBox>-->
 		<Button HorizontalAlignment="Right"  Text="Done" MouseClick="/ActionDone_MouseClick" Height="-1" Margin="5"/>
 	</VerticalStack>
 </Window>

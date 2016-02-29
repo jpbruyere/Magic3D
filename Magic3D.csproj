@@ -172,6 +172,7 @@
     <Folder Include="src\LayoutsAndGroups\" />
     <Folder Include="src\engine\Effects\" />
     <Folder Include="images\expansions\" />
+    <Folder Include="Styles\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="image2\abilities.svg" />
@@ -271,6 +272,8 @@
     <EmbeddedResource Include="images\abstrait4.jpg" />
     <EmbeddedResource Include="images\abstract1.jpg" />
     <EmbeddedResource Include="images\abstrait3.jpg" />
+    <EmbeddedResource Include="Styles\MainMenuBut.style" />
+    <EmbeddedResource Include="ui\MsgBox.goml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\Crow\Crow.csproj">
